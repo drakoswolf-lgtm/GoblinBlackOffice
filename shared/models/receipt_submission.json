@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ReceiptSubmission",
+  "type": "object",
+  "properties": {
+    "receiptId": {"type": "string"},
+    "submittedAt": {"type": "string", "format": "date-time"},
+    "source": {"type": "string", "enum": ["camera", "gallery", "upload"]}
+  },
+  "required": ["receiptId", "submittedAt", "source"]
+}

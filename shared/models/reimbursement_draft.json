@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ReimbursementDraft",
+  "type": "object",
+  "properties": {
+    "draftId": {"type": "string"},
+    "employeeId": {"type": "string"},
+    "currency": {"type": "string"},
+    "totalAmount": {"type": "number"}
+  },
+  "required": ["draftId", "employeeId", "currency", "totalAmount"]
+}
