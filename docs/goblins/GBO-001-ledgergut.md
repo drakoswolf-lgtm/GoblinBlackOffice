@@ -7,7 +7,7 @@
 
 ## Mission
 
-Extract receipt data and generate completed reimbursement forms.
+Extract receipt data and generate completed reimbursement workbooks containing finalized reimbursement forms.
 
 ## Inputs
 
@@ -17,7 +17,8 @@ Extract receipt data and generate completed reimbursement forms.
 
 ## Outputs
 
-- Completed reimbursement workbooks with extracted data
+- Completed reimbursement workbook with extracted receipt data
+- Finalized reimbursement form ready for review/submission
 
 ## Dependencies
 
