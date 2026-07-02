@@ -30,6 +30,9 @@ export const api = {
   listGoblins: () => request('GET', '/goblins'),
   getGoblin: (id) => request('GET', `/goblins/${id}`),
 
+  // Health
+  health: () => request('GET', '/health'),
+
   // Cases
   createCase: (type, goblinId) =>
     request('POST', '/cases', { type, assignedGoblinId: goblinId ?? undefined }),
@@ -53,4 +56,17 @@ export const api = {
 
   downloadUrl: (caseId, filename) =>
     `${BASE}/cases/${caseId}/download/${filename}`,
+
+  // Ledgergut standalone endpoints
+  ledgergutExtract: (file) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    return request('POST', '/ledgergut/extract', fd, true);
+  },
+
+  ledgergutGenerate: (data) =>
+    request('POST', '/ledgergut/generate-reimbursement', data),
+
+  ledgergutDownloadUrl: (filename) =>
+    `${BASE}/ledgergut/download/${filename}`,
 };

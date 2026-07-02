@@ -5,7 +5,7 @@ Goblin Black Office — FastAPI application entry point.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import cases, goblins
+from app.routers import cases, goblins, ledgergut as ledgergut_router
 
 app = FastAPI(
     title="Goblin Black Office",
@@ -26,6 +26,7 @@ app.add_middleware(
 
 app.include_router(cases.router)
 app.include_router(goblins.router)
+app.include_router(ledgergut_router.router)
 
 
 @app.get("/")

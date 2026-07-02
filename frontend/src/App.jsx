@@ -10,9 +10,10 @@ import { api } from './api/client'
 import Dashboard from './pages/Dashboard'
 import GoblinPick from './pages/GoblinPick'
 import CaseFlow from './pages/CaseFlow'
+import LedgergutFlow from './pages/LedgergutFlow'
 
 export default function App() {
-  const [view, setView] = useState('dashboard') // 'dashboard' | 'pick' | 'case'
+  const [view, setView] = useState('dashboard') // 'dashboard' | 'pick' | 'case' | 'ledgergut'
   const [activeCaseId, setActiveCaseId] = useState(null)
   const [cases, setCases] = useState([])
   const [loadError, setLoadError] = useState(null)
@@ -33,6 +34,12 @@ export default function App() {
   const goHome   = () => { refreshCases(); setView('dashboard') }
 
   const handleGoblinPicked = async (goblinId, caseType) => {
+    // Ledgergut uses the dedicated standalone flow
+    if (goblinId === 'ledgergut') {
+      setView('ledgergut')
+      return
+    }
+    // Other goblins use the case-based flow
     try {
       const newCase = await api.createCase(caseType, goblinId)
       openCase(newCase.id)
@@ -59,6 +66,9 @@ export default function App() {
       )}
       {view === 'case' && activeCaseId && (
         <CaseFlow caseId={activeCaseId} onDone={goHome} />
+      )}
+      {view === 'ledgergut' && (
+        <LedgergutFlow onDone={goHome} />
       )}
     </div>
   )
