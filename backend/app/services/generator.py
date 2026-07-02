@@ -43,7 +43,7 @@ def generate_reimbursement_package(case: Case, output_dir: str) -> str:
         "=" * 60,
         f"Case ID      : {case.id}",
         f"Generated    : {now}",
-        f"Processed by : Ledgergut, Senior Reimbursement Operative",
+        "Processed by : Ledgergut, Receipt Intelligence Officer",
         "-" * 60,
         "EXPENSE DETAILS",
         "-" * 60,

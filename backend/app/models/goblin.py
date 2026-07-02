@@ -58,7 +58,7 @@ GOBLIN_REGISTRY: List[Goblin] = [
         id="ledgergut",
         name="Ledgergut",
         division=GoblinDivision.FINANCE,
-        title="Senior Reimbursement Operative",
+        title="Receipt Intelligence Officer",
         status=GoblinStatus.AVAILABLE,
         capabilities=[
             "receipt_parsing",

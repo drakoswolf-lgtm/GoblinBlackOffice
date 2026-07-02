@@ -99,7 +99,7 @@ def generate_reimbursement(payload: ReimbursementRequest) -> ReimbursementRespon
         "        GOBLIN BLACK OFFICE — REIMBURSEMENT REQUEST",
         "=" * 60,
         f"Generated    : {now}",
-        "Processed by : Ledgergut, Senior Reimbursement Operative",
+        "Processed by : Ledgergut, Receipt Intelligence Officer",
         "-" * 60,
         "EXPENSE DETAILS",
         "-" * 60,
