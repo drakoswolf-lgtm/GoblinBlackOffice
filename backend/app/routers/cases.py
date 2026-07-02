@@ -112,7 +112,7 @@ async def upload_evidence(
     os.makedirs(EVIDENCE_DIR, exist_ok=True)
 
     for upload in files:
-        safe_name = f"{case_id}_{upload.filename}"
+        safe_name = f"{case_id}_{os.path.basename(upload.filename or 'upload')}"
         dest = os.path.join(EVIDENCE_DIR, safe_name)
         content = await upload.read()
         with open(dest, "wb") as fh:
