@@ -1,0 +1,5 @@
+Coffee Palace
+123 Bean St
+Date: 2024-03-15
+Latte    $5.50
+Total Due $5.50
