@@ -39,7 +39,7 @@ Squarmish does not ingest receipts or perform OCR. That is Ledgergut's job.
 
 The hand-off works as follows:
 
-- **Ledgergut** processes a receipt and determines `billable_status = billable` or `maybe_billable`.
+- **Ledgergut** processes a receipt and determines `billable_status = billable`, `maybe_billable`, or `tax_only` when applicable.
 - If `paid_by = steve` and the billable status qualifies, Ledgergut writes the receipt record to the **Squarmish Invoice Candidate Queue**.
 - **Squarmish** picks up the queue, groups candidates by `project_name` and inferred client, and begins building or updating a draft invoice.
 
@@ -140,6 +140,7 @@ Squarmish resolves `billable_status` for each record:
 |------------------|-------------------|
 | `billable` | Include as a confirmed line item |
 | `maybe_billable` | Include as a flagged line item with `review_status = needs_review` |
+| `tax_only` | Map to a `tax_passthrough` line item when the passthrough context is clear; otherwise hold with `review_status = needs_review` |
 | `already_invoiced` | Excluded by default; surfaced in review notes if detected |
 | `not_billable` | Not included |
 
@@ -387,9 +388,9 @@ The following is a sample Squarmish draft invoice in JSON format:
   "subtotal": 365.00,
   "tax_lines": [
     { "label": "GST", "rate": 0.05, "amount": 18.25 },
-    { "label": "PST", "rate": 0.07, "amount": 25.55 }
+    { "label": "PST", "rate": 0.07, "amount": 1.75 }
   ],
-  "total": 408.80,
+  "total": 385.00,
   "status": "pending_review",
   "needs_user_review": true,
   "review_notes": "One materials line item sourced from a maybe_billable Ledgergut record (LG-20260703-0042). Confirm whether fasteners are billable to Jackson Retail before approving.",
