@@ -58,7 +58,7 @@ Each queue entry carries the full Ledgergut receipt record (see GBO-001, Section
 | `record_id` | string | Ledgergut record ID, e.g. `LG-20260703-0042` |
 | `project_name` | string | Assigned project from Ledgergut |
 | `paid_by` | enum | Payer identifier from Ledgergut |
-| `billable_status` | enum | `billable` or `maybe_billable` |
+| `billable_status` | enum | Ledgergut-compatible status such as `billable`, `maybe_billable`, or `tax_only` |
 | `total_amount` | decimal | Receipt total including tax |
 | `currency` | string | ISO 4217, e.g. `CAD` |
 | `vendor_name` | string | Extracted vendor name |
@@ -162,6 +162,10 @@ A labour line item includes:
 | `amount` | decimal | `quantity × unit_price` |
 | `line_item_type` | enum | `labour` |
 | `billable_status` | enum | Typically `billable` |
+| `taxable` | boolean | Whether the labour charge is taxable in the invoice context |
+| `tax_treatment` | enum | e.g. `gst_only`, `gst_pst`, `hst`, `gst_qst`, `exempt`, `non_taxable`, `tax_passthrough`, `needs_review` |
+| `tax_region` | string | Usually inherited from the invoice unless overridden for the line |
+| `tax_notes` | string or null | Reviewer notes for exemptions, pass-through treatment, or special handling |
 | `review_status` | enum | `confirmed` if entered by reviewer |
 
 In v0.1, labour lines are added during the human review step. Future automation may pull from a time-tracking or scheduling goblin.
@@ -186,6 +190,10 @@ A materials line item includes:
 | `line_item_type` | enum | `materials` |
 | `linked_record_id` | string | Ledgergut `record_id` |
 | `billable_status` | enum | Carried from Ledgergut |
+| `taxable` | boolean | Whether the billed amount is taxable to the client |
+| `tax_treatment` | enum | e.g. `gst_only`, `gst_pst`, `hst`, `gst_qst`, `exempt`, `non_taxable`, `tax_passthrough`, `needs_review` |
+| `tax_region` | string | Province/jurisdiction used for this line's tax treatment |
+| `tax_notes` | string or null | Captures reviewer rationale for reimbursements, exemptions, or pass-through treatment |
 | `review_status` | enum | `needs_review` if `maybe_billable` |
 
 Whether Squarmish bills tax as a pass-through or rolls it into the line item total is determined by collar config and reviewer preference. In v0.1, the reviewer decides.
@@ -206,7 +214,18 @@ Tax handling in Black Collar mode follows Canadian tax conventions.
 | `QC` | GST (5%) + QST (9.975%) | QST replaces PST in Quebec |
 | Other | GST (5%) + provincial rate | Varies; configurable |
 
-Squarmish applies tax lines based on `tax_region` from the draft invoice. Tax is calculated on the invoice `subtotal` (sum of pre-tax line item amounts).
+Squarmish applies tax lines based on `tax_region` from the draft invoice and the tax metadata on each line item. Tax must not be calculated blindly on the full invoice `subtotal`.
+
+Each invoice line item should carry:
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `taxable` | boolean | Whether the line should participate in tax calculations |
+| `tax_treatment` | enum | `gst_only`, `gst_pst`, `hst`, `gst_qst`, `exempt`, `non_taxable`, `tax_passthrough`, or `needs_review` |
+| `tax_region` | string | Tax jurisdiction for the specific line item |
+| `tax_notes` | string or null | Freeform reviewer context for exemptions, reimbursements, and pass-through handling |
+
+`tax_lines` are derived from the subset of taxable line items and their `tax_treatment`, not simply from the whole invoice subtotal. Non-taxable, exempt, or pass-through items may contribute to the subtotal while being excluded from standard tax calculations or routed for review.
 
 ### Tax line format
 
@@ -218,9 +237,11 @@ Squarmish applies tax lines based on `tax_region` from the draft invoice. Tax is
 }
 ```
 
-Tax lines are advisory in v0.1. The human reviewer confirms correctness before issue, especially for mixed taxable/non-taxable line items.
+Tax lines are advisory in v0.1. The human reviewer confirms correctness before issue, especially for BC contractor invoices, mixed labour/materials invoices, reimbursements, pass-through taxes, and any invoice containing both taxable and non-taxable line items.
 
 Squarmish should never auto-apply HST to a province where it does not apply, or vice versa. Unrecognized `tax_region` values set `needs_user_review = true` for the tax section.
+
+Future implementation should keep tax rates and tax rules effective-dated and configuration-driven rather than hardcoded, so historical invoices and rate changes can be handled safely.
 
 ---
 
@@ -276,6 +297,7 @@ Inherited from Ledgergut; valid in Squarmish context:
 - `maybe_billable` — requires human confirmation
 - `not_billable` — excluded from invoicing
 - `already_invoiced` — appears on a prior invoice; excluded unless overridden
+- `tax_only` — tax-only passthrough amount from Ledgergut; map to a `tax_passthrough` line item or hold for review when context is incomplete
 
 ### `client_payment_status`
 
@@ -284,13 +306,13 @@ Inherited from Ledgergut; valid in Squarmish context:
 - `paid` — payment received in full
 - `overdue` — past due with no full payment
 - `disputed` — client has raised a payment dispute
-- `void` — invoice voided; payment not expected
+- `voided` — invoice voided; payment not expected
 
 ### `review_status`
 
 - `confirmed` — field or line item has been verified by a human reviewer
 - `needs_review` — requires human attention before the invoice can be approved
-- `auto_approved` — system-generated with high confidence; no review required
+- `auto_approved` — system-generated with high confidence; may clear item-level review flags but must not bypass the invoice-level human approval gate in v0.1
 - `rejected` — reviewer excluded this item from the invoice
 
 ---
@@ -303,6 +325,7 @@ The reviewer performs the following:
 
 1. **Confirm client and project** — verify the invoice is going to the right recipient.
 2. **Review line items** — confirm, adjust, or remove each line item; resolve `needs_review` items.
+   - `auto_approved` line items may be accepted without further edits, but they still remain inside the invoice-level human approval workflow.
 3. **Add labour lines** — enter any billable hours or flat labour fees not sourced from receipts.
 4. **Verify tax lines** — confirm tax region and applied rates match the job and client location.
 5. **Set payment terms** — confirm `due_date` and any special payment notes.
@@ -336,6 +359,10 @@ The following is a sample Squarmish draft invoice in JSON format:
       "line_item_type": "materials",
       "linked_record_id": "LG-20260703-0042",
       "billable_status": "maybe_billable",
+      "taxable": true,
+      "tax_treatment": "gst_pst",
+      "tax_region": "BC",
+      "tax_notes": "Confirm whether fasteners are fully billable and taxable to the client.",
       "review_status": "needs_review"
     },
     {
@@ -347,6 +374,10 @@ The following is a sample Squarmish draft invoice in JSON format:
       "line_item_type": "labour",
       "linked_record_id": null,
       "billable_status": "billable",
+      "taxable": true,
+      "tax_treatment": "gst_only",
+      "tax_region": "BC",
+      "tax_notes": "BC labour treatment should be confirmed by reviewer before issue.",
       "review_status": "confirmed"
     }
   ],
@@ -396,7 +427,7 @@ Collar-specific invoice rules should be configuration-driven, not hardcoded. Squ
 | One invoice per project (default) | Multi-project invoices require manual assembly |
 | No partial billing / progress billing | Full invoice only in v0.1 |
 | No PDF generation | Output is JSON; rendering is out of scope for this spec |
-| Tax rates are static defaults | Rate changes require a config update |
+| Tax logic is advisory only | Human review remains mandatory, especially for mixed tax treatment or BC contractor invoices |
 | No payment reconciliation | Squarmish does not process payments in v0.1 |
 
 ---
