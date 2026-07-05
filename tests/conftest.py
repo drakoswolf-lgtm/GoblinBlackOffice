@@ -20,8 +20,6 @@ from app.services.ledgergut_service import seed_sample_receipts
 
 @pytest.fixture(autouse=True)
 def fresh_database():
-    if TEST_DB_PATH.exists():
-        TEST_DB_PATH.unlink()
     reset_db()
     with SessionLocal() as db:
         seed_sample_receipts(db)

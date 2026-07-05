@@ -2,12 +2,14 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from pydantic import Field
+
 from app.schemas.common import ORMModel, ReceiptCoreFields, ReceiptLineItemBase, ReceiptTaxLineBase
 
 
 class ReceiptCreate(ReceiptCoreFields):
-    line_items: list[ReceiptLineItemBase] = []
-    tax_lines: list[ReceiptTaxLineBase] = []
+    line_items: list[ReceiptLineItemBase] = Field(default_factory=list)
+    tax_lines: list[ReceiptTaxLineBase] = Field(default_factory=list)
 
 
 class ReceiptUpdate(ReceiptCoreFields):

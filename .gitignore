@@ -106,6 +106,10 @@ unlinked_spec.ds
 
 # Coverage
 coverage/
+__pycache__/
+.pytest_cache/
+.venv/
+*.db
 
 # Symbols
 app.*.symbols

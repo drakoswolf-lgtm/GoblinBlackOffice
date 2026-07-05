@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, datetime, time
+from datetime import UTC, date, datetime, time
 from decimal import Decimal, ROUND_HALF_UP
 from uuid import uuid4
 
@@ -86,7 +86,9 @@ def _validate_receipt_fields(payload: ReceiptCreate | ReceiptUpdate) -> tuple[bo
         raise HTTPException(status_code=422, detail="receipt_date cannot be in the future")
 
     status = payload.status.value if payload.status else ("pending_review" if needs_review else "approved")
-    review_notes = " ".join(notes) if notes else payload.review_notes
+    if payload.review_notes:
+        _append_note(notes, payload.review_notes)
+    review_notes = " ".join(notes) if notes else None
     return needs_review, review_notes, status
 
 
@@ -154,7 +156,7 @@ def _receipt_query(db: Session):
 
 
 def generate_receipt_id() -> str:
-    return f"LG-{datetime.utcnow():%Y%m%d}-{uuid4().hex[:8].upper()}"
+    return f"LG-{datetime.now(UTC):%Y%m%d}-{uuid4().hex[:8].upper()}"
 
 
 def seed_sample_receipts(db: Session) -> None:
