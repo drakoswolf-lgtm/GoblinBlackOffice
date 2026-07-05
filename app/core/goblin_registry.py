@@ -133,7 +133,7 @@ _GOBLINS: List[GoblinEntry] = [
         ],
         guiding_question="What are we actually agreeing to?",
         status="planned",
-        canonical_doc_path="docs/library/02-character-bible.md",
+        canonical_doc_path="docs/library/05-department-head-character-bible.md",
     ),
     GoblinEntry(
         id="packrat_mcduffel",
@@ -153,7 +153,7 @@ _GOBLINS: List[GoblinEntry] = [
         ],
         guiding_question="How do we get from A to B with the least pain?",
         status="planned",
-        canonical_doc_path="docs/library/02-character-bible.md",
+        canonical_doc_path="docs/library/05-department-head-character-bible.md",
     ),
     GoblinEntry(
         id="patch",
@@ -172,7 +172,7 @@ _GOBLINS: List[GoblinEntry] = [
         ],
         guiding_question="Can we build it, and if not, why not?",
         status="planned",
-        canonical_doc_path="docs/library/02-character-bible.md",
+        canonical_doc_path="docs/library/05-department-head-character-bible.md",
     ),
     GoblinEntry(
         id="grimscratch",
@@ -190,7 +190,7 @@ _GOBLINS: List[GoblinEntry] = [
         ],
         guiding_question="What's the worst realistic outcome, and how do we avoid it?",
         status="planned",
-        canonical_doc_path="docs/library/02-character-bible.md",
+        canonical_doc_path="docs/library/05-department-head-character-bible.md",
     ),
 ]
 

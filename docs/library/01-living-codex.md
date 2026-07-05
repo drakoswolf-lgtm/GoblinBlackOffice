@@ -19,10 +19,10 @@ added.
 | `aeterna_skyeward` | Æterna SkyeWard | Architecture & Strategy | Planned | [Character Bible](02-character-bible.md) |
 | `ledgergut` | Ledgergut | Finance & Records | Draft | [GBO-001](../goblins/GBO-001-ledgergut-workflow.md) |
 | `squarmish` | Squarmish | Billing & Revenue | Draft | [GBO-002](../goblins/GBO-002-squarmish-invoice-workflow.md) |
-| `signor` | SigNor the Immutable | Contracts & Governance | Planned | [Character Bible](02-character-bible.md) |
-| `packrat_mcduffel` | Packrat McDuffel | Logistics & Planning | Planned | [Character Bible](02-character-bible.md) |
-| `patch` | Patch | Operations & Engineering | Planned | [Character Bible](02-character-bible.md) |
-| `grimscratch` | Grimscratch | Compliance & Risk | Planned | [Character Bible](02-character-bible.md) |
+| `signor` | SigNor the Immutable | Contracts & Governance | Planned | [Scroll 005](05-department-head-character-bible.md) |
+| `packrat_mcduffel` | Packrat McDuffel | Logistics & Planning | Planned | [Scroll 005](05-department-head-character-bible.md) |
+| `patch` | Patch | Operations & Engineering | Planned | [Scroll 005](05-department-head-character-bible.md) |
+| `grimscratch` | Grimscratch | Compliance & Risk | Planned | [Scroll 005](05-department-head-character-bible.md) |
 
 The authoritative source for this table is `app/core/goblin_registry.py`.
 
@@ -43,6 +43,7 @@ The authoritative source for this table is `app/core/goblin_registry.py`.
 |----------|---------|
 | [Scroll 001 — Living Codex](01-living-codex.md) | Master index of agents, scrolls, and documents (this file) |
 | [Scroll 002 — Character Bible](02-character-bible.md) | Canonical character and role definitions for all goblins |
+| [Scroll 005 — Department Head Character Bible](05-department-head-character-bible.md) | Canonical personalities, visual identities, and philosophies for Department Heads |
 
 ---
 
