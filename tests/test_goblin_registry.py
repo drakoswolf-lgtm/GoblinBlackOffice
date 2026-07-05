@@ -126,3 +126,55 @@ class TestGoblinEntryFields:
         goblin = registry.get_by_id("ledgergut")
         with pytest.raises((AttributeError, TypeError)):
             goblin.id = "changed"  # type: ignore[misc]
+
+
+class TestCanonicalDepartmentsAndGuidingQuestions:
+    """Assert the canonical department and guiding question for every goblin."""
+
+    CANON = {
+        "aeterna_skyeward": {
+            "department": "Architecture & Strategy",
+            "guiding_question": "What problem are we really trying to solve?",
+        },
+        "ledgergut": {
+            "department": "Finance & Records",
+            "guiding_question": "Can we account for it?",
+        },
+        "squarmish": {
+            "department": "Billing & Revenue",
+            "guiding_question": "Who is paying us, when, and how much?",
+        },
+        "signor": {
+            "department": "Contracts & Governance",
+            "guiding_question": "What are we actually agreeing to?",
+        },
+        "packrat_mcduffel": {
+            "department": "Logistics & Planning",
+            "guiding_question": "How do we get from A to B with the least pain?",
+        },
+        "patch": {
+            "department": "Operations & Engineering",
+            "guiding_question": "Can we build it, and if not, why not?",
+        },
+        "grimscratch": {
+            "department": "Compliance & Risk",
+            "guiding_question": "What's the worst realistic outcome, and how do we avoid it?",
+        },
+    }
+
+    def test_canonical_departments(self):
+        for goblin_id, expected in self.CANON.items():
+            goblin = registry.get_by_id(goblin_id)
+            assert goblin.department == expected["department"], (
+                f"'{goblin_id}' department mismatch: "
+                f"got '{goblin.department}', expected '{expected['department']}'"
+            )
+
+    def test_canonical_guiding_questions(self):
+        for goblin_id, expected in self.CANON.items():
+            goblin = registry.get_by_id(goblin_id)
+            assert goblin.guiding_question == expected["guiding_question"], (
+                f"'{goblin_id}' guiding_question mismatch: "
+                f"got '{goblin.guiding_question}', "
+                f"expected '{expected['guiding_question']}'"
+            )

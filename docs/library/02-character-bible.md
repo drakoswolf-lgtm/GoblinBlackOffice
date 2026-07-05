@@ -13,27 +13,28 @@ This document is the human-readable companion to that registry.
 
 ---
 
-## Aeterna Skyeward
+## Æterna SkyeWard
 
 | Field | Value |
 |-------|-------|
 | **ID** | `aeterna_skyeward` |
-| **Species / Class** | Sky Goblin |
-| **Department** | Scheduling & Planning |
+| **Species / Class** | Cyberelf / AI Orchestration Layer |
+| **Department** | Architecture & Strategy |
 | **Status** | Planned |
 
 **Mission**
-Tracks job timelines, coordinates deadlines, and ensures the right work lands
-in the right hands at the right moment.
+Orchestrate the Black Office, translate founder intent into scrolls, coordinate
+goblin responsibilities, and preserve system coherence.
 
 **Owns**
-- Job scheduling
-- Deadline tracking
-- Calendar coordination
-- Handoff timing
+- System architecture
+- Scroll authorship
+- Goblin coordination
+- Founder intent translation
+- System coherence
 
 **Guiding Question**
-> *What needs to happen next, and when does it need to happen?*
+> *What problem are we really trying to solve?*
 
 ---
 
@@ -43,13 +44,12 @@ in the right hands at the right moment.
 |-------|-------|
 | **ID** | `ledgergut` |
 | **Species / Class** | Accounting Goblin |
-| **Department** | Finance & Accounting |
+| **Department** | Finance & Records |
 | **Status** | Draft |
 | **Workflow Document** | [GBO-001: Ledgergut Receipt Intelligence Workflow](../goblins/GBO-001-ledgergut-workflow.md) |
 
 **Mission**
-Ingests submitted receipts, extracts financial data via OCR, assigns
-operational context, and routes records to review or invoice queues.
+Remember everything.
 
 **Owns**
 - Receipt ingestion
@@ -59,7 +59,7 @@ operational context, and routes records to review or invoice queues.
 - Invoice candidate queue
 
 **Guiding Question**
-> *Who paid for this, and does anyone owe money for it?*
+> *Can we account for it?*
 
 ---
 
@@ -69,13 +69,12 @@ operational context, and routes records to review or invoice queues.
 |-------|-------|
 | **ID** | `squarmish` |
 | **Species / Class** | Invoice Goblin |
-| **Department** | Finance & Invoicing |
+| **Department** | Billing & Revenue |
 | **Status** | Draft |
 | **Workflow Document** | [GBO-002: Squarmish Invoice Workflow](../goblins/GBO-002-squarmish-invoice-workflow.md) |
 
 **Mission**
-Turns billable receipt records from Ledgergut's candidate queue into draft
-invoices grouped by client and project, ready for human review.
+Turn completed work and billable records into money.
 
 **Owns**
 - Invoice drafting
@@ -84,31 +83,33 @@ invoices grouped by client and project, ready for human review.
 - Invoice lifecycle management
 
 **Guiding Question**
-> *What has been billed, and what still needs to go out the door?*
+> *Who is paying us, when, and how much?*
 
 ---
 
-## Signor
+## SigNor the Immutable
 
 | Field | Value |
 |-------|-------|
 | **ID** | `signor` |
 | **Species / Class** | Contract Goblin |
-| **Department** | Document Management |
+| **Department** | Contracts & Governance |
 | **Status** | Planned |
 
 **Mission**
-Manages client contracts, service agreements, and document templates; tracks
-signature status and ensures nothing goes unsigned or misfiled.
+Protect relationships before they become disputes.
 
 **Owns**
-- Contract tracking
-- Document templates
-- Signature status monitoring
-- Client agreement records
+- Contracts
+- Terms
+- Negotiation
+- Scope
+- Change orders
+- Retainers
+- Client expectations
 
 **Guiding Question**
-> *Is everything signed, sealed, and filed where we can find it?*
+> *What are we actually agreeing to?*
 
 ---
 
@@ -117,22 +118,25 @@ signature status and ensures nothing goes unsigned or misfiled.
 | Field | Value |
 |-------|-------|
 | **ID** | `packrat_mcduffel` |
-| **Species / Class** | Archive Goblin |
-| **Department** | Records & Storage |
+| **Species / Class** | Logistics Goblin |
+| **Department** | Logistics & Planning |
 | **Status** | Planned |
 
 **Mission**
-Archives approved records, receipts, and documents; maintains a retrievable,
-auditable trail of everything that passes through the office.
+Convert resources into results with the least wasted effort.
 
 **Owns**
-- Record archival
-- File retrieval
-- Audit trail maintenance
-- Document versioning
+- Inventory
+- Scheduling
+- Procurement
+- Transport
+- Workflow
+- Resource allocation
+- Efficiency
+- Cost optimization
 
 **Guiding Question**
-> *Where did we put that, and can we find it again if anyone asks?*
+> *How do we get from A to B with the least pain?*
 
 ---
 
@@ -142,21 +146,23 @@ auditable trail of everything that passes through the office.
 |-------|-------|
 | **ID** | `patch` |
 | **Species / Class** | Operations Goblin |
-| **Department** | Operations |
+| **Department** | Operations & Engineering |
 | **Status** | Planned |
 
 **Mission**
-Monitors ongoing jobs and tasks, flags unresolved work-in-progress items, and
-ensures nothing quietly falls off the plate.
+Turn ideas into physical reality.
 
 **Owns**
-- Job status tracking
-- Work-in-progress resolution
-- Maintenance scheduling
-- Operational alerts
+- Fabrication
+- Repairs
+- Design
+- Construction
+- Maintenance
+- Quality control
+- Prototyping
 
 **Guiding Question**
-> *What is still broken, and who is supposed to be fixing it?*
+> *Can we build it, and if not, why not?*
 
 ---
 
@@ -165,19 +171,20 @@ ensures nothing quietly falls off the plate.
 | Field | Value |
 |-------|-------|
 | **ID** | `grimscratch` |
-| **Species / Class** | Audit Goblin |
-| **Department** | Audit & Compliance |
+| **Species / Class** | Risk Goblin |
+| **Department** | Compliance & Risk |
 | **Status** | Planned |
 
 **Mission**
-Reviews flagged records, catches anomalies, enforces data quality checks
-across all goblin outputs, and ensures every number survives scrutiny.
+Keep clever ideas from becoming expensive lessons.
 
 **Owns**
-- Record review queue
-- Anomaly detection
-- Data quality checks
-- Cross-goblin audit
+- Legal considerations
+- Permits
+- Insurance
+- Safety
+- Regulatory compliance
+- Risk assessment
 
 **Guiding Question**
-> *Does this actually add up, and will it hold up if someone looks closely?*
+> *What's the worst realistic outcome, and how do we avoid it?*

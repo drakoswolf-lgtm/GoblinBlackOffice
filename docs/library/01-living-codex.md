@@ -16,13 +16,13 @@ added.
 
 | ID | Display Name | Department | Status | Canonical Document |
 |----|--------------|-----------|--------|-------------------|
-| `aeterna_skyeward` | Aeterna Skyeward | Scheduling & Planning | Planned | [Character Bible](02-character-bible.md) |
-| `ledgergut` | Ledgergut | Finance & Accounting | Draft | [GBO-001](../goblins/GBO-001-ledgergut-workflow.md) |
-| `squarmish` | Squarmish | Finance & Invoicing | Draft | [GBO-002](../goblins/GBO-002-squarmish-invoice-workflow.md) |
-| `signor` | Signor | Document Management | Planned | [Character Bible](02-character-bible.md) |
-| `packrat_mcduffel` | Packrat McDuffel | Records & Storage | Planned | [Character Bible](02-character-bible.md) |
-| `patch` | Patch | Operations | Planned | [Character Bible](02-character-bible.md) |
-| `grimscratch` | Grimscratch | Audit & Compliance | Planned | [Character Bible](02-character-bible.md) |
+| `aeterna_skyeward` | Æterna SkyeWard | Architecture & Strategy | Planned | [Character Bible](02-character-bible.md) |
+| `ledgergut` | Ledgergut | Finance & Records | Draft | [GBO-001](../goblins/GBO-001-ledgergut-workflow.md) |
+| `squarmish` | Squarmish | Billing & Revenue | Draft | [GBO-002](../goblins/GBO-002-squarmish-invoice-workflow.md) |
+| `signor` | SigNor the Immutable | Contracts & Governance | Planned | [Character Bible](02-character-bible.md) |
+| `packrat_mcduffel` | Packrat McDuffel | Logistics & Planning | Planned | [Character Bible](02-character-bible.md) |
+| `patch` | Patch | Operations & Engineering | Planned | [Character Bible](02-character-bible.md) |
+| `grimscratch` | Grimscratch | Compliance & Risk | Planned | [Character Bible](02-character-bible.md) |
 
 The authoritative source for this table is `app/core/goblin_registry.py`.
 
