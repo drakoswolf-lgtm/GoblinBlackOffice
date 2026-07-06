@@ -26,7 +26,7 @@ This Scroll supersedes any previous informal descriptions.
 |-------|-------|
 | **ID** | `signor` |
 | **Department** | Contracts & Governance |
-| **Registry Entry** | [Character Bible](02-character-bible.md#signor-the-immutable) |
+| **Registry Entry** | [Character Bible](02-character-bible.md) |
 
 ### Mission
 
@@ -116,7 +116,7 @@ Signs everything by hand.
 |-------|-------|
 | **ID** | `packrat_mcduffel` |
 | **Department** | Logistics & Planning |
-| **Registry Entry** | [Character Bible](02-character-bible.md#packrat-mcduffel) |
+| **Registry Entry** | [Character Bible](02-character-bible.md) |
 
 ### Mission
 
@@ -188,7 +188,7 @@ Nobody has ever witnessed him unpacking.
 |-------|-------|
 | **ID** | `patch` |
 | **Department** | Operations & Engineering |
-| **Registry Entry** | [Character Bible](02-character-bible.md#patch) |
+| **Registry Entry** | [Character Bible](02-character-bible.md) |
 
 ### Mission
 
@@ -264,7 +264,7 @@ Because someday...
 |-------|-------|
 | **ID** | `grimscratch` |
 | **Department** | Compliance & Risk |
-| **Registry Entry** | [Character Bible](02-character-bible.md#grimscratch) |
+| **Registry Entry** | [Character Bible](02-character-bible.md) |
 
 ### Mission
 
