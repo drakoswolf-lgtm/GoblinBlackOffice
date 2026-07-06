@@ -1,7 +1,7 @@
 # Scroll 002 — Character Bible
 
 > **Status:** Active — Working Reference
-> **Last Updated:** 2026-07-05
+> **Last Updated:** 2026-07-06
 
 ---
 
@@ -95,7 +95,7 @@ Turn completed work and billable records into money.
 | **Species / Class** | Contract Goblin |
 | **Department** | Contracts & Governance |
 | **Status** | Planned |
-| **Character Bible** | [Scroll 005 — Department Head Character Bible](05-department-head-character-bible.md#-signor-the-immutable) |
+| **Character Bible** | [Scroll 005 — Department Head Character Bible](05-department-head-character-bible.md) |
 
 **Mission**
 Protect relationships before they become disputes.
@@ -122,7 +122,7 @@ Protect relationships before they become disputes.
 | **Species / Class** | Logistics Goblin |
 | **Department** | Logistics & Planning |
 | **Status** | Planned |
-| **Character Bible** | [Scroll 005 — Department Head Character Bible](05-department-head-character-bible.md#-packrat-mcduffel) |
+| **Character Bible** | [Scroll 005 — Department Head Character Bible](05-department-head-character-bible.md) |
 
 **Mission**
 Convert resources into results with the least wasted effort.
@@ -150,7 +150,7 @@ Convert resources into results with the least wasted effort.
 | **Species / Class** | Operations Goblin |
 | **Department** | Operations & Engineering |
 | **Status** | Planned |
-| **Character Bible** | [Scroll 005 — Department Head Character Bible](05-department-head-character-bible.md#️-patch) |
+| **Character Bible** | [Scroll 005 — Department Head Character Bible](05-department-head-character-bible.md) |
 
 **Mission**
 Turn ideas into physical reality.
@@ -177,7 +177,7 @@ Turn ideas into physical reality.
 | **Species / Class** | Risk Goblin |
 | **Department** | Compliance & Risk |
 | **Status** | Planned |
-| **Character Bible** | [Scroll 005 — Department Head Character Bible](05-department-head-character-bible.md#️-grimscratch) |
+| **Character Bible** | [Scroll 005 — Department Head Character Bible](05-department-head-character-bible.md) |
 
 **Mission**
 Keep clever ideas from becoming expensive lessons.
@@ -200,6 +200,9 @@ Keep clever ideas from becoming expensive lessons.
 Some responsibilities are too specialized to belong to a department.
 These individuals operate across departmental boundaries.
 
+They are first-class canon, but they are not Department Heads and are
+intentionally excluded from `app/core/goblin_registry.py`.
+
 | Name | Role |
 |------|------|
 | 🔨 **Red** | Master of the Forge |
@@ -207,4 +210,4 @@ These individuals operate across departmental boundaries.
 | 🐔 **Dame Sheela** | First Chairchicken of the Egg Reallocation & Friendship Society; Hospitality & Morale |
 | 👤 **The OverDirector (Steve)** | Founder, Vision, Final Authority |
 
-See [Scroll 005 — Department Head Character Bible](05-department-head-character-bible.md#specialists) for the full specialists reference.
+See [Scroll 006 — Specialists of the Black Office](06-specialists-of-the-black-office.md) for the full specialists reference.
