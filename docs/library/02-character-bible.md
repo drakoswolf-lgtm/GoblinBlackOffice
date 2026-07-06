@@ -95,6 +95,7 @@ Turn completed work and billable records into money.
 | **Species / Class** | Contract Goblin |
 | **Department** | Contracts & Governance |
 | **Status** | Planned |
+| **Character Bible** | [Scroll 005 — Department Head Character Bible](05-department-head-character-bible.md#-signor-the-immutable) |
 
 **Mission**
 Protect relationships before they become disputes.
@@ -121,6 +122,7 @@ Protect relationships before they become disputes.
 | **Species / Class** | Logistics Goblin |
 | **Department** | Logistics & Planning |
 | **Status** | Planned |
+| **Character Bible** | [Scroll 005 — Department Head Character Bible](05-department-head-character-bible.md#-packrat-mcduffel) |
 
 **Mission**
 Convert resources into results with the least wasted effort.
@@ -148,6 +150,7 @@ Convert resources into results with the least wasted effort.
 | **Species / Class** | Operations Goblin |
 | **Department** | Operations & Engineering |
 | **Status** | Planned |
+| **Character Bible** | [Scroll 005 — Department Head Character Bible](05-department-head-character-bible.md#️-patch) |
 
 **Mission**
 Turn ideas into physical reality.
@@ -174,6 +177,7 @@ Turn ideas into physical reality.
 | **Species / Class** | Risk Goblin |
 | **Department** | Compliance & Risk |
 | **Status** | Planned |
+| **Character Bible** | [Scroll 005 — Department Head Character Bible](05-department-head-character-bible.md#️-grimscratch) |
 
 **Mission**
 Keep clever ideas from becoming expensive lessons.
@@ -188,3 +192,19 @@ Keep clever ideas from becoming expensive lessons.
 
 **Guiding Question**
 > *What's the worst realistic outcome, and how do we avoid it?*
+
+---
+
+## Specialists
+
+Some responsibilities are too specialized to belong to a department.
+These individuals operate across departmental boundaries.
+
+| Name | Role |
+|------|------|
+| 🔨 **Red** | Master of the Forge |
+| 🐍 **James** | OAuth Basilisk, Keeper of Authentication |
+| 🐔 **Dame Sheela** | First Chairchicken of the Egg Reallocation & Friendship Society; Hospitality & Morale |
+| 👤 **The OverDirector (Steve)** | Founder, Vision, Final Authority |
+
+See [Scroll 005 — Department Head Character Bible](05-department-head-character-bible.md#specialists) for the full specialists reference.
