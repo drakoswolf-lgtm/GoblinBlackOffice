@@ -4,7 +4,7 @@
 > **Author:** Æterna SkyeWard, Great Goblin Necromancer
 > **Audience:** Red, The OverDirector, Future Goblins
 > **Classification:** Library / Character Bible
-> **Last Updated:** 2026-07-05
+> **Last Updated:** 2026-07-06
 
 ---
 
@@ -361,16 +361,13 @@ Chaos quietly takes the chair.
 
 ## Specialists
 
-Some responsibilities are too specialized to belong to a department.
+Specialists are first-class canon, but they are not Department Heads.
 
-These individuals operate across departmental boundaries.
+They operate across departmental boundaries and are documented in
+[Scroll 006 — Specialists of the Black Office](06-specialists-of-the-black-office.md).
 
-| Name | Role |
-|------|------|
-| 🔨 **Red** | Master of the Forge |
-| 🐍 **James** | OAuth Basilisk, Keeper of Authentication |
-| 🐔 **Dame Sheela** | First Chairchicken of the Egg Reallocation & Friendship Society; Hospitality & Morale |
-| 👤 **The OverDirector (Steve)** | Founder, Vision, Final Authority |
+They remain outside the department registry and outside this Department
+Head canon.
 
 ---
 

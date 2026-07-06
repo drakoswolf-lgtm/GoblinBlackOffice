@@ -18,6 +18,13 @@ EXPECTED_IDS = {
     "grimscratch",
 }
 
+SPECIALIST_IDS = {
+    "red_ironbeard",
+    "james",
+    "dame_sheela",
+    "the_overdirector",
+}
+
 
 class TestRegistryReturnsAllGoblins:
     def test_get_all_returns_list(self):
@@ -45,6 +52,11 @@ class TestGetById:
     def test_unknown_id_raises_key_error(self):
         with pytest.raises(KeyError):
             registry.get_by_id("not_a_real_goblin")
+
+    def test_specialists_are_not_in_registry(self):
+        for specialist_id in SPECIALIST_IDS:
+            with pytest.raises(KeyError):
+                registry.get_by_id(specialist_id)
 
 
 class TestNoDuplicateIds:
@@ -178,3 +190,9 @@ class TestCanonicalDepartmentsAndGuidingQuestions:
                 f"got '{goblin.guiding_question}', "
                 f"expected '{expected['guiding_question']}'"
             )
+
+
+class TestSpecialistsRemainOutsideRegistry:
+    def test_registry_only_contains_department_goblins(self):
+        ids = {goblin.id for goblin in registry.get_all()}
+        assert ids.isdisjoint(SPECIALIST_IDS)
