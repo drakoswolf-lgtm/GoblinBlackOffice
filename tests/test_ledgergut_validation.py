@@ -7,7 +7,7 @@ from app.ledgergut.models import (
     ReceiptRecord,
     ReimbursementStatus,
 )
-from app.ledgergut.validation import validate_receipt
+from app.ledgergut.validation import ValidationPolicy, validate_receipt
 
 
 def make_record(**overrides: object) -> ReceiptRecord:
@@ -61,6 +61,43 @@ def test_v01_flags_future_receipt_dates() -> None:
     assert [finding.rule_id for finding in findings] == ["V-01"]
 
 
+def test_v02_flags_stale_receipt_dates_for_black_collar_review() -> None:
+    record = make_record(
+        receipt=ReceiptExtraction(
+            receipt_date=date(2026, 3, 1),
+            subtotal="25.00",
+            tax_amount="3.00",
+            total_amount="28.00",
+            currency="CAD",
+        )
+    )
+
+    findings = validate_receipt(record, today=date(2026, 7, 14))
+
+    assert [finding.rule_id for finding in findings] == ["V-02"]
+    assert findings[0].severity == "warning"
+
+
+def test_v02_uses_configurable_stale_receipt_window() -> None:
+    record = make_record(
+        receipt=ReceiptExtraction(
+            receipt_date=date(2026, 5, 1),
+            subtotal="25.00",
+            tax_amount="3.00",
+            total_amount="28.00",
+            currency="CAD",
+        )
+    )
+
+    findings = validate_receipt(
+        record,
+        today=date(2026, 7, 14),
+        policy=ValidationPolicy(default_currency="CAD", stale_receipt_days=30),
+    )
+
+    assert [finding.rule_id for finding in findings] == ["V-02"]
+
+
 def test_v03_flags_non_positive_totals() -> None:
     record = make_record(
         receipt=ReceiptExtraction(
@@ -108,11 +145,17 @@ def test_v04_allows_tax_rounding_within_tolerance() -> None:
 
 
 def test_v05_flags_missing_project_assignment() -> None:
-    record = make_record(project_name=None)
+    record = make_record(project_name=None, assignment_confidence=None)
 
     findings = validate_receipt(record, today=date(2026, 7, 14))
 
     assert [finding.rule_id for finding in findings] == ["V-05"]
+
+
+def test_v05_allows_manual_project_selection_without_assignment_confidence() -> None:
+    record = make_record(assignment_confidence=None)
+
+    assert validate_receipt(record, today=date(2026, 7, 14)) == ()
 
 
 def test_v05_flags_uncertain_project_assignment() -> None:
@@ -121,6 +164,7 @@ def test_v05_flags_uncertain_project_assignment() -> None:
     findings = validate_receipt(record, today=date(2026, 7, 14))
 
     assert [finding.rule_id for finding in findings] == ["V-05"]
+    assert findings[0].fields == ("project_name", "assignment_confidence")
 
 
 def test_v06_flags_unknown_payer() -> None:

@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from decimal import Decimal
+from datetime import timedelta
 
 from app.ledgergut.models import BillableStatus, PaidBy, ReceiptRecord, ValidationFinding
 
@@ -12,16 +14,38 @@ CONFIDENCE_THRESHOLD = 0.75
 TOTAL_TOLERANCE = Decimal("0.05")
 
 
+@dataclass(frozen=True)
+class ValidationPolicy:
+    """Configurable validation settings for a Ledgergut receipt workflow."""
+
+    default_currency: str | None = None
+    stale_receipt_days: int | None = None
+    assignment_confidence_threshold: float = CONFIDENCE_THRESHOLD
+    ocr_confidence_threshold: float = CONFIDENCE_THRESHOLD
+
+
+BLACK_COLLAR_VALIDATION_POLICY = ValidationPolicy(
+    default_currency=BLACK_COLLAR_DEFAULT_CURRENCY,
+    stale_receipt_days=90,
+)
+
+
 def validate_receipt(
     record: ReceiptRecord,
     *,
     today: date | None = None,
+    policy: ValidationPolicy | None = None,
 ) -> tuple[ValidationFinding, ...]:
     """Return deterministic structured validation findings for a receipt record."""
 
     findings: list[ValidationFinding] = []
     evaluation_date = today or datetime.now(timezone.utc).date()
     receipt = record.receipt
+    validation_policy = policy or (
+        BLACK_COLLAR_VALIDATION_POLICY
+        if record.collar_id == "black_collar"
+        else ValidationPolicy()
+    )
 
     if receipt.receipt_date and receipt.receipt_date > evaluation_date:
         findings.append(
@@ -30,6 +54,26 @@ def validate_receipt(
                 fields=("receipt_date",),
                 severity="error",
                 message="Receipt date cannot be in the future.",
+                requires_human_review=True,
+            )
+        )
+
+    if (
+        record.collar_id == "black_collar"
+        and validation_policy.stale_receipt_days is not None
+        and receipt.receipt_date is not None
+        and receipt.receipt_date
+        < evaluation_date - timedelta(days=validation_policy.stale_receipt_days)
+    ):
+        findings.append(
+            ValidationFinding(
+                rule_id="V-02",
+                fields=("receipt_date",),
+                severity="warning",
+                message=(
+                    "Receipt date is older than the configured stale-receipt review "
+                    f"window ({validation_policy.stale_receipt_days} days)."
+                ),
                 requires_human_review=True,
             )
         )
@@ -63,17 +107,27 @@ def validate_receipt(
 
     project_missing = not record.project_name
     project_uncertain = (
-        record.assignment_confidence is None
-        or record.assignment_confidence < CONFIDENCE_THRESHOLD
+        bool(record.project_name)
+        and record.assignment_confidence is not None
+        and record.assignment_confidence
+        < validation_policy.assignment_confidence_threshold
     )
     if record.collar_id == "black_collar" and (project_missing or project_uncertain):
-        detail = "missing" if project_missing else "uncertain"
+        fields = ("project_name",) if project_missing else ("project_name", "assignment_confidence")
+        message = (
+            "Project assignment is missing and requires review."
+            if project_missing
+            else (
+                "Inferred project assignment confidence is below "
+                f"{validation_policy.assignment_confidence_threshold:.2f}."
+            )
+        )
         findings.append(
             ValidationFinding(
                 rule_id="V-05",
-                fields=("project_name", "assignment_confidence"),
+                fields=fields,
                 severity="warning",
-                message=f"Project assignment is {detail} and requires review.",
+                message=message,
                 requires_human_review=True,
             )
         )
@@ -90,7 +144,7 @@ def validate_receipt(
         )
 
     expected_currency = record.currency or (
-        BLACK_COLLAR_DEFAULT_CURRENCY if record.collar_id == "black_collar" else None
+        validation_policy.default_currency if record.collar_id == "black_collar" else None
     )
     detected_currency = receipt.currency
     if expected_currency and detected_currency:
@@ -123,7 +177,11 @@ def validate_receipt(
         )
 
     for field_name, score in sorted(record.ocr_confidence.items()):
-        if field_name == "overall" or score is None or score >= CONFIDENCE_THRESHOLD:
+        if (
+            field_name == "overall"
+            or score is None
+            or score >= validation_policy.ocr_confidence_threshold
+        ):
             continue
         findings.append(
             ValidationFinding(
@@ -132,7 +190,7 @@ def validate_receipt(
                 severity="warning",
                 message=(
                     f"OCR confidence for '{field_name}' is below "
-                    f"{CONFIDENCE_THRESHOLD:.2f}."
+                    f"{validation_policy.ocr_confidence_threshold:.2f}."
                 ),
                 requires_human_review=True,
             )
