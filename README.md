@@ -6,11 +6,11 @@ A personal workforce of disgruntled goblins dedicated to saving you time, making
 ### Quick start (fresh checkout)
 
 ```bash
-# 1. Install dependencies (Python 3.10+ required)
-pip install flask
+# 1. Install Python dependencies (Python 3.10+ required)
+pip install flask pillow pytesseract
 
-# 2. Launch the web UI
-python run_ledgergut.py
+# 2. Launch Ledgergut
+PYTHONPATH=. python run_ledgergut.py
 ```
 
 Then open **http://localhost:5000** in your browser.
@@ -20,6 +20,34 @@ validation, and save receipts to a local JSON file (`runtime/ledgergut/receipts.
 Saved receipts can be exported as CSV from the same page.
 
 Uploaded images are stored in `runtime/ledgergut/images/` (gitignored).
+
+### Local OCR dependency
+
+Ledgergut receipt scanning uses **Tesseract OCR** locally through `pytesseract`.
+Scanned values are only suggestions — always review and correct them before saving.
+
+#### Install Tesseract
+
+**Windows (Chocolatey)**
+
+```powershell
+choco install tesseract
+```
+
+**macOS (Homebrew)**
+
+```bash
+brew install tesseract
+```
+
+**Ubuntu**
+
+```bash
+sudo apt-get update
+sudo apt-get install -y tesseract-ocr
+```
+
+If Tesseract is missing or unavailable, Ledgergut still supports full manual entry.
 
 ### Running tests
 

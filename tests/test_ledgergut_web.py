@@ -233,6 +233,79 @@ def test_post_error_finding_does_not_save(app_client):
     assert len(store.list_receipts()) == 0
 
 
+def test_scan_receipt_populates_form_without_saving(app_client, monkeypatch):
+    import io
+
+    import app.ledgergut.web as web_module
+
+    client, store = app_client
+    monkeypatch.setattr(
+        web_module,
+        "extract_text_from_image",
+        lambda image_data: "\n".join(
+            [
+                "HOME HARDWARE",
+                "Date: 2026-07-01",
+                "GST 1.25",
+                "PST 1.75",
+                "SUBTOTAL 25.00",
+                "TOTAL 28.00",
+                "Receipt #: RCT-00421",
+            ]
+        ),
+    )
+
+    response = client.post(
+        "/receipts/scan",
+        data={
+            **_valid_form(vendor_name="", receipt_date="", subtotal="", tax_amount="", total_amount=""),
+            "receipt_image": (io.BytesIO(b"\x89PNG\r\n\x1a\n"), "receipt.png"),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 200
+    assert b"OCR suggestions only" in response.data
+    assert b'value="HOME HARDWARE"' in response.data
+    assert b'value="2026-07-01"' in response.data
+    assert b'value="25.00"' in response.data
+    assert b'value="3.00"' in response.data
+    assert b'value="28.00"' in response.data
+    assert b'value="RCT-00421"' in response.data
+    assert b"Receipt #: RCT-00421" in response.data
+    assert len(store.list_receipts()) == 0
+
+
+def test_scan_receipt_failure_shows_user_facing_message(app_client, monkeypatch):
+    import io
+
+    import app.ledgergut.web as web_module
+    from app.ledgergut.ocr import OcrError
+
+    client, store = app_client
+    monkeypatch.setattr(
+        web_module,
+        "extract_text_from_image",
+        lambda image_data: (_ for _ in ()).throw(
+            OcrError("Ledgergut could not scan that receipt image. You can still enter it manually.")
+        ),
+    )
+
+    response = client.post(
+        "/receipts/scan",
+        data={
+            **_valid_form(vendor_name=""),
+            "receipt_image": (io.BytesIO(b"\x89PNG\r\n\x1a\n"), "receipt.png"),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 200
+    assert b"Scan unavailable" in response.data
+    assert b"You can still enter it manually" in response.data
+    assert len(store.list_receipts()) == 0
+
+
 def test_post_malformed_money_does_not_crash(app_client):
     client, _ = app_client
     response = client.post("/receipts/new", data=_valid_form(subtotal="abc"))
