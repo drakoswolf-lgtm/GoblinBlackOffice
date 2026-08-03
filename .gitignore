@@ -7,6 +7,15 @@
 .buildlog/
 .history
 
+# Python runtime / packaging
+__pycache__/
+*.egg-info/
+dist/
+.eggs/
+
+# Ledgergut runtime data (uploads + persistence)
+runtime/
+
 
 
 # Flutter repo-specific
