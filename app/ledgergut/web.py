@@ -75,13 +75,19 @@ def new_receipt():
         if not has_errors and not input_errors:
             # Validation passed — now it is safe to persist the image.
             image_filename = None
+            written_image_path: Path | None = None
             if pending_image is not None:
                 image_data, ext = pending_image
                 image_filename = f"{uuid.uuid4().hex}.{ext}"
-                (_store.image_dir / image_filename).write_bytes(image_data)
+                written_image_path = _store.image_dir / image_filename
+                written_image_path.write_bytes(image_data)
             try:
                 _store.save_receipt(record.to_dict(), image_filename)
             except StorageError as exc:
+                # Roll back: remove the image that was just written so it does
+                # not remain on disk without a corresponding receipt record.
+                if written_image_path is not None:
+                    written_image_path.unlink(missing_ok=True)
                 storage_error = str(exc)
             else:
                 return redirect(url_for("index") + "?saved=1")

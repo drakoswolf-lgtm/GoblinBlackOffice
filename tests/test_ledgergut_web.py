@@ -329,3 +329,26 @@ def test_success_banner_absent_without_query_param(app_client):
     response = client.get("/")
     assert response.status_code == 200
     assert b"saved successfully" not in response.data.lower()
+
+
+def test_storage_error_on_save_deletes_written_image(app_client):
+    """If save_receipt raises StorageError after image write, the image must be deleted."""
+    import io
+
+    client, store = app_client
+
+    # Corrupt the store so that save_receipt raises StorageError.
+    store._path.parent.mkdir(parents=True, exist_ok=True)
+    store._path.write_text("{ corrupted json {{", encoding="utf-8")
+    store._image_dir.mkdir(parents=True, exist_ok=True)
+
+    fake_image = (io.BytesIO(b"\x89PNG\r\n\x1a\n"), "receipt.png")
+    response = client.post(
+        "/receipts/new",
+        data={**_valid_form(), "receipt_image": fake_image},
+        content_type="multipart/form-data",
+    )
+    assert response.status_code == 200
+    # The image directory must be empty — the image was rolled back on StorageError.
+    image_files = list(store._image_dir.iterdir())
+    assert image_files == [], f"Unexpected orphaned files: {image_files}"
