@@ -132,8 +132,14 @@
     <p style="font-size:0.85rem;color:#666;">Receipt entry &amp; validation</p>
   </header>
 
-  {% if request.args.get('saved') %}
+  {% if saved %}
   <div class="alert success">✓ Receipt saved successfully.</div>
+  {% endif %}
+
+  {% if storage_error %}
+  <div class="alert error">
+    <strong>Storage error:</strong> {{ storage_error }}
+  </div>
   {% endif %}
 
   {% if input_errors %}

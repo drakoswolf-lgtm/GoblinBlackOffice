@@ -5,9 +5,14 @@ from __future__ import annotations
 import csv
 import io
 import json
+import shutil
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+
+
+class StorageError(Exception):
+    """Raised when the receipt store cannot be read (e.g. corrupted JSON)."""
 
 _DEFAULT_STORE = Path("runtime") / "ledgergut" / "receipts.json"
 _DEFAULT_IMAGE_DIR = Path("runtime") / "ledgergut" / "images"
@@ -54,9 +59,24 @@ class ReceiptStore:
         text = self._path.read_text(encoding="utf-8")
         try:
             data = json.loads(text)
-        except json.JSONDecodeError:
-            data = []
-        return data if isinstance(data, list) else []
+        except json.JSONDecodeError as exc:
+            timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+            backup_path = self._path.with_suffix(f".corrupted.{timestamp}.json")
+            shutil.copy2(str(self._path), str(backup_path))
+            raise StorageError(
+                f"Receipt store is corrupted and could not be read. "
+                f"A backup has been saved to '{backup_path.name}'. "
+                f"Detail: {exc}"
+            ) from exc
+        if not isinstance(data, list):
+            timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+            backup_path = self._path.with_suffix(f".corrupted.{timestamp}.json")
+            shutil.copy2(str(self._path), str(backup_path))
+            raise StorageError(
+                f"Receipt store has unexpected format (expected a JSON array). "
+                f"A backup has been saved to '{backup_path.name}'."
+            )
+        return data
 
     def _write(self, records: list[dict]) -> None:
         self._ensure_paths()

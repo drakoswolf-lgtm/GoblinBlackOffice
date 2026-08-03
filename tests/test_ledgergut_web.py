@@ -263,3 +263,69 @@ def test_csv_export_empty_store(app_client):
     response = client.get("/export/csv")
     assert response.status_code == 200
     assert b"record_id" in response.data
+
+
+# ---------------------------------------------------------------------------
+# Regression tests for PR review fixes
+# ---------------------------------------------------------------------------
+
+
+def test_rejected_submission_leaves_no_orphaned_image(app_client, tmp_path):
+    """Fix 1: image must NOT be written to disk when validation blocks saving."""
+    import io
+
+    client, store = app_client
+
+    # V-03 error: zero total blocks saving
+    fake_image = (io.BytesIO(b"\x89PNG\r\n\x1a\n"), "receipt.png")
+    data = _valid_form(total_amount="0.00")
+    response = client.post(
+        "/receipts/new",
+        data={**data, "receipt_image": fake_image},
+        content_type="multipart/form-data",
+    )
+    assert response.status_code == 200
+    assert b"V-03" in response.data
+    # The image directory must be empty — no orphaned file
+    image_files = list(store.image_dir.iterdir())
+    assert image_files == [], f"Unexpected orphaned files: {image_files}"
+
+
+def test_corrupted_store_raises_storage_error(tmp_store: ReceiptStore):
+    """Fix 2: corrupted JSON must raise StorageError and back up the damaged file."""
+    from app.ledgergut.storage import StorageError
+
+    tmp_store._path.write_text("{ not valid json {{", encoding="utf-8")
+    with pytest.raises(StorageError, match="corrupted"):
+        tmp_store.list_receipts()
+    # The backup file must exist alongside the store
+    backups = list(tmp_store._path.parent.glob("*.corrupted.*.json"))
+    assert len(backups) == 1
+
+
+def test_corrupted_store_does_not_overwrite_data(tmp_store: ReceiptStore):
+    """Fix 2: a subsequent save must NOT silently overwrite the damaged store."""
+    from app.ledgergut.storage import StorageError
+
+    original_content = "{ not valid json {{"
+    tmp_store._path.write_text(original_content, encoding="utf-8")
+    with pytest.raises(StorageError):
+        tmp_store.save_receipt({"description": "new"})
+    # The store file must be unchanged — data not silently overwritten
+    assert tmp_store._path.read_text(encoding="utf-8") == original_content
+
+
+def test_success_banner_appears_after_redirect(app_client):
+    """Fix 3: the success banner must be visible when /?saved=1 is loaded."""
+    client, _ = app_client
+    response = client.get("/?saved=1")
+    assert response.status_code == 200
+    assert b"saved successfully" in response.data.lower()
+
+
+def test_success_banner_absent_without_query_param(app_client):
+    """Fix 3: the success banner must NOT appear on a plain GET /."""
+    client, _ = app_client
+    response = client.get("/")
+    assert response.status_code == 200
+    assert b"saved successfully" not in response.data.lower()
