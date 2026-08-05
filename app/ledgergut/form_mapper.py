@@ -79,6 +79,7 @@ def build_models(
         subtotal=subtotal,
         tax_amount=tax_amount,
         total_amount=total_amount,
+        receipt_number=form.get("receipt_number", "").strip() or None,
         currency=currency,
     )
 

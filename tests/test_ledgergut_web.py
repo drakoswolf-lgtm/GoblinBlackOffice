@@ -233,6 +233,201 @@ def test_post_error_finding_does_not_save(app_client):
     assert len(store.list_receipts()) == 0
 
 
+def test_scan_receipt_populates_form_without_saving(app_client, monkeypatch):
+    import io
+
+    import app.ledgergut.web as web_module
+
+    client, store = app_client
+    monkeypatch.setattr(
+        web_module,
+        "extract_text_from_image",
+        lambda image_data: "\n".join(
+            [
+                "HOME HARDWARE",
+                "Date: 2026-07-01",
+                "GST 1.25",
+                "PST 1.75",
+                "SUBTOTAL 25.00",
+                "TOTAL 28.00",
+                "Receipt #: RCT-00421",
+            ]
+        ),
+    )
+
+    response = client.post(
+        "/receipts/scan",
+        data={
+            **_valid_form(vendor_name="", receipt_date="", subtotal="", tax_amount="", total_amount=""),
+            "receipt_image": (io.BytesIO(b"\x89PNG\r\n\x1a\n"), "receipt.png"),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 200
+    assert b"OCR suggestions only" in response.data
+    assert b'value="HOME HARDWARE"' in response.data
+    assert b'value="2026-07-01"' in response.data
+    assert b'value="25.00"' in response.data
+    assert b'value="3.00"' in response.data
+    assert b'value="28.00"' in response.data
+    assert b'value="RCT-00421"' in response.data
+    assert b"Receipt #: RCT-00421" in response.data
+    assert len(store.list_receipts()) == 0
+
+
+def test_scan_receipt_does_not_overwrite_user_entered_fields(app_client, monkeypatch):
+    import io
+
+    import app.ledgergut.web as web_module
+
+    client, store = app_client
+    monkeypatch.setattr(
+        web_module,
+        "extract_text_from_image",
+        lambda image_data: "\n".join(
+            [
+                "HOME HARDWARE",
+                "Date: 2026-07-01",
+                "SUBTOTAL 25.00",
+                "GST 1.25",
+                "PST 1.75",
+                "TOTAL 28.00",
+                "Receipt #: RCT-00421",
+            ]
+        ),
+    )
+
+    response = client.post(
+        "/receipts/scan",
+        data={
+            **_valid_form(
+                vendor_name="Manual Vendor",
+                receipt_date="2026-07-04",
+                subtotal="20.00",
+                tax_amount="2.00",
+                total_amount="22.00",
+                receipt_number="MANUAL-123",
+            ),
+            "receipt_image": (io.BytesIO(b"\x89PNG\r\n\x1a\n"), "receipt.png"),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 200
+    assert b'value="Manual Vendor"' in response.data
+    assert b'value="2026-07-04"' in response.data
+    assert b'value="20.00"' in response.data
+    assert b'value="2.00"' in response.data
+    assert b'value="22.00"' in response.data
+    assert b'value="MANUAL-123"' in response.data
+    assert b"Receipt #: RCT-00421" in response.data
+    assert len(store.list_receipts()) == 0
+
+
+def test_scan_then_save_preserves_uploaded_receipt_image(app_client, monkeypatch):
+    import io
+
+    import app.ledgergut.web as web_module
+
+    client, store = app_client
+    web_module.app.config["LEDGERGUT_PENDING_IMAGES"] = {}
+
+    def fake_extract_text(image_data):
+        return "\n".join(
+            [
+                "HOME HARDWARE",
+                "Date: 2026-07-01",
+                "SUBTOTAL 25.00",
+                "GST 1.25",
+                "PST 1.75",
+                "TOTAL 28.00",
+                "Receipt #: RCT-00421",
+            ]
+        )
+
+    monkeypatch.setattr(
+        web_module,
+        "extract_text_from_image",
+        fake_extract_text,
+    )
+
+    uploaded_image = (
+        b"\x89PNG\r\n\x1a\n"
+        b"\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00"
+        b"\x90wS\xde\x00\x00\x00\x0cIDAT\x08\x99c\xf8\xff\xff?\x00\x05\xfe\x02\xfe"
+        b"\xdc\xccY\xe7\x00\x00\x00\x00IEND\xaeB`\x82"
+    )
+    scan_response = client.post(
+        "/receipts/scan",
+        data={
+            **_valid_form(vendor_name="", receipt_date="", subtotal="", tax_amount="", total_amount=""),
+            "receipt_image": (io.BytesIO(uploaded_image), "receipt.png"),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert scan_response.status_code == 200
+    assert b'name="pending_image_token"' in scan_response.data
+    pending_image_token = next(iter(web_module.app.config["LEDGERGUT_PENDING_IMAGES"]))
+    pending_payload = web_module.app.config["LEDGERGUT_PENDING_IMAGES"][pending_image_token]
+
+    save_response = client.post(
+        "/receipts/new",
+        data={
+            **_valid_form(
+                vendor_name="HOME HARDWARE",
+                receipt_date="2026-07-01",
+                subtotal="25.00",
+                tax_amount="3.00",
+                total_amount="28.00",
+                receipt_number="RCT-00421",
+            ),
+            "pending_image_token": pending_image_token,
+        },
+        follow_redirects=True,
+    )
+
+    assert save_response.status_code == 200
+    saved_records = store.list_receipts()
+    assert len(saved_records) == 1
+    image_filename = saved_records[0].get("image_filename")
+    assert image_filename
+    saved_image_path = store.image_dir / image_filename
+    assert saved_image_path.read_bytes() == bytes.fromhex(pending_payload["image_data"])
+    assert pending_image_token not in web_module.app.config["LEDGERGUT_PENDING_IMAGES"]
+
+
+def test_scan_receipt_failure_shows_user_facing_message(app_client, monkeypatch):
+    import io
+
+    import app.ledgergut.web as web_module
+    from app.ledgergut.ocr import OcrError
+
+    client, store = app_client
+    monkeypatch.setattr(
+        web_module,
+        "extract_text_from_image",
+        lambda image_data: (_ for _ in ()).throw(
+            OcrError("Ledgergut could not scan that receipt image. You can still enter it manually.")
+        ),
+    )
+
+    response = client.post(
+        "/receipts/scan",
+        data={
+            **_valid_form(vendor_name=""),
+            "receipt_image": (io.BytesIO(b"\x89PNG\r\n\x1a\n"), "receipt.png"),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 200
+    assert b"Scan unavailable" in response.data
+    assert b"You can still enter it manually" in response.data
+    assert len(store.list_receipts()) == 0
+
+
 def test_post_malformed_money_does_not_crash(app_client):
     client, _ = app_client
     response = client.post("/receipts/new", data=_valid_form(subtotal="abc"))

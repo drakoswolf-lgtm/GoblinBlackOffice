@@ -99,6 +99,40 @@
       margin-top: 1rem;
     }
     .primary-btn:hover { background: #226022; }
+    .secondary-btn {
+      background: #1a6e9f;
+    }
+    .secondary-btn:hover { background: #145477; }
+    .button-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .button-row .primary-btn { margin-top: 0; }
+    .hint {
+      font-size: 0.82rem;
+      color: #666;
+      margin-top: -0.2rem;
+      margin-bottom: 0.6rem;
+    }
+    .suggestion-box {
+      background: #fff3cd;
+      border: 1px solid #ffe69c;
+      color: #664d03;
+    }
+    details {
+      margin-top: 1rem;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+    }
+    details pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 0.82rem;
+      margin-top: 0.75rem;
+    }
     .receipts-section { margin-top: 1.5rem; }
     .export-link {
       display: inline-block;
@@ -122,6 +156,7 @@
     .empty-msg { color: #888; font-size: 0.9rem; margin-top: 0.5rem; }
     @media (max-width: 500px) {
       .row { flex-direction: column; gap: 0; }
+      .button-row { flex-direction: column; gap: 0.5rem; }
       table { font-size: 0.75rem; }
     }
   </style>
@@ -139,6 +174,18 @@
   {% if storage_error %}
   <div class="alert error">
     <strong>Storage error:</strong> {{ storage_error }}
+  </div>
+  {% endif %}
+
+  {% if scan_error %}
+  <div class="alert error">
+    <strong>Scan unavailable:</strong> {{ scan_error }}
+  </div>
+  {% endif %}
+
+  {% if scan_message %}
+  <div class="alert suggestion-box">
+    <strong>OCR suggestions only:</strong> {{ scan_message }}
   </div>
   {% endif %}
 
@@ -178,23 +225,30 @@
   {% endif %}
 
   <h2>New Receipt</h2>
-  <form method="POST" action="/receipts/new" enctype="multipart/form-data">
+  <form method="POST" action="/receipts/new" enctype="multipart/form-data" id="receipt-form">
+    <textarea name="ocr_raw_text" hidden>{{ ocr_raw_text }}</textarea>
+    <textarea name="ocr_confidence_notes" hidden>{{ ocr_confidence_notes | join('\n') }}</textarea>
+    <input type="hidden" name="pending_image_token" value="{{ form_data.get('pending_image_token', '') }}">
 
     <fieldset>
       <legend>Receipt Image</legend>
       <label for="receipt_image">Upload image (PNG / JPG)</label>
       <input type="file" id="receipt_image" name="receipt_image" accept=".png,.jpg,.jpeg">
+      <p class="hint">Scan runs locally with Tesseract. Review every suggestion before saving. Max 10 MB.</p>
       <img id="image-preview" alt="Receipt preview">
     </fieldset>
 
     <fieldset>
-      <legend>Vendor &amp; Date</legend>
+      <legend>Vendor, Date &amp; Suggested Receipt Number</legend>
       <label for="vendor_name">Vendor name</label>
       <input type="text" id="vendor_name" name="vendor_name"
              value="{{ form_data.get('vendor_name', '') }}" placeholder="e.g. Home Hardware">
       <label for="receipt_date">Receipt date</label>
       <input type="date" id="receipt_date" name="receipt_date"
              value="{{ form_data.get('receipt_date', '') }}">
+      <label for="receipt_number">Receipt number (suggested if detected)</label>
+      <input type="text" id="receipt_number" name="receipt_number"
+             value="{{ form_data.get('receipt_number', '') }}" placeholder="e.g. RCT-00421">
     </fieldset>
 
     <fieldset>
@@ -267,8 +321,27 @@
              value="{{ form_data.get('submitted_by', '') }}" placeholder="e.g. steve">
     </fieldset>
 
-    <button type="submit" class="primary-btn">💾 Save Receipt</button>
+    <div class="button-row">
+      <button type="submit" class="primary-btn secondary-btn" formaction="/receipts/scan" id="scan-button">🔎 Scan Receipt</button>
+      <button type="submit" class="primary-btn" id="save-button">💾 Save Receipt</button>
+    </div>
   </form>
+
+  {% if ocr_confidence_notes or ocr_raw_text %}
+  <details>
+    <summary>OCR review details</summary>
+    {% if ocr_confidence_notes %}
+    <ul style="margin:0.75rem 0 0 1rem;">
+      {% for note in ocr_confidence_notes %}
+      <li>{{ note }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% if ocr_raw_text %}
+    <pre>{{ ocr_raw_text }}</pre>
+    {% endif %}
+  </details>
+  {% endif %}
 
   <section class="receipts-section">
     <h2>Saved Receipts</h2>
@@ -308,15 +381,26 @@
   </section>
 
   <script>
-    document.getElementById('receipt_image').addEventListener('change', function () {
+    var imageInput = document.getElementById('receipt_image');
+    var preview = document.getElementById('image-preview');
+    var form = document.getElementById('receipt-form');
+
+    imageInput.addEventListener('change', function () {
       var file = this.files[0];
-      var preview = document.getElementById('image-preview');
       if (file) {
         preview.src = URL.createObjectURL(file);
         preview.style.display = 'block';
       } else {
         preview.style.display = 'none';
       }
+    });
+
+    form.addEventListener('submit', function (event) {
+      if (!event.submitter) {
+        return;
+      }
+      event.submitter.disabled = true;
+      event.submitter.textContent = event.submitter.id === 'scan-button' ? 'Scanning…' : 'Saving…';
     });
   </script>
 </body>

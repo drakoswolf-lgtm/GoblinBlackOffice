@@ -10,6 +10,7 @@ from app.ledgergut.models import (
     TaxLine,
     ValidationFinding,
 )
+from app.ledgergut.receipt_parser import ReceiptSuggestions, parse_receipt_text
 from app.ledgergut.validation import (
     BLACK_COLLAR_VALIDATION_POLICY,
     BLACK_COLLAR_DEFAULT_CURRENCY,
@@ -28,10 +29,12 @@ __all__ = [
     "ReceiptExtraction",
     "ReceiptLineItem",
     "ReceiptRecord",
+    "ReceiptSuggestions",
     "ReimbursementStatus",
     "TOTAL_TOLERANCE",
     "TaxLine",
     "ValidationPolicy",
     "ValidationFinding",
+    "parse_receipt_text",
     "validate_receipt",
 ]
