@@ -276,6 +276,55 @@ def test_scan_receipt_populates_form_without_saving(app_client, monkeypatch):
     assert len(store.list_receipts()) == 0
 
 
+def test_scan_receipt_does_not_overwrite_user_entered_fields(app_client, monkeypatch):
+    import io
+
+    import app.ledgergut.web as web_module
+
+    client, store = app_client
+    monkeypatch.setattr(
+        web_module,
+        "extract_text_from_image",
+        lambda image_data: "\n".join(
+            [
+                "HOME HARDWARE",
+                "Date: 2026-07-01",
+                "SUBTOTAL 25.00",
+                "GST 1.25",
+                "PST 1.75",
+                "TOTAL 28.00",
+                "Receipt #: RCT-00421",
+            ]
+        ),
+    )
+
+    response = client.post(
+        "/receipts/scan",
+        data={
+            **_valid_form(
+                vendor_name="Manual Vendor",
+                receipt_date="2026-07-04",
+                subtotal="20.00",
+                tax_amount="2.00",
+                total_amount="22.00",
+                receipt_number="MANUAL-123",
+            ),
+            "receipt_image": (io.BytesIO(b"\x89PNG\r\n\x1a\n"), "receipt.png"),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 200
+    assert b'value="Manual Vendor"' in response.data
+    assert b'value="2026-07-04"' in response.data
+    assert b'value="20.00"' in response.data
+    assert b'value="2.00"' in response.data
+    assert b'value="22.00"' in response.data
+    assert b'value="MANUAL-123"' in response.data
+    assert b"Receipt #: RCT-00421" in response.data
+    assert len(store.list_receipts()) == 0
+
+
 def test_scan_receipt_failure_shows_user_facing_message(app_client, monkeypatch):
     import io
 

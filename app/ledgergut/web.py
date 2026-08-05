@@ -92,17 +92,17 @@ def _read_pending_image(*, required: bool) -> tuple[tuple[bytes, str] | None, st
 
 def _apply_suggestions(form_data: dict[str, str], suggestions: ReceiptSuggestions) -> dict[str, str]:
     updated = dict(form_data)
-    if suggestions.vendor_name is not None:
+    if suggestions.vendor_name is not None and not updated.get("vendor_name", "").strip():
         updated["vendor_name"] = suggestions.vendor_name
-    if suggestions.receipt_date is not None:
+    if suggestions.receipt_date is not None and not updated.get("receipt_date", "").strip():
         updated["receipt_date"] = suggestions.receipt_date.isoformat()
-    if suggestions.subtotal is not None:
+    if suggestions.subtotal is not None and not updated.get("subtotal", "").strip():
         updated["subtotal"] = f"{suggestions.subtotal:.2f}"
-    if suggestions.tax_amount is not None:
+    if suggestions.tax_amount is not None and not updated.get("tax_amount", "").strip():
         updated["tax_amount"] = f"{suggestions.tax_amount:.2f}"
-    if suggestions.total_amount is not None:
+    if suggestions.total_amount is not None and not updated.get("total_amount", "").strip():
         updated["total_amount"] = f"{suggestions.total_amount:.2f}"
-    if suggestions.receipt_number is not None:
+    if suggestions.receipt_number is not None and not updated.get("receipt_number", "").strip():
         updated["receipt_number"] = suggestions.receipt_number
     updated["ocr_raw_text"] = suggestions.raw_text
     updated["ocr_confidence_notes"] = "\n".join(suggestions.confidence_notes)

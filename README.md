@@ -10,7 +10,13 @@ A personal workforce of disgruntled goblins dedicated to saving you time, making
 pip install flask pillow pytesseract
 
 # 2. Launch Ledgergut
-PYTHONPATH=. python run_ledgergut.py
+python run_ledgergut.py
+```
+
+**PowerShell**
+
+```powershell
+python run_ledgergut.py
 ```
 
 Then open **http://localhost:5000** in your browser.
