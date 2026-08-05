@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 import uuid
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from flask import Flask, Response, redirect, render_template, request, url_for
@@ -19,6 +19,7 @@ from app.ledgergut.validation import validate_receipt
 _HERE = Path(__file__).parent
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
+PENDING_IMAGE_TTL = timedelta(minutes=30)
 
 app = Flask(__name__, template_folder=str(_HERE / "templates"))
 app.secret_key = os.environ.get("LEDGERGUT_SECRET", "ledgergut-dev-secret")
@@ -36,6 +37,43 @@ def _enum_options() -> dict:
 
 def _ocr_notes_from_form(form_data: dict[str, str]) -> list[str]:
     return [line for line in form_data.get("ocr_confidence_notes", "").splitlines() if line.strip()]
+
+
+def _pending_images() -> dict[str, dict[str, str]]:
+    pending_images = app.config.setdefault("LEDGERGUT_PENDING_IMAGES", {})
+    assert isinstance(pending_images, dict)
+    return pending_images
+
+
+def _prune_pending_images(now: datetime | None = None) -> None:
+    current_time = now or datetime.now(timezone.utc)
+    expired_tokens = []
+    for token, payload in _pending_images().items():
+        expires_at = datetime.fromisoformat(payload["expires_at"])
+        if expires_at <= current_time:
+            expired_tokens.append(token)
+    for token in expired_tokens:
+        _pending_images().pop(token, None)
+
+
+def _store_pending_image(image_data: bytes, ext: str) -> str:
+    _prune_pending_images()
+    token = uuid.uuid4().hex
+    expires_at = datetime.now(timezone.utc) + PENDING_IMAGE_TTL
+    _pending_images()[token] = {
+        "image_data": image_data.hex(),
+        "ext": ext,
+        "expires_at": expires_at.isoformat(),
+    }
+    return token
+
+
+def _consume_pending_image(token: str) -> tuple[bytes, str] | None:
+    _prune_pending_images()
+    payload = _pending_images().pop(token, None)
+    if payload is None:
+        return None
+    return bytes.fromhex(payload["image_data"]), payload["ext"]
 
 
 def _render_index(
@@ -125,7 +163,7 @@ def scan_receipt():
         )
 
     assert pending_image is not None
-    image_data, _ = pending_image
+    image_data, ext = pending_image
     try:
         raw_text = extract_text_from_image(image_data)
         suggestions = parse_receipt_text(raw_text)
@@ -136,6 +174,7 @@ def scan_receipt():
         )
 
     updated_form_data = _apply_suggestions(form_data, suggestions)
+    updated_form_data["pending_image_token"] = _store_pending_image(image_data, ext)
     return _render_index(
         form_data=updated_form_data,
         scan_message="OCR suggestions loaded. Review every extracted field before saving.",
@@ -148,6 +187,13 @@ def new_receipt():
 
     # Read the uploaded file into memory; do NOT write to disk yet.
     pending_image, image_error = _read_pending_image(required=False)
+    if pending_image is None:
+        pending_image_token = form_data.get("pending_image_token", "").strip()
+        if pending_image_token:
+            pending_image = _consume_pending_image(pending_image_token)
+            if pending_image is None:
+                input_error = "Scanned receipt image expired. Re-upload the image before saving."
+                image_error = input_error if image_error is None else image_error
     record, input_errors = build_models(form_data)
     if image_error:
         input_errors.append(image_error)

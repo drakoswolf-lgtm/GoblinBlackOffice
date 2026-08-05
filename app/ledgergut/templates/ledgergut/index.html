@@ -228,6 +228,7 @@
   <form method="POST" action="/receipts/new" enctype="multipart/form-data" id="receipt-form">
     <textarea name="ocr_raw_text" hidden>{{ ocr_raw_text }}</textarea>
     <textarea name="ocr_confidence_notes" hidden>{{ ocr_confidence_notes | join('\n') }}</textarea>
+    <input type="hidden" name="pending_image_token" value="{{ form_data.get('pending_image_token', '') }}">
 
     <fieldset>
       <legend>Receipt Image</legend>
