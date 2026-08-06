@@ -1,0 +1,22 @@
+# render.yaml — Deploy Ledgergut on Render.com (free tier)
+# Docs: https://render.com/docs/infrastructure-as-code
+services:
+  - type: web
+    name: ledgergut
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: |
+      apt-get update -qq && apt-get install -y -qq tesseract-ocr
+      pip install --upgrade pip
+      pip install flask pillow pytesseract gunicorn
+    startCommand: gunicorn "app.ledgergut.web:app" --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    envVars:
+      - key: LEDGERGUT_SECRET
+        generateValue: true
+      - key: PYTHONUNBUFFERED
+        value: "1"
+    disk:
+      name: ledgergut-data
+      mountPath: /opt/render/project/src/runtime
+      sizeGB: 1

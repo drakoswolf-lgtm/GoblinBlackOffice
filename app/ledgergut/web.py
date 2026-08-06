@@ -21,7 +21,12 @@ ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 PENDING_IMAGE_TTL = timedelta(minutes=30)
 
-app = Flask(__name__, template_folder=str(_HERE / "templates"))
+app = Flask(
+    __name__,
+    template_folder=str(_HERE / "templates"),
+    static_folder=str(_HERE / "static"),
+    static_url_path="/static",
+)
 app.secret_key = os.environ.get("LEDGERGUT_SECRET", "ledgergut-dev-secret")
 
 _store = ReceiptStore()
@@ -145,6 +150,19 @@ def _apply_suggestions(form_data: dict[str, str], suggestions: ReceiptSuggestion
     updated["ocr_raw_text"] = suggestions.raw_text
     updated["ocr_confidence_notes"] = "\n".join(suggestions.confidence_notes)
     return updated
+
+
+@app.route("/manifest.json")
+def pwa_manifest():
+    return app.send_static_file("manifest.json")
+
+
+@app.route("/sw.js")
+def service_worker():
+    response = app.send_static_file("sw.js")
+    response.headers["Service-Worker-Allowed"] = "/"
+    response.headers["Cache-Control"] = "no-cache"
+    return response
 
 
 @app.route("/", methods=["GET"])
