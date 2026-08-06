@@ -13,9 +13,9 @@ RUN pip install --no-cache-dir flask pillow pytesseract gunicorn
 
 COPY app/ ./app/
 
-# Persist receipt data on a volume mount.
-RUN mkdir -p /data/runtime/ledgergut/images
-ENV LEDGERGUT_RUNTIME=/data/runtime
+# All persistent data (receipts, images, any future app data) lives under /data.
+# Mount a named volume at /data to persist across container restarts.
+ENV LEDGERGUT_RUNTIME=/data
 
 EXPOSE 8080
 

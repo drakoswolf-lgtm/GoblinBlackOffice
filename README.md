@@ -3,58 +3,99 @@ A personal workforce of disgruntled goblins dedicated to saving you time, making
 
 ## Ledgergut — Receipt Entry UI
 
-Ledgergut is a mobile-first PWA (Progressive Web App). You can **install it as an icon on your Android home screen** by deploying the backend to any HTTPS host — no Python, Termux, or Tesseract installation required on your phone.
+Ledgergut is a mobile-first PWA (Progressive Web App). You can **install it as an icon on your Android home screen** with no Python, Termux, or Tesseract required on your phone.
+
+The recommended setup runs Ledgergut in Docker on a Windows PC and exposes it privately to your phone over **Tailscale**.
 
 ---
 
-### Android quick-start (recommended — Render.com free tier)
+### Android quick-start (recommended — Windows PC + Docker Desktop + Tailscale)
 
-> **Prerequisites on your computer** (one-time setup): a GitHub account and a free [Render.com](https://render.com) account.
+> **Prerequisites (one-time setup on the PC):**
+> - [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/) — installed and running
+> - [Tailscale](https://tailscale.com/download/windows) — installed and signed in on both the PC and the Android phone
+> - Tailscale **Serve** configured to expose port 8080 over HTTPS (see step 3 below)
 
-#### 1. Deploy the backend
+#### 1. Build and run the container
 
-1. Fork or push this repository to your GitHub account.
-2. Log in at [dashboard.render.com](https://dashboard.render.com) → **New → Web Service**.
-3. Connect your GitHub repo. Render auto-detects `render.yaml`.
-4. Click **Create Web Service** — Render installs Python, Tesseract, and all dependencies automatically.
-5. Wait ~3 minutes for the first build. Copy your public URL (e.g. `https://ledgergut.onrender.com`).
+Open **PowerShell** on the Windows PC:
 
-> **Free-tier note:** Render free instances spin down after 15 minutes of inactivity. The first request after a sleep takes ~30 s. Upgrade to the $7/month Starter plan to keep it always-on.
+```powershell
+# Clone the repo (or cd into an existing checkout)
+cd C:\path\to\GoblinBlackOffice
 
-#### 2. Install on Android as a home screen icon
+# Build the image
+docker build -t ledgergut .
 
-1. Open Chrome on your Android phone and navigate to your Render URL.
-2. Tap the **⋮ menu → Add to Home screen** (Chrome shows an install banner automatically on HTTPS).
-3. Tap **Add** — a Ledgergut icon appears on your home screen.
-4. Launch from the icon: the app opens full-screen, like a native app.
+# Create a named volume for all persistent data (receipts + images)
+docker volume create ledgergut-data
 
-#### 3. Use Ledgergut on Android
+# Run the container — binds to localhost only; Tailscale Serve proxies HTTPS
+docker run -d --name ledgergut `
+    -p 127.0.0.1:8080:8080 `
+    -v ledgergut-data:/data `
+    --restart unless-stopped `
+    -e LEDGERGUT_SECRET="$(New-Guid)" `
+    ledgergut
+```
+
+> All receipt records and uploaded images are stored in the `ledgergut-data` Docker volume, mounted at `/data` inside the container.
+
+#### 2. Expose over Tailscale HTTPS (Tailscale Serve)
+
+In PowerShell (the PC must already be signed in to Tailscale):
+
+```powershell
+tailscale serve https / http://127.0.0.1:8080
+```
+
+Tailscale Serve issues a trusted HTTPS certificate and makes the app reachable at your PC's Tailscale hostname — something like `https://my-pc.tail12345.ts.net`. PWA install in Chrome requires HTTPS, which Tailscale Serve provides automatically.
+
+> To find your PC's Tailscale hostname: `tailscale status` — look for your machine's entry.
+
+#### 3. Install on Android as a home screen icon
+
+1. Make sure Tailscale is running on your Android phone.
+2. Open **Chrome** and navigate to `https://<your-pc-tailscale-hostname>` (e.g. `https://my-pc.tail12345.ts.net`).
+3. Tap **⋮ menu → Add to Home screen** (Chrome shows an install banner automatically on HTTPS).
+4. Tap **Add** — a Ledgergut icon appears on your home screen.
+5. Launch from the icon: the app opens full-screen, camera-ready.
+
+#### 4. Use Ledgergut on Android
 
 | Feature | How |
 |---------|-----|
-| Photograph a receipt | Tap **Upload or photograph receipt** → your camera opens directly |
+| Photograph a receipt | Tap **Upload or photograph receipt** → camera opens directly |
 | Upload from gallery | Same button → choose **Gallery / Files** |
 | OCR | Tap **🔎 Scan Receipt** — extracted fields are pre-filled |
 | Review & correct | Edit any field before saving |
 | Save | Tap **💾 Save Receipt** |
 | Export CSV | Tap **⬇ Export CSV** in the Saved Receipts section |
 
----
+#### Useful container management commands
 
-### Alternative: self-hosted Docker deployment
+```powershell
+# View logs
+docker logs ledgergut
 
-```bash
-# Build and run locally (requires Docker)
+# Stop / start
+docker stop ledgergut
+docker start ledgergut
+
+# Update to a new build
 docker build -t ledgergut .
-docker run -p 8080:8080 -v ledgergut-data:/data ledgergut
-# Then open http://localhost:8080
+docker stop ledgergut && docker rm ledgergut
+docker run -d --name ledgergut `
+    -p 127.0.0.1:8080:8080 `
+    -v ledgergut-data:/data `
+    --restart unless-stopped `
+    -e LEDGERGUT_SECRET="$(New-Guid)" `
+    ledgergut
 ```
 
-For a persistent VPS (DigitalOcean, Fly.io, Railway, etc.) deploy the container image and mount a volume at `/data`. Set the `LEDGERGUT_SECRET` env var to a random string.
-
 ---
 
-### Local desktop quick-start (Python)
+### Local desktop quick-start (Python, no Docker)
 
 ```bash
 # 1. Install Python dependencies (Python 3.10+ required)
@@ -70,7 +111,7 @@ Saved receipts go to `runtime/ledgergut/receipts.json`. Uploaded images go to `r
 
 ### Local OCR dependency
 
-Ledgergut uses **Tesseract OCR** (via `pytesseract`) when running locally. It is pre-installed in the Render and Docker deployments. For local use:
+Ledgergut uses **Tesseract OCR** (via `pytesseract`) when running locally. It is pre-installed in the Docker image. For local use:
 
 **Windows (Chocolatey)**
 
