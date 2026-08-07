@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import functools
+import hmac
 import os
 import uuid
 from datetime import date, datetime, timedelta, timezone
@@ -21,16 +23,100 @@ ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 PENDING_IMAGE_TTL = timedelta(minutes=30)
 
+# ---------------------------------------------------------------------------
+# Configuration helpers
+# ---------------------------------------------------------------------------
+
+def _require_env(name: str, dev_fallback: str | None = None) -> str:
+    """Return the env var value.
+
+    In production (LEDGERGUT_ENV=production) the variable *must* be set;
+    using a dev fallback silently in production is a security risk.
+    """
+    value = os.environ.get(name, "").strip()
+    if value:
+        return value
+    is_production = os.environ.get("LEDGERGUT_ENV", "").lower() == "production"
+    if is_production:
+        raise RuntimeError(
+            f"Required environment variable '{name}' is not set. "
+            "Set LEDGERGUT_ENV=production only when all required variables are configured."
+        )
+    if dev_fallback is not None:
+        return dev_fallback
+    raise RuntimeError(f"Required environment variable '{name}' is not set.")
+
+
 app = Flask(
     __name__,
     template_folder=str(_HERE / "templates"),
     static_folder=str(_HERE / "static"),
     static_url_path="/static",
 )
-app.secret_key = os.environ.get("LEDGERGUT_SECRET", "ledgergut-dev-secret")
+app.secret_key = _require_env("LEDGERGUT_SECRET", dev_fallback="ledgergut-dev-secret")
+app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
 _store = ReceiptStore()
 
+# ---------------------------------------------------------------------------
+# Authentication
+# ---------------------------------------------------------------------------
+
+# These may be unset in dev; enforce presence in production via _require_env.
+_AUTH_USERNAME = _require_env("LEDGERGUT_USERNAME", dev_fallback="")
+_AUTH_PASSWORD = _require_env("LEDGERGUT_PASSWORD", dev_fallback="")
+
+_AUTH_CHALLENGE = Response(
+    "Authentication required.",
+    status=401,
+    headers={"WWW-Authenticate": 'Basic realm="Ledgergut"'},
+)
+
+
+def _check_auth() -> bool:
+    """Return True iff the request carries valid Basic auth credentials.
+
+    Uses constant-time comparison to prevent timing attacks.
+    When auth is not configured (dev), all requests are allowed.
+    """
+    if not _AUTH_USERNAME and not _AUTH_PASSWORD:
+        return True
+    auth = request.authorization
+    if auth is None:
+        return False
+    username_ok = hmac.compare_digest(auth.username or "", _AUTH_USERNAME)
+    password_ok = hmac.compare_digest(auth.password or "", _AUTH_PASSWORD)
+    return username_ok and password_ok
+
+
+def _login_required(fn):
+    """Decorator: require valid HTTP Basic auth, return 401 otherwise."""
+    @functools.wraps(fn)
+    def _wrapped(*args, **kwargs):
+        if not _check_auth():
+            return _AUTH_CHALLENGE
+        return fn(*args, **kwargs)
+    return _wrapped
+
+
+# ---------------------------------------------------------------------------
+# Cache-Control helper
+# ---------------------------------------------------------------------------
+
+_NO_STORE = "no-store, private"
+
+
+def _no_store(response: Response) -> Response:
+    """Apply Cache-Control: no-store, private to a receipt-bearing response."""
+    response.headers["Cache-Control"] = _NO_STORE
+    return response
+
+
+# ---------------------------------------------------------------------------
+# Internal helpers
+# ---------------------------------------------------------------------------
 
 def _enum_options() -> dict:
     return {
@@ -90,7 +176,7 @@ def _render_index(
     storage_error: str | None = None,
     scan_message: str | None = None,
     scan_error: str | None = None,
-) -> str:
+) -> Response:
     receipts = []
     try:
         receipts = _store.list_receipts()
@@ -98,7 +184,7 @@ def _render_index(
         storage_error = storage_error or str(exc)
 
     page_form_data = form_data or {}
-    return render_template(
+    html = render_template(
         "ledgergut/index.html",
         enums=_enum_options(),
         receipts=receipts,
@@ -112,6 +198,7 @@ def _render_index(
         ocr_raw_text=page_form_data.get("ocr_raw_text", ""),
         ocr_confidence_notes=_ocr_notes_from_form(page_form_data),
     )
+    return _no_store(Response(html, mimetype="text/html"))
 
 
 def _read_pending_image(*, required: bool) -> tuple[tuple[bytes, str] | None, str | None]:
@@ -152,6 +239,15 @@ def _apply_suggestions(form_data: dict[str, str], suggestions: ReceiptSuggestion
     return updated
 
 
+# ---------------------------------------------------------------------------
+# Unauthenticated routes (PWA infrastructure + health)
+# ---------------------------------------------------------------------------
+
+@app.route("/health")
+def health():
+    return Response('{"status": "ok"}', mimetype="application/json")
+
+
 @app.route("/manifest.json")
 def pwa_manifest():
     return app.send_static_file("manifest.json")
@@ -165,12 +261,18 @@ def service_worker():
     return response
 
 
+# ---------------------------------------------------------------------------
+# Protected routes
+# ---------------------------------------------------------------------------
+
 @app.route("/", methods=["GET"])
+@_login_required
 def index():
     return _render_index(saved=request.args.get("saved") == "1")
 
 
 @app.route("/receipts/scan", methods=["POST"])
+@_login_required
 def scan_receipt():
     form_data = request.form.to_dict()
     pending_image, image_error = _read_pending_image(required=True)
@@ -200,6 +302,7 @@ def scan_receipt():
 
 
 @app.route("/receipts/new", methods=["POST"])
+@_login_required
 def new_receipt():
     form_data = request.form.to_dict()
 
@@ -251,17 +354,18 @@ def new_receipt():
 
 
 @app.route("/export/csv")
+@_login_required
 def export_csv():
     try:
         csv_data = _store.as_csv()
     except StorageError:
-        return Response(
+        return _no_store(Response(
             "Receipt store is unavailable. Check the server console for details.",
             status=500,
             mimetype="text/plain",
-        )
-    return Response(
+        ))
+    return _no_store(Response(
         csv_data,
         mimetype="text/csv",
         headers={"Content-Disposition": "attachment; filename=ledgergut-receipts.csv"},
-    )
+    ))

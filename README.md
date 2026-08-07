@@ -9,14 +9,31 @@ The recommended setup runs Ledgergut in Docker on a Windows PC and exposes it pr
 
 ---
 
+> ⚠️ **Security: keep Ledgergut private**
+>
+> - **Do not** enable Tailscale Funnel.
+> - **Do not** configure router port forwarding to the PC.
+> - **Do not** bind Docker to `0.0.0.0` or any LAN/public interface — always use `-p 127.0.0.1:8080:8080`.
+> - Ledgergut must only be reachable through the Tailscale private network.
+
+---
+
 ### Android quick-start (recommended — Windows PC + Docker Desktop + Tailscale)
 
 > **Prerequisites (one-time setup on the PC):**
 > - [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/) — installed and running
 > - [Tailscale](https://tailscale.com/download/windows) — installed and signed in on both the PC and the Android phone
-> - Tailscale **Serve** configured to expose port 8080 over HTTPS (see step 3 below)
 
-#### 1. Build and run the container
+#### 1. Make the PC always-on
+
+Before deploying, configure the PC so Ledgergut stays reachable:
+
+1. **Docker Desktop → Settings → General → Start Docker Desktop when you sign in to your computer** ✓
+2. **Tailscale runs as a Windows service by default** — verify with `Get-Service Tailscale` in PowerShell.
+3. **Disable automatic sleep while plugged in** (Power & sleep settings → Sleep → Never when plugged in).
+4. Confirm that `--restart unless-stopped` is set on the container (see step 2) so Docker restarts Ledgergut after reboot.
+
+#### 2. Build and run the container
 
 Open **PowerShell** on the Windows PC:
 
@@ -35,33 +52,59 @@ docker run -d --name ledgergut `
     -p 127.0.0.1:8080:8080 `
     -v ledgergut-data:/data `
     --restart unless-stopped `
+    -e LEDGERGUT_ENV=production `
     -e LEDGERGUT_SECRET="$(New-Guid)" `
+    -e LEDGERGUT_USERNAME="yourUsername" `
+    -e LEDGERGUT_PASSWORD="yourStrongPassword" `
     ledgergut
 ```
 
-> All receipt records and uploaded images are stored in the `ledgergut-data` Docker volume, mounted at `/data` inside the container.
+> All receipt records and uploaded images are stored in the `ledgergut-data` Docker volume, mounted at `/data` inside the container. Container recreation does **not** back up the volume — see [Backup & restore](#backup--restore-ledgergut-data) below.
 
-#### 2. Expose over Tailscale HTTPS (Tailscale Serve)
+> **Required environment variables in production:**
+> - `LEDGERGUT_ENV=production` — enables production-mode enforcement
+> - `LEDGERGUT_SECRET` — random string for Flask session signing
+> - `LEDGERGUT_USERNAME` and `LEDGERGUT_PASSWORD` — HTTP Basic auth credentials
+
+#### 3. Expose over Tailscale HTTPS (Tailscale Serve)
 
 In PowerShell (the PC must already be signed in to Tailscale):
 
 ```powershell
-tailscale serve https / http://127.0.0.1:8080
+# Start Tailscale Serve persistently (survives reboots)
+tailscale serve --bg http://127.0.0.1:8080
+
+# Verify the serve configuration
+tailscale serve status
+
+# To remove the Tailscale Serve rule later
+tailscale serve reset
 ```
 
 Tailscale Serve issues a trusted HTTPS certificate and makes the app reachable at your PC's Tailscale hostname — something like `https://my-pc.tail12345.ts.net`. PWA install in Chrome requires HTTPS, which Tailscale Serve provides automatically.
 
 > To find your PC's Tailscale hostname: `tailscale status` — look for your machine's entry.
 
-#### 3. Install on Android as a home screen icon
+#### 4. Install on Android as a home screen icon
 
 1. Make sure Tailscale is running on your Android phone.
 2. Open **Chrome** and navigate to `https://<your-pc-tailscale-hostname>` (e.g. `https://my-pc.tail12345.ts.net`).
-3. Tap **⋮ menu → Add to Home screen** (Chrome shows an install banner automatically on HTTPS).
-4. Tap **Add** — a Ledgergut icon appears on your home screen.
-5. Launch from the icon: the app opens full-screen, camera-ready.
+3. Enter your username and password when prompted.
+4. Tap **⋮ menu → Add to Home screen** (Chrome shows an install banner automatically on HTTPS).
+5. Tap **Add** — a Ledgergut icon appears on your home screen.
+6. Launch from the icon: the app opens full-screen, camera-ready.
 
-#### 4. Use Ledgergut on Android
+#### 5. Verify after reboot
+
+After rebooting the PC, confirm Ledgergut is running:
+
+```powershell
+# Check the health endpoint (no auth required)
+Invoke-WebRequest http://127.0.0.1:8080/health
+# Expected: {"status": "ok"}
+```
+
+#### 6. Use Ledgergut on Android
 
 | Feature | How |
 |---------|-----|
@@ -82,16 +125,58 @@ docker logs ledgergut
 docker stop ledgergut
 docker start ledgergut
 
-# Update to a new build
+# Update to a new build (volume data is preserved)
 docker build -t ledgergut .
 docker stop ledgergut && docker rm ledgergut
 docker run -d --name ledgergut `
     -p 127.0.0.1:8080:8080 `
     -v ledgergut-data:/data `
     --restart unless-stopped `
+    -e LEDGERGUT_ENV=production `
     -e LEDGERGUT_SECRET="$(New-Guid)" `
+    -e LEDGERGUT_USERNAME="yourUsername" `
+    -e LEDGERGUT_PASSWORD="yourStrongPassword" `
     ledgergut
 ```
+
+---
+
+### Backup & restore Ledgergut data
+
+> ⚠️ **Container recreation does not back up the `ledgergut-data` named volume.** Always back up the volume separately before recreating or removing the container.
+
+#### Back up (command line)
+
+```powershell
+# Export the entire /data volume to a compressed archive
+docker run --rm `
+    -v ledgergut-data:/data:ro `
+    -v "$PWD:/backup" `
+    alpine tar czf /backup/ledgergut-backup.tar.gz -C / data
+
+# The archive is saved as ledgergut-backup.tar.gz in the current directory.
+```
+
+#### Restore from archive
+
+```powershell
+# Restore into a (new or existing) volume
+docker run --rm `
+    -v ledgergut-data:/data `
+    -v "$PWD:/backup" `
+    alpine sh -c "cd / && tar xzf /backup/ledgergut-backup.tar.gz"
+```
+
+#### Back up using Docker Desktop
+
+1. Open Docker Desktop → **Volumes** → `ledgergut-data`.
+2. Click **Export** → choose a destination folder.
+3. Docker Desktop saves a `.tar.gz` archive of the volume contents.
+
+#### Restore using Docker Desktop
+
+1. Open Docker Desktop → **Volumes** → create or select `ledgergut-data`.
+2. Click **Import** → select the previously exported `.tar.gz` file.
 
 ---
 
