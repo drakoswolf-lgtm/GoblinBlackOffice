@@ -5,416 +5,266 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Ledgergut">
-  <meta name="theme-color" content="#2a7a2a">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Black Office">
+  <meta name="theme-color" content="#09090c">
   <link rel="manifest" href="/manifest.json">
   <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
-  <title>Ledgergut — Receipt Entry</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: system-ui, sans-serif;
-      background: #f5f5f5;
-      color: #222;
-      padding: 1rem;
-      max-width: 700px;
-      margin: 0 auto;
-    }
-    h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
-    h2 { font-size: 1.1rem; margin: 1.25rem 0 0.5rem; }
-    header { margin-bottom: 1rem; border-bottom: 2px solid #333; padding-bottom: 0.5rem; }
-    .alert {
-      border-radius: 4px;
-      padding: 0.75rem 1rem;
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
-    }
-    .alert.success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
-    .alert.error   { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
-    .alert ul { margin: 0.4rem 0 0 1rem; }
-    .findings { margin-bottom: 1rem; }
-    .finding {
-      border-radius: 4px;
-      padding: 0.5rem 0.75rem;
-      margin-bottom: 0.4rem;
-      font-size: 0.88rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      align-items: baseline;
-    }
-    .finding.error   { background: #f8d7da; border-left: 4px solid #dc3545; }
-    .finding.warning { background: #fff3cd; border-left: 4px solid #ffc107; }
-    .badge {
-      font-size: 0.72rem;
-      font-weight: bold;
-      padding: 0.15rem 0.4rem;
-      border-radius: 3px;
-      background: #333;
-      color: #fff;
-    }
-    .finding.error   .badge { background: #dc3545; }
-    .finding.warning .badge { background: #856404; }
-    .rule { font-weight: bold; font-size: 0.82rem; color: #555; }
-    .fields { font-size: 0.78rem; color: #666; font-style: italic; }
-    form { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 1rem; }
-    fieldset { border: none; margin-bottom: 0.75rem; }
-    legend { font-weight: bold; font-size: 0.95rem; margin-bottom: 0.5rem; color: #444; }
-    label { display: block; font-size: 0.85rem; margin-bottom: 0.15rem; color: #555; }
-    input[type="text"],
-    input[type="date"],
-    input[type="number"],
-    input[type="file"],
-    select,
-    textarea {
-      width: 100%;
-      padding: 0.45rem 0.6rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 0.95rem;
-      margin-bottom: 0.6rem;
-      background: #fafafa;
-    }
-    input:focus, select:focus, textarea:focus {
-      outline: 2px solid #4a90d9;
-      border-color: #4a90d9;
-      background: #fff;
-    }
-    textarea { resize: vertical; min-height: 3rem; }
-    .row { display: flex; gap: 0.75rem; }
-    .row > * { flex: 1; }
-    #image-preview {
-      display: none;
-      max-width: 100%;
-      max-height: 180px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      margin-top: 0.4rem;
-    }
-    .primary-btn {
-      display: block;
-      width: 100%;
-      padding: 0.85rem;
-      background: #2a7a2a;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-size: 1.05rem;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 1rem;
-    }
-    .primary-btn:hover { background: #226022; }
-    .secondary-btn {
-      background: #1a6e9f;
-    }
-    .secondary-btn:hover { background: #145477; }
-    .button-row {
-      display: flex;
-      gap: 0.75rem;
-      margin-top: 1rem;
-    }
-    .button-row .primary-btn { margin-top: 0; }
-    .hint {
-      font-size: 0.82rem;
-      color: #666;
-      margin-top: -0.2rem;
-      margin-bottom: 0.6rem;
-    }
-    .suggestion-box {
-      background: #fff3cd;
-      border: 1px solid #ffe69c;
-      color: #664d03;
-    }
-    details {
-      margin-top: 1rem;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      padding: 0.75rem 1rem;
-    }
-    details pre {
-      white-space: pre-wrap;
-      word-break: break-word;
-      font-size: 0.82rem;
-      margin-top: 0.75rem;
-    }
-    .receipts-section { margin-top: 1.5rem; }
-    .export-link {
-      display: inline-block;
-      margin-bottom: 0.75rem;
-      font-size: 0.9rem;
-      color: #1a6e9f;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.82rem;
-      background: #fff;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 0.4rem 0.6rem;
-      text-align: left;
-    }
-    th { background: #f0f0f0; font-weight: bold; }
-    tr:nth-child(even) { background: #fafafa; }
-    .empty-msg { color: #888; font-size: 0.9rem; margin-top: 0.5rem; }
-    @media (max-width: 500px) {
-      .row { flex-direction: column; gap: 0; }
-      .button-row { flex-direction: column; gap: 0.5rem; }
-      table { font-size: 0.75rem; }
-    }
-  </style>
+  <link rel="stylesheet" href="/static/black-office.css">
+  <title>Goblin Black Office</title>
 </head>
 <body>
-  <header>
-    <h1>🧾 Ledgergut</h1>
-    <p style="font-size:0.85rem;color:#666;">Receipt entry &amp; validation</p>
+<div class="office-shell">
+  <header class="masthead">
+    <div>
+      <div class="eyebrow">Private business operations system</div>
+      <h1>GOBLIN BLACK OFFICE</h1>
+      <p id="office-subtitle">Founder/Operator Office · Black Collar</p>
+    </div>
+    <div class="status-chip">● OFFICE ONLINE</div>
   </header>
 
-  {% if saved %}
-  <div class="alert success">✓ Receipt saved successfully.</div>
-  {% endif %}
+  <nav class="nav" aria-label="Black Office sections">
+    <button type="button" class="active" data-view="desk">Desk</button>
+    <button type="button" data-view="squad">Squad</button>
+    <button type="button" data-view="portal">Summoning Portal</button>
+    <button type="button" data-view="intelligence">Intelligence</button>
+    <button type="button" data-view="ledgergut">Ledgergut</button>
+  </nav>
 
-  {% if storage_error %}
-  <div class="alert error">
-    <strong>Storage error:</strong> {{ storage_error }}
-  </div>
-  {% endif %}
+  <main>
+    <section class="view active" id="view-desk">
+      <div class="desk">
+        <section class="identity-card">
+          <div class="kicker">Office Charter</div>
+          <h2 id="business-display">Your Black Office</h2>
+          <p>Set the identity and operating doctrine for this Office. Currency appoints the Intelligence Service automatically.</p>
+          <form id="office-profile" class="identity-form">
+            <div class="wide">
+              <label for="business_name">Business / trade name</label>
+              <input id="business_name" name="business_name" type="text" placeholder="e.g. Oasis Greenscapes Property Services">
+            </div>
+            <div>
+              <label for="operator_name">Owner / operator</label>
+              <input id="operator_name" name="operator_name" type="text" placeholder="Name or handle">
+            </div>
+            <div>
+              <label for="office_currency">Reporting currency</label>
+              <select id="office_currency" name="office_currency">
+                <option value="CAD">CAD — G.S.I.S.</option>
+                <option value="USD">USD — G.I.A.</option>
+                <option value="EUR">EUR — INTERGOB</option>
+                <option value="GBP">GBP — MI-G</option>
+              </select>
+            </div>
+            <div class="wide">
+              <label for="office_collar">Collar</label>
+              <select id="office_collar" name="office_collar">
+                <option value="Black Collar">Black Collar — founder/operator command mode</option>
+                <option value="Blue Collar">Blue Collar — trades & contractors</option>
+                <option value="White Collar">White Collar — office/corporate</option>
+                <option value="Service Collar">Service Collar — hospitality & service</option>
+                <option value="Tie-Dye Collar">Tie-Dye Collar — artist/creative</option>
+                <option value="Green Collar">Green Collar — landscaping/property maintenance</option>
+                <option value="Gold Collar">Gold Collar — premium client-facing output</option>
+                <option value="Red Collar">Red Collar — urgent money recovery</option>
+                <option value="Grey Collar">Grey Collar — mixed/unknown triage</option>
+              </select>
+            </div>
+            <div class="wide"><button class="btn" type="submit">Seal Office Charter</button></div>
+          </form>
+        </section>
 
-  {% if scan_error %}
-  <div class="alert error">
-    <strong>Scan unavailable:</strong> {{ scan_error }}
-  </div>
-  {% endif %}
-
-  {% if scan_message %}
-  <div class="alert suggestion-box">
-    <strong>OCR suggestions only:</strong> {{ scan_message }}
-  </div>
-  {% endif %}
-
-  {% if input_errors %}
-  <div class="alert error">
-    <strong>Please fix the following before saving:</strong>
-    <ul>
-      {% for err in input_errors %}<li>{{ err }}</li>{% endfor %}
-    </ul>
-  </div>
-  {% endif %}
-
-  {% if findings %}
-  <div class="findings">
-    <h2>Validation Findings</h2>
-    {% for f in findings %}
-    <div class="finding {{ f.severity }}">
-      <span class="badge">{{ f.severity|upper }}</span>
-      <span class="rule">{{ f.rule_id }}</span>
-      <span>{{ f.message }}</span>
-      {% if f.fields %}
-      <span class="fields">Fields: {{ f.fields | join(', ') }}</span>
-      {% endif %}
-    </div>
-    {% endfor %}
-    {% set has_errors = findings | selectattr('severity', 'equalto', 'error') | list %}
-    {% if has_errors %}
-    <p style="font-size:0.85rem;color:#721c24;margin-top:0.4rem;">
-      ⚠ Receipt not saved — fix the errors above and resubmit.
-    </p>
-    {% else %}
-    <p style="font-size:0.85rem;color:#856404;margin-top:0.4rem;">
-      ⚠ Receipt was not saved due to the warnings above. Correct or acknowledge them and resubmit.
-    </p>
-    {% endif %}
-  </div>
-  {% endif %}
-
-  <h2>New Receipt</h2>
-  <form method="POST" action="/receipts/new" enctype="multipart/form-data" id="receipt-form">
-    <textarea name="ocr_raw_text" hidden>{{ ocr_raw_text }}</textarea>
-    <textarea name="ocr_confidence_notes" hidden>{{ ocr_confidence_notes | join('\n') }}</textarea>
-    <input type="hidden" name="pending_image_token" value="{{ form_data.get('pending_image_token', '') }}">
-
-    <fieldset>
-      <legend>Receipt Image</legend>
-      <label for="receipt_image">Upload or photograph receipt (PNG / JPG)</label>
-      <input type="file" id="receipt_image" name="receipt_image" accept="image/*" capture="environment">
-      <p class="hint">On Android: tap to photograph the receipt with your camera, or choose from gallery. OCR runs on the server — review every suggestion before saving. Max 10 MB.</p>
-      <img id="image-preview" alt="Receipt preview">
-    </fieldset>
-
-    <fieldset>
-      <legend>Vendor, Date &amp; Suggested Receipt Number</legend>
-      <label for="vendor_name">Vendor name</label>
-      <input type="text" id="vendor_name" name="vendor_name"
-             value="{{ form_data.get('vendor_name', '') }}" placeholder="e.g. Home Hardware">
-      <label for="receipt_date">Receipt date</label>
-      <input type="date" id="receipt_date" name="receipt_date"
-             value="{{ form_data.get('receipt_date', '') }}">
-      <label for="receipt_number">Receipt number (suggested if detected)</label>
-      <input type="text" id="receipt_number" name="receipt_number"
-             value="{{ form_data.get('receipt_number', '') }}" placeholder="e.g. RCT-00421">
-    </fieldset>
-
-    <fieldset>
-      <legend>Details</legend>
-      <label for="description">Description</label>
-      <textarea id="description" name="description" rows="2"
-                placeholder="Brief description of the expense">{{ form_data.get('description', '') }}</textarea>
-      <label for="project_name">Project name</label>
-      <input type="text" id="project_name" name="project_name"
-             value="{{ form_data.get('project_name', '') }}" placeholder="e.g. Jackson Retail">
-      <label for="expense_category">Expense category</label>
-      <input type="text" id="expense_category" name="expense_category"
-             value="{{ form_data.get('expense_category', '') }}" placeholder="e.g. materials">
-    </fieldset>
-
-    <fieldset>
-      <legend>Amounts</legend>
-      <div class="row">
-        <div>
-          <label for="subtotal">Subtotal</label>
-          <input type="text" id="subtotal" name="subtotal" inputmode="decimal"
-                 value="{{ form_data.get('subtotal', '') }}" placeholder="0.00">
-        </div>
-        <div>
-          <label for="tax_amount">Tax amount</label>
-          <input type="text" id="tax_amount" name="tax_amount" inputmode="decimal"
-                 value="{{ form_data.get('tax_amount', '') }}" placeholder="0.00">
-        </div>
-        <div>
-          <label for="total_amount">Total amount</label>
-          <input type="text" id="total_amount" name="total_amount" inputmode="decimal"
-                 value="{{ form_data.get('total_amount', '') }}" placeholder="0.00">
-        </div>
+        <aside class="intel-badge">
+          <div>
+            <div class="kicker">Appointed Intelligence Service</div>
+            <div class="intel-mark" id="intel-service">G.S.I.S.</div>
+            <p id="intel-service-name">Goblin Security Intelligence Service</p>
+            <small>Bound to Office reporting currency, not country.</small>
+          </div>
+          <div aria-hidden="true">◈</div>
+        </aside>
       </div>
-      <label for="currency">Currency</label>
-      <input type="text" id="currency" name="currency"
-             value="{{ form_data.get('currency', 'CAD') }}" placeholder="CAD" style="width:6rem;">
-    </fieldset>
 
-    <fieldset>
-      <legend>Payment &amp; Status</legend>
-      <label for="paid_by">Paid by</label>
-      <select id="paid_by" name="paid_by">
-        {% for v in enums.paid_by %}
-        <option value="{{ v }}" {% if form_data.get('paid_by', '') == v %}selected{% endif %}>{{ v }}</option>
-        {% endfor %}
-      </select>
-      <label for="reimbursement_status">Reimbursement status</label>
-      <select id="reimbursement_status" name="reimbursement_status">
-        {% for v in enums.reimbursement_status %}
-        <option value="{{ v }}" {% if form_data.get('reimbursement_status', '') == v %}selected{% endif %}>{{ v }}</option>
-        {% endfor %}
-      </select>
-      <label for="billable_status">Billable status</label>
-      <select id="billable_status" name="billable_status">
-        <option value="">— select —</option>
-        {% for v in enums.billable_status %}
-        <option value="{{ v }}" {% if form_data.get('billable_status', '') == v %}selected{% endif %}>{{ v }}</option>
-        {% endfor %}
-      </select>
-      <label for="invoice_id">Invoice ID (if already invoiced)</label>
-      <input type="text" id="invoice_id" name="invoice_id"
-             value="{{ form_data.get('invoice_id', '') }}" placeholder="INV-…">
-    </fieldset>
+      <div class="office-grid">
+        <section class="panel">
+          <div class="kicker">The Desk</div>
+          <h2>What needs attention</h2>
+          <div class="intel-grid">
+            <div class="metric"><span>Receipts in archive</span><strong>{{ receipts|length }}</strong><small>Ledgergut records</small></div>
+            <div class="metric"><span>Active working goblin</span><strong>1</strong><small>Ledgergut · Finance & Records</small></div>
+            <div class="metric"><span>Intelligence service</span><strong id="desk-intel">G.S.I.S.</strong><small>Reporting & analysis</small></div>
+          </div>
+        </section>
+        <aside class="panel doctrine">
+          <div class="kicker">RAAE doctrine</div>
+          <h3>Recursive Autopredjudicial Analysis Engine™</h3>
+          <blockquote>Every component carries the burden of proving its continued existence.</blockquote>
+          <p>Observe → compare → challenge → simplify → re-evaluate. Recommendations are advisory. No goblin gets left behind.</p>
+        </aside>
+      </div>
+    </section>
 
-    <fieldset>
-      <legend>Submitted by</legend>
-      <label for="submitted_by">Your name / handle</label>
-      <input type="text" id="submitted_by" name="submitted_by"
-             value="{{ form_data.get('submitted_by', '') }}" placeholder="e.g. steve">
-    </fieldset>
+    <section class="view" id="view-squad">
+      <section class="panel">
+        <div class="kicker">Elite operational roster</div>
+        <h2>Your Squad</h2>
+        <p>The Office may know many goblins. Only selected specialists hold active squad postings.</p>
+        <div class="squad-grid">
+          <article class="goblin-card"><div class="state">ACTIVE · WORKING</div><h3>Ledgergut</h3><small>Accounting Goblin · Finance & Records</small><p>Remember everything. Receipt ingestion, OCR, reimbursements and billable expense routing.</p></article>
+          <article class="goblin-card planned"><div class="state">AVAILABLE · DRAFT</div><h3>Squarmish</h3><small>Invoice Goblin · Billing & Revenue</small><p>Turns completed work and billable records into money.</p></article>
+          <article class="goblin-card planned"><div class="state">AVAILABLE · PLANNED</div><h3>SigNor the Immutable</h3><small>Contract Goblin · Contracts & Governance</small><p>Protects relationships before they become disputes.</p></article>
+          <article class="goblin-card planned"><div class="state">AVAILABLE · PLANNED</div><h3>Packrat McDuffel</h3><small>Logistics Goblin · Logistics & Planning</small><p>Moves resources toward results with the least wasted effort.</p></article>
+          <article class="goblin-card planned"><div class="state">AVAILABLE · PLANNED</div><h3>Patch</h3><small>Operations Goblin · Operations & Engineering</small><p>Turns ideas into physical reality.</p></article>
+          <article class="goblin-card planned"><div class="state">AVAILABLE · PLANNED</div><h3>Grimscratch</h3><small>Risk Goblin · Compliance & Risk</small><p>Keeps clever ideas from becoming expensive lessons.</p></article>
+        </div>
+      </section>
+    </section>
 
-    <div class="button-row">
-      <button type="submit" class="primary-btn secondary-btn" formaction="/receipts/scan" id="scan-button">🔎 Scan Receipt</button>
-      <button type="submit" class="primary-btn" id="save-button">💾 Save Receipt</button>
-    </div>
-  </form>
+    <section class="view" id="view-portal">
+      <section class="portal">
+        <div>
+          <div class="portal-ring">◈</div>
+          <div class="kicker">Capability requisition interface</div>
+          <h2>Summoning Portal</h2>
+          <p>Describe the problem. The Office should identify the capability required before it proposes another goblin.</p>
+          <textarea id="summon-request" placeholder="e.g. I keep losing track of quotes and follow-ups..."></textarea>
+          <button class="btn" type="button" id="summon-button">Consult the Portal</button>
+          <p id="summon-response" class="hint">Portal recommendations are design-stage only. Nothing is summoned without explicit approval.</p>
+        </div>
+      </section>
+    </section>
 
-  {% if ocr_confidence_notes or ocr_raw_text %}
-  <details>
-    <summary>OCR review details</summary>
-    {% if ocr_confidence_notes %}
-    <ul style="margin:0.75rem 0 0 1rem;">
-      {% for note in ocr_confidence_notes %}
-      <li>{{ note }}</li>
-      {% endfor %}
-    </ul>
-    {% endif %}
-    {% if ocr_raw_text %}
-    <pre>{{ ocr_raw_text }}</pre>
-    {% endif %}
-  </details>
-  {% endif %}
+    <section class="view" id="view-intelligence">
+      <section class="panel">
+        <div class="kicker">Accumulated business intelligence</div>
+        <h2><span id="intel-heading">G.S.I.S.</span> Intelligence Desk</h2>
+        <p>Shared Office data becomes useful here: records, briefings, project intelligence, expense analysis, tax packages, forecasts and anomaly reports.</p>
+        <div class="intel-grid">
+          <div class="metric"><span>Receipt records</span><strong>{{ receipts|length }}</strong><small>Available to Intelligence</small></div>
+          <div class="metric"><span>Working datasets</span><strong>1</strong><small>Ledgergut receipt archive</small></div>
+          <div class="metric"><span>Cross-goblin reports</span><strong>0</strong><small>Awaiting additional squad capabilities</small></div>
+        </div>
+        <p><a class="export-link" href="/export/csv">Export Ledgergut field data → CSV</a></p>
+        <div class="doctrine">
+          <div class="kicker">Autopredjudicial watch</div>
+          <p>As the Office grows, Intelligence will flag duplicate reports, obsolete workflows, overlapping responsibilities and other structures whose continued existence no longer pays rent.</p>
+        </div>
+      </section>
+    </section>
 
-  <section class="receipts-section">
-    <h2>Saved Receipts</h2>
-    {% if receipts %}
-    <a class="export-link" href="/export/csv">⬇ Export CSV</a>
-    <div style="overflow-x:auto;">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Date</th>
-            <th>Vendor</th>
-            <th>Total</th>
-            <th>Currency</th>
-            <th>Project</th>
-            <th>Paid by</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for rec in receipts | reverse %}
-          <tr>
-            <td>{{ rec.get('record_id', '') }}</td>
-            <td>{{ rec.get('receipt', {}).get('receipt_date', '') }}</td>
-            <td>{{ rec.get('receipt', {}).get('vendor_name', '') }}</td>
-            <td>{{ rec.get('receipt', {}).get('total_amount', '') }}</td>
-            <td>{{ rec.get('currency', '') }}</td>
-            <td>{{ rec.get('project_name', '') }}</td>
-            <td>{{ rec.get('paid_by', '') }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% else %}
-    <p class="empty-msg">No receipts saved yet.</p>
-    {% endif %}
-  </section>
+    <section class="view" id="view-ledgergut">
+      <section class="ledgergut-panel">
+        <div class="ledgergut-head">
+          <div><div class="kicker">GBO-001 · Finance & Records</div><h2>Ledgergut</h2><p>Receipt capture, OCR, validation and archive.</p></div>
+          <div class="status-chip">● ACTIVE</div>
+        </div>
 
-  <script>
-    var imageInput = document.getElementById('receipt_image');
-    var preview = document.getElementById('image-preview');
-    var form = document.getElementById('receipt-form');
+        {% if saved %}<div class="alert success">✓ Receipt digested. Ledger updated.</div>{% endif %}
+        {% if storage_error %}<div class="alert error"><strong>Storage error:</strong> {{ storage_error }}</div>{% endif %}
+        {% if scan_error %}<div class="alert error"><strong>Scan unavailable:</strong> {{ scan_error }}</div>{% endif %}
+        {% if scan_message %}<div class="alert suggestion-box"><strong>OCR suggestions only:</strong> {{ scan_message }}</div>{% endif %}
+        {% if input_errors %}<div class="alert error"><strong>Please fix the following before saving:</strong><ul>{% for err in input_errors %}<li>{{ err }}</li>{% endfor %}</ul></div>{% endif %}
 
-    imageInput.addEventListener('change', function () {
-      var file = this.files[0];
-      if (file) {
-        preview.src = URL.createObjectURL(file);
-        preview.style.display = 'block';
-      } else {
-        preview.style.display = 'none';
-      }
-    });
+        {% if findings %}
+        <div class="findings"><h3>Validation Findings</h3>
+          {% for f in findings %}<div class="finding {{ f.severity }}"><span class="badge">{{ f.severity|upper }}</span> <strong>{{ f.rule_id }}</strong> {{ f.message }} {% if f.fields %}<span class="fields">Fields: {{ f.fields | join(', ') }}</span>{% endif %}</div>{% endfor %}
+        </div>
+        {% endif %}
 
-    form.addEventListener('submit', function (event) {
-      if (!event.submitter) {
-        return;
-      }
-      event.submitter.disabled = true;
-      event.submitter.textContent = event.submitter.id === 'scan-button' ? 'Scanning…' : 'Saving…';
-    });
+        <form method="POST" action="/receipts/new" enctype="multipart/form-data" id="receipt-form" class="receipt-form">
+          <textarea name="ocr_raw_text" hidden>{{ ocr_raw_text }}</textarea>
+          <textarea name="ocr_confidence_notes" hidden>{{ ocr_confidence_notes | join('\n') }}</textarea>
+          <input type="hidden" name="pending_image_token" value="{{ form_data.get('pending_image_token', '') }}">
 
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('/sw.js', { scope: '/' });
-      });
-    }
-  </script>
+          <fieldset>
+            <legend>01 · Capture</legend>
+            <label for="receipt_image">Photograph or upload receipt</label>
+            <input type="file" id="receipt_image" name="receipt_image" accept="image/*" capture="environment">
+            <p class="hint">Camera-first on Android. OCR runs on the Office server. Review every suggestion before saving. Max 10 MB.</p>
+            <img id="image-preview" alt="Receipt preview">
+          </fieldset>
+
+          <fieldset>
+            <legend>02 · Review essentials</legend>
+            <label for="vendor_name">Vendor name</label><input type="text" id="vendor_name" name="vendor_name" value="{{ form_data.get('vendor_name', '') }}" placeholder="e.g. Home Hardware">
+            <div class="row">
+              <div><label for="receipt_date">Receipt date</label><input type="date" id="receipt_date" name="receipt_date" value="{{ form_data.get('receipt_date', '') }}"></div>
+              <div><label for="receipt_number">Receipt number</label><input type="text" id="receipt_number" name="receipt_number" value="{{ form_data.get('receipt_number', '') }}" placeholder="RCT-00421"></div>
+              <div><label for="currency">Currency</label><input type="text" id="currency" name="currency" value="{{ form_data.get('currency', 'CAD') }}" placeholder="CAD"></div>
+            </div>
+            <label for="description">Description</label><textarea id="description" name="description" rows="2" placeholder="Brief description of the expense">{{ form_data.get('description', '') }}</textarea>
+            <div class="row">
+              <div><label for="project_name">Project / job</label><input type="text" id="project_name" name="project_name" value="{{ form_data.get('project_name', '') }}" placeholder="Project name"></div>
+              <div><label for="expense_category">Category</label><input type="text" id="expense_category" name="expense_category" value="{{ form_data.get('expense_category', '') }}" placeholder="materials"></div>
+              <div><label for="submitted_by">Submitted by</label><input type="text" id="submitted_by" name="submitted_by" value="{{ form_data.get('submitted_by', '') }}" placeholder="operator"></div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>03 · Money</legend>
+            <div class="row">
+              <div><label for="subtotal">Subtotal</label><input type="text" id="subtotal" name="subtotal" inputmode="decimal" value="{{ form_data.get('subtotal', '') }}" placeholder="0.00"></div>
+              <div><label for="tax_amount">Tax</label><input type="text" id="tax_amount" name="tax_amount" inputmode="decimal" value="{{ form_data.get('tax_amount', '') }}" placeholder="0.00"></div>
+              <div><label for="total_amount">Total</label><input type="text" id="total_amount" name="total_amount" inputmode="decimal" value="{{ form_data.get('total_amount', '') }}" placeholder="0.00"></div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>04 · Routing</legend>
+            <div class="row">
+              <div><label for="paid_by">Paid by</label><select id="paid_by" name="paid_by">{% for v in enums.paid_by %}<option value="{{ v }}" {% if form_data.get('paid_by', '') == v %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></div>
+              <div><label for="reimbursement_status">Reimbursement</label><select id="reimbursement_status" name="reimbursement_status">{% for v in enums.reimbursement_status %}<option value="{{ v }}" {% if form_data.get('reimbursement_status', '') == v %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></div>
+              <div><label for="billable_status">Billable</label><select id="billable_status" name="billable_status"><option value="">— select —</option>{% for v in enums.billable_status %}<option value="{{ v }}" {% if form_data.get('billable_status', '') == v %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></div>
+            </div>
+            <label for="invoice_id">Invoice ID, if already invoiced</label><input type="text" id="invoice_id" name="invoice_id" value="{{ form_data.get('invoice_id', '') }}" placeholder="INV-…">
+          </fieldset>
+
+          <div class="button-row">
+            <button type="submit" class="btn secondary" formaction="/receipts/scan" id="scan-button">Scan Receipt</button>
+            <button type="submit" class="btn" id="save-button">Save to Ledger</button>
+          </div>
+        </form>
+
+        {% if ocr_confidence_notes or ocr_raw_text %}<details><summary>OCR review details</summary>{% if ocr_confidence_notes %}<ul>{% for note in ocr_confidence_notes %}<li>{{ note }}</li>{% endfor %}</ul>{% endif %}{% if ocr_raw_text %}<pre>{{ ocr_raw_text }}</pre>{% endif %}</details>{% endif %}
+
+        <section class="receipts-section">
+          <div class="ledgergut-head"><h3>Archive</h3>{% if receipts %}<a class="export-link" href="/export/csv">Export CSV</a>{% endif %}</div>
+          {% if receipts %}<div style="overflow-x:auto"><table><thead><tr><th>ID</th><th>Date</th><th>Vendor</th><th>Total</th><th>Currency</th><th>Project</th><th>Paid by</th></tr></thead><tbody>{% for rec in receipts | reverse %}<tr><td>{{ rec.get('record_id', '') }}</td><td>{{ rec.get('receipt', {}).get('receipt_date', '') }}</td><td>{{ rec.get('receipt', {}).get('vendor_name', '') }}</td><td>{{ rec.get('receipt', {}).get('total_amount', '') }}</td><td>{{ rec.get('currency', '') }}</td><td>{{ rec.get('project_name', '') }}</td><td>{{ rec.get('paid_by', '') }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p class="empty-msg">No receipts saved yet.</p>{% endif %}
+        </section>
+      </section>
+    </section>
+  </main>
+</div>
+<script>
+(function(){
+  const services={CAD:['G.S.I.S.','Goblin Security Intelligence Service'],USD:['G.I.A.','Goblin Intelligence Agency'],EUR:['INTERGOB','International Goblin Intelligence'],GBP:['MI-G','Goblin Intelligence · UK']};
+  const profileForm=document.getElementById('office-profile');
+  const business=document.getElementById('business_name');
+  const operator=document.getElementById('operator_name');
+  const currency=document.getElementById('office_currency');
+  const collar=document.getElementById('office_collar');
+  function applyProfile(p){
+    business.value=p.business||''; operator.value=p.operator||''; currency.value=p.currency||'CAD'; collar.value=p.collar||'Black Collar';
+    const svc=services[currency.value]||services.CAD;
+    document.getElementById('intel-service').textContent=svc[0]; document.getElementById('intel-service-name').textContent=svc[1]; document.getElementById('desk-intel').textContent=svc[0]; document.getElementById('intel-heading').textContent=svc[0];
+    document.getElementById('business-display').textContent=business.value||'Your Black Office';
+    document.getElementById('office-subtitle').textContent=(operator.value?operator.value+' · ':'')+collar.value;
+    const receiptCurrency=document.getElementById('currency'); if(receiptCurrency && !receiptCurrency.value) receiptCurrency.value=currency.value;
+  }
+  let stored={}; try{stored=JSON.parse(localStorage.getItem('gbo.officeProfile')||'{}')}catch(e){}
+  applyProfile(stored);
+  currency.addEventListener('change',()=>applyProfile({business:business.value,operator:operator.value,currency:currency.value,collar:collar.value}));
+  collar.addEventListener('change',()=>applyProfile({business:business.value,operator:operator.value,currency:currency.value,collar:collar.value}));
+  profileForm.addEventListener('submit',e=>{e.preventDefault(); const p={business:business.value.trim(),operator:operator.value.trim(),currency:currency.value,collar:collar.value}; localStorage.setItem('gbo.officeProfile',JSON.stringify(p)); applyProfile(p);});
+  document.querySelectorAll('.nav button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));btn.classList.add('active');document.getElementById('view-'+btn.dataset.view).classList.add('active');}));
+  document.getElementById('summon-button').addEventListener('click',()=>{const q=document.getElementById('summon-request').value.trim();document.getElementById('summon-response').textContent=q?'Portal request logged for capability analysis. RAAE will first test whether an existing squad capability already solves it.':'The Portal requires a problem before it can justify a goblin.';});
+  const imageInput=document.getElementById('receipt_image'),preview=document.getElementById('image-preview'),form=document.getElementById('receipt-form');
+  imageInput.addEventListener('change',function(){const file=this.files[0];if(file){preview.src=URL.createObjectURL(file);preview.style.display='block'}else{preview.style.display='none'}});
+  form.addEventListener('submit',function(event){if(!event.submitter)return;event.submitter.disabled=true;event.submitter.textContent=event.submitter.id==='scan-button'?'Scanning…':'Saving…'});
+  if({{ 'true' if saved or scan_error or scan_message or input_errors or findings else 'false' }}){document.querySelector('[data-view="ledgergut"]').click();}
+  if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js',{scope:'/'}));}
+})();
+</script>
 </body>
 </html>
