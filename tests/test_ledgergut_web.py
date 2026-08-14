@@ -26,8 +26,19 @@ def tmp_store(tmp_path: Path) -> ReceiptStore:
 
 @pytest.fixture()
 def app_client(tmp_path: Path, monkeypatch):
-    """Flask test client backed by an isolated temporary store."""
+    """Flask test client backed by an isolated temporary store.
+
+    Auth is disabled (empty username/password) so existing tests do not need
+    to supply credentials.  The module is reloaded to pick up the env state.
+    """
+    import importlib
     import app.ledgergut.web as web_module
+
+    monkeypatch.setenv("LEDGERGUT_USERNAME", "")
+    monkeypatch.setenv("LEDGERGUT_PASSWORD", "")
+    monkeypatch.setenv("LEDGERGUT_SECRET", "test-secret")
+    monkeypatch.delenv("LEDGERGUT_ENV", raising=False)
+    importlib.reload(web_module)
 
     store = ReceiptStore(
         store_path=tmp_path / "receipts.json",
@@ -35,6 +46,7 @@ def app_client(tmp_path: Path, monkeypatch):
     )
     monkeypatch.setattr(web_module, "_store", store)
     web_module.app.config["TESTING"] = True
+    web_module.app.config["LEDGERGUT_PENDING_IMAGES"] = {}
     return web_module.app.test_client(), store
 
 
