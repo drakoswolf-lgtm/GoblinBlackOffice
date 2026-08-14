@@ -27,6 +27,10 @@ PENDING_IMAGE_TTL = timedelta(minutes=30)
 # Configuration helpers
 # ---------------------------------------------------------------------------
 
+def _is_production() -> bool:
+    return os.environ.get("LEDGERGUT_ENV", "").lower() == "production"
+
+
 def _require_env(name: str, dev_fallback: str | None = None) -> str:
     """Return the env var value.
 
@@ -36,8 +40,7 @@ def _require_env(name: str, dev_fallback: str | None = None) -> str:
     value = os.environ.get(name, "").strip()
     if value:
         return value
-    is_production = os.environ.get("LEDGERGUT_ENV", "").lower() == "production"
-    if is_production:
+    if _is_production():
         raise RuntimeError(
             f"Required environment variable '{name}' is not set. "
             "Set LEDGERGUT_ENV=production only when all required variables are configured."
@@ -54,7 +57,9 @@ app = Flask(
     static_url_path="/static",
 )
 app.secret_key = _require_env("LEDGERGUT_SECRET", dev_fallback="ledgergut-dev-secret")
-app.config["SESSION_COOKIE_SECURE"] = True
+# Secure cookies are required in production (served over HTTPS by Tailscale).
+# Keep them usable for the documented local HTTP development path.
+app.config["SESSION_COOKIE_SECURE"] = _is_production()
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
