@@ -19,7 +19,11 @@ ENV LEDGERGUT_RUNTIME=/data
 
 EXPOSE 8080
 
+# Ledgergut's scan -> review -> save handoff currently keeps pending images in
+# process memory. Keep Gunicorn at one worker so consecutive requests cannot land
+# on different processes and lose that pending image. Scale only after moving the
+# pending-image store to shared/persistent storage.
 CMD ["gunicorn", "app.ledgergut.web:app", \
      "--bind", "0.0.0.0:8080", \
-     "--workers", "2", \
+     "--workers", "1", \
      "--timeout", "120"]
