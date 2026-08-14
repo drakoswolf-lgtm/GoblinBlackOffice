@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import io
 import json
+import os
 import shutil
 import uuid
 from datetime import datetime, timezone
@@ -14,8 +15,24 @@ from pathlib import Path
 class StorageError(Exception):
     """Raised when the receipt store cannot be read (e.g. corrupted JSON)."""
 
-_DEFAULT_STORE = Path("runtime") / "ledgergut" / "receipts.json"
-_DEFAULT_IMAGE_DIR = Path("runtime") / "ledgergut" / "images"
+
+def _runtime_base() -> Path:
+    """Return the runtime data root.
+
+    Uses the ``LEDGERGUT_RUNTIME`` environment variable when set (useful for
+    Docker / hosted deployments), otherwise falls back to a ``runtime/``
+    directory relative to the current working directory.
+    """
+    env = os.environ.get("LEDGERGUT_RUNTIME", "").strip()
+    return Path(env) if env else Path("runtime")
+
+
+def _default_store() -> Path:
+    return _runtime_base() / "ledgergut" / "receipts.json"
+
+
+def _default_image_dir() -> Path:
+    return _runtime_base() / "ledgergut" / "images"
 
 CSV_FIELDNAMES = [
     "record_id",
@@ -45,8 +62,8 @@ class ReceiptStore:
         store_path: Path | None = None,
         image_dir: Path | None = None,
     ) -> None:
-        self._path = Path(store_path) if store_path else _DEFAULT_STORE
-        self._image_dir = Path(image_dir) if image_dir else _DEFAULT_IMAGE_DIR
+        self._path = Path(store_path) if store_path else _default_store()
+        self._image_dir = Path(image_dir) if image_dir else _default_image_dir()
 
     def _ensure_paths(self) -> None:
         self._path.parent.mkdir(parents=True, exist_ok=True)

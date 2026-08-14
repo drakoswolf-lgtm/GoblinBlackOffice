@@ -3,6 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Ledgergut">
+  <meta name="theme-color" content="#2a7a2a">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
   <title>Ledgergut — Receipt Entry</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -232,9 +239,9 @@
 
     <fieldset>
       <legend>Receipt Image</legend>
-      <label for="receipt_image">Upload image (PNG / JPG)</label>
-      <input type="file" id="receipt_image" name="receipt_image" accept=".png,.jpg,.jpeg">
-      <p class="hint">Scan runs locally with Tesseract. Review every suggestion before saving. Max 10 MB.</p>
+      <label for="receipt_image">Upload or photograph receipt (PNG / JPG)</label>
+      <input type="file" id="receipt_image" name="receipt_image" accept="image/*" capture="environment">
+      <p class="hint">On Android: tap to photograph the receipt with your camera, or choose from gallery. OCR runs on the server — review every suggestion before saving. Max 10 MB.</p>
       <img id="image-preview" alt="Receipt preview">
     </fieldset>
 
@@ -402,6 +409,12 @@
       event.submitter.disabled = true;
       event.submitter.textContent = event.submitter.id === 'scan-button' ? 'Scanning…' : 'Saving…';
     });
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' });
+      });
+    }
   </script>
 </body>
 </html>
