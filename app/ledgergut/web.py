@@ -18,6 +18,7 @@ from app.ledgergut.models import BillableStatus, PaidBy, ReimbursementStatus
 from app.ledgergut.ocr import OcrError, extract_text_from_image
 from app.ledgergut.office_adapter import receipt_record_to_expense
 from app.ledgergut.receipt_parser import ReceiptSuggestions, parse_receipt_text
+from app.ledgergut.sql_storage import SqlReceiptStore
 from app.ledgergut.storage import ReceiptStore, StorageError
 from app.ledgergut.validation import validate_receipt
 
@@ -31,12 +32,14 @@ app.secret_key = os.environ.get("GBO_SECRET", os.environ.get("LEDGERGUT_SECRET",
 app.config["GBO_AUTH_REQUIRED"] = os.environ.get("GBO_AUTH_REQUIRED", "0").lower() in {"1", "true", "yes"}
 configure_specialist_auth(app)
 
-_store = ReceiptStore()
-_image_store = build_receipt_image_store(_store.image_dir)
-
 
 def _active_business_id() -> str:
     return current_business_id() if app.config.get("GBO_AUTH_REQUIRED") else _office_business_id
+
+
+_database_url = os.environ.get("DATABASE_URL", "").strip()
+_store = SqlReceiptStore(_database_url, _active_business_id) if _database_url else ReceiptStore()
+_image_store = build_receipt_image_store(_store.image_dir)
 
 
 def _enum_options() -> dict:
