@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 import hashlib
+import os
 import re
 import uuid
 
@@ -83,7 +84,8 @@ def complete_onboarding(user: User, *, business_name: str, currency: str) -> tup
 
 def configure_specialist_auth(app: Flask) -> None:
     """Protect a mounted specialist when GBO_AUTH_REQUIRED is enabled."""
-    app.secret_key = app.config.get("SECRET_KEY") or __import__("os").environ.get("GBO_SECRET", "gbo-dev-secret")
+    app.secret_key = os.environ.get("GBO_SECRET", "gbo-dev-secret")
+    app.config["SESSION_COOKIE_NAME"] = "gbo_session"
 
     @app.before_request
     def _require_office_account():
