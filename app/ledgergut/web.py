@@ -102,11 +102,16 @@ def _render_index(
     except StorageError as exc:
         storage_error = storage_error or str(exc)
 
+    active_business_id = _active_business_id()
+    projects = _office_store.projects.list_for_business(active_business_id)
+    clients = {c.client_id: c for c in _office_store.clients.list_for_business(active_business_id)}
     page_form_data = form_data or {}
     return render_template(
         "ledgergut/index.html",
         enums=_enum_options(),
         receipts=receipts,
+        projects=projects,
+        clients=clients,
         form_data=page_form_data,
         findings=findings or [],
         input_errors=input_errors or [],
@@ -201,6 +206,11 @@ def new_receipt():
     if image_error:
         input_errors.append(image_error)
 
+    active_business_id = _active_business_id()
+    selected_project_id = form_data.get("office_project_id", "").strip() or None
+    if selected_project_id is not None and _office_store.projects.get(selected_project_id, active_business_id) is None:
+        input_errors.append("Choose a valid Office project.")
+
     findings = []
     storage_error = None
     if record:
@@ -223,7 +233,11 @@ def new_receipt():
                 storage_error = str(exc)
             else:
                 office_record = replace(record, record_id=record_id)
-                expense = receipt_record_to_expense(office_record, business_id=_active_business_id())
+                expense = receipt_record_to_expense(
+                    office_record,
+                    business_id=active_business_id,
+                    project_id=selected_project_id,
+                )
                 _office_store.expenses.save(expense)
                 return redirect(url_for("index") + "?saved=1")
 
