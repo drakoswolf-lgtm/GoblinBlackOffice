@@ -1,0 +1,45 @@
+name: goblin-black-office-beta
+region: tor
+services:
+  - name: web
+    github:
+      repo: drakoswolf-lgtm/GoblinBlackOffice
+      branch: main
+      deploy_on_push: false
+    dockerfile_path: Dockerfile
+    source_dir: /
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: apps-s-1vcpu-1gb-fixed
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 10
+      period_seconds: 10
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 6
+    envs:
+      - key: GBO_AUTH_REQUIRED
+        value: "1"
+        scope: RUN_TIME
+        type: GENERAL
+      - key: GBO_ENV
+        value: production
+        scope: RUN_TIME
+        type: GENERAL
+      - key: SPACES_REGION
+        value: tor1
+        scope: RUN_TIME
+        type: GENERAL
+      - key: SPACES_ENDPOINT_URL
+        value: https://tor1.digitaloceanspaces.com
+        scope: RUN_TIME
+        type: GENERAL
+      - key: WEB_CONCURRENCY
+        value: "2"
+        scope: RUN_TIME
+        type: GENERAL
+      - key: WEB_THREADS
+        value: "4"
+        scope: RUN_TIME
+        type: GENERAL
