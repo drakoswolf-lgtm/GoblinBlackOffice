@@ -2,22 +2,54 @@
 
 Target stack: DigitalOcean App Platform + managed PostgreSQL + Spaces.
 
+## Pinned private-beta shape
+
+- App Platform region: Toronto (`tor`)
+- Web service: 1 shared vCPU / 1 GiB fixed container (`apps-s-1vcpu-1gb-fixed`)
+- PostgreSQL region: Toronto (`tor1`), smallest managed single-node PostgreSQL plan
+- Spaces region: Toronto (`tor1`), Standard Storage, private bucket
+- App spec: `.do/app.yaml`
+- Health check: `/health`
+
+Expected base monthly cost at the current published rates:
+
+- App Platform 1 GiB fixed container: US$10.00/month
+- Managed PostgreSQL 1 GiB / 1 vCPU: US$15.15/month
+- Spaces Standard subscription: US$5.00/month
+- Expected base total: US$30.15/month before unusual excess transfer/storage
+
+The app spec intentionally has `deploy_on_push: false` until database and secret configuration are complete. Do not enable automatic deploys before the release gate passes.
+
 ## Required application settings
 
-- `GBO_AUTH_REQUIRED=1`
+Safe values are already present in `.do/app.yaml` where appropriate. The following must be injected as secrets or resource-specific values during provisioning:
+
 - `GBO_SECRET=<long random secret>`
-- `DATABASE_URL=<managed PostgreSQL connection string>`
-- `SPACES_ENDPOINT_URL=<regional Spaces endpoint, e.g. https://sfo3.digitaloceanspaces.com>`
+- `DATABASE_URL=<managed PostgreSQL private connection string>`
 - `SPACES_BUCKET=<private bucket name>`
 - `SPACES_ACCESS_KEY_ID=<secret>`
 - `SPACES_SECRET_ACCESS_KEY=<secret>`
-- `SPACES_REGION=<region slug>`
-- `PORT=8080` (App Platform normally supplies this)
 
-Optional tuning:
+The spec supplies:
 
+- `GBO_AUTH_REQUIRED=1`
+- `GBO_ENV=production`
+- `SPACES_REGION=tor1`
+- `SPACES_ENDPOINT_URL=https://tor1.digitaloceanspaces.com`
 - `WEB_CONCURRENCY=2`
 - `WEB_THREADS=4`
+
+App Platform supplies `PORT` from the configured `http_port` (8080).
+
+## Provisioning order
+
+1. Create the smallest managed PostgreSQL cluster in `tor1`.
+2. Create a private Spaces Standard bucket in `tor1`.
+3. Create a limited Spaces access key with read/write/delete access to that bucket only.
+4. Create the App Platform app from `.do/app.yaml`.
+5. Add `DATABASE_URL`, `GBO_SECRET`, `SPACES_BUCKET`, `SPACES_ACCESS_KEY_ID`, and `SPACES_SECRET_ACCESS_KEY` as encrypted runtime values.
+6. Deploy once and complete the release gate below.
+7. Only after the smoke tests pass, enable deploy-on-push for `main`.
 
 ## App Platform
 
