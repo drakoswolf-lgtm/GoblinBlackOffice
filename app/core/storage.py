@@ -1,15 +1,10 @@
-"""Persistence boundaries for shared Black Office records.
-
-These protocols keep goblin workflows independent of the storage engine. The
-production implementation can use PostgreSQL while tests and local tools use
-lightweight alternatives.
-"""
+"""Persistence boundaries for shared Black Office records."""
 
 from __future__ import annotations
 
 from typing import Protocol, TypeVar
 
-from .models import Agreement, Business, Client, Expense, Invoice, Payment, Project
+from .models import Agreement, Business, Client, Expense, Invoice, Payment, Project, User
 
 T = TypeVar("T")
 
@@ -21,8 +16,7 @@ class Repository(Protocol[T]):
 
 
 class BlackOfficeStore(Protocol):
-    """Storage contract shared by Æterna and every goblin specialist."""
-
+    users: Repository[User]
     businesses: Repository[Business]
     clients: Repository[Client]
     projects: Repository[Project]

@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable, Generic, TypeVar
 
-from .models import Agreement, Business, Client, Expense, Invoice, Payment, Project
+from .models import Agreement, Business, Client, Expense, Invoice, Payment, Project, User
 
 T = TypeVar("T")
 
@@ -28,17 +28,12 @@ class InMemoryRepository(Generic[T]):
         return record
 
     def list_for_business(self, business_id: str) -> list[T]:
-        return [
-            record
-            for record in self._records.values()
-            if getattr(record, "business_id", None) == business_id
-        ]
+        return [record for record in self._records.values() if getattr(record, "business_id", None) == business_id]
 
 
 @dataclass
 class InMemoryBlackOfficeStore:
-    """Concrete dependency-free store implementing the shared repository shape."""
-
+    users: InMemoryRepository[User]
     businesses: InMemoryRepository[Business]
     clients: InMemoryRepository[Client]
     projects: InMemoryRepository[Project]
@@ -50,6 +45,7 @@ class InMemoryBlackOfficeStore:
     @classmethod
     def create(cls) -> "InMemoryBlackOfficeStore":
         return cls(
+            users=InMemoryRepository(lambda item: item.user_id),
             businesses=InMemoryRepository(lambda item: item.business_id),
             clients=InMemoryRepository(lambda item: item.client_id),
             projects=InMemoryRepository(lambda item: item.project_id),
