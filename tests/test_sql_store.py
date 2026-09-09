@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from app.core.models import Agreement, AgreementStatus, Business, Expense
+from app.core.models import Agreement, AgreementStatus, Business, Expense, Invoice, InvoiceLineItem
 from app.core.sql_store import SqlBlackOfficeStore
 
 
@@ -60,3 +60,33 @@ def test_sql_store_preserves_decimal_money(tmp_path):
     assert loaded is not None
     assert loaded.amount == Decimal("0.10")
     assert isinstance(loaded.amount, Decimal)
+
+
+def test_sql_store_round_trips_invoice_line_items(tmp_path):
+    url = f"sqlite:///{tmp_path / 'invoice.db'}"
+    first = SqlBlackOfficeStore(url)
+    first.invoices.save(
+        Invoice(
+            invoice_id="SQ-1",
+            business_id="BIZ-1",
+            project_id="PRJ-1",
+            client_id="CLI-1",
+            total=Decimal("128.50"),
+            subtotal=Decimal("128.50"),
+            agreement_id="AGR-1",
+            line_items=(
+                InvoiceLineItem(description="Labour", amount=Decimal("100.00"), source_type="agreement", source_id="AGR-1"),
+                InvoiceLineItem(description="Fasteners", amount=Decimal("28.50"), source_type="expense", source_id="EXP-1"),
+            ),
+            review_notes=("Tax unresolved.",),
+        )
+    )
+
+    second = SqlBlackOfficeStore(url)
+    invoice = second.invoices.get("SQ-1", "BIZ-1")
+    assert invoice is not None
+    assert invoice.agreement_id == "AGR-1"
+    assert invoice.subtotal == Decimal("128.50")
+    assert invoice.line_items[0].description == "Labour"
+    assert invoice.line_items[1].amount == Decimal("28.50")
+    assert invoice.review_notes == ("Tax unresolved.",)
