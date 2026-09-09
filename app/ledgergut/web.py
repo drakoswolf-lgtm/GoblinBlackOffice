@@ -102,11 +102,16 @@ def _render_index(
     except StorageError as exc:
         storage_error = storage_error or str(exc)
 
+    active_business_id = _active_business_id()
+    projects = _office_store.projects.list_for_business(active_business_id)
+    clients = {c.client_id: c for c in _office_store.clients.list_for_business(active_business_id)}
     page_form_data = form_data or {}
     return render_template(
         "ledgergut/index.html",
         enums=_enum_options(),
         receipts=receipts,
+        projects=projects,
+        clients=clients,
         form_data=page_form_data,
         findings=findings or [],
         input_errors=input_errors or [],
@@ -157,6 +162,17 @@ def _apply_suggestions(form_data: dict[str, str], suggestions: ReceiptSuggestion
     return updated
 
 
+def _selected_office_project_id(form_data: dict[str, str], business_id: str) -> str | None:
+    explicit = form_data.get("office_project_id", "").strip()
+    if explicit:
+        return explicit
+    label = form_data.get("project_name", "").strip().casefold()
+    if not label:
+        return None
+    matches = [p for p in _office_store.projects.list_for_business(business_id) if p.name.strip().casefold() == label]
+    return matches[0].project_id if len(matches) == 1 else None
+
+
 @app.route("/", methods=["GET"])
 def index():
     return _render_index(saved=request.args.get("saved") == "1")
@@ -201,6 +217,12 @@ def new_receipt():
     if image_error:
         input_errors.append(image_error)
 
+    active_business_id = _active_business_id()
+    selected_project_id = _selected_office_project_id(form_data, active_business_id)
+    explicit_project_id = form_data.get("office_project_id", "").strip()
+    if explicit_project_id and _office_store.projects.get(explicit_project_id, active_business_id) is None:
+        input_errors.append("Choose a valid Office project.")
+
     findings = []
     storage_error = None
     if record:
@@ -223,7 +245,11 @@ def new_receipt():
                 storage_error = str(exc)
             else:
                 office_record = replace(record, record_id=record_id)
-                expense = receipt_record_to_expense(office_record, business_id=_active_business_id())
+                expense = receipt_record_to_expense(
+                    office_record,
+                    business_id=active_business_id,
+                    project_id=selected_project_id,
+                )
                 _office_store.expenses.save(expense)
                 return redirect(url_for("index") + "?saved=1")
 
