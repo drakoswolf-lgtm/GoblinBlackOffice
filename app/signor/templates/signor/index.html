@@ -12,7 +12,7 @@
     h1 { margin:.25rem 0; } .intro { color:#bac2c7; max-width:680px; }
     form,.preview { margin-top:24px; padding:22px; border:1px solid #30363a; background:#181b1e; border-radius:10px; }
     label { display:block; margin:14px 0 6px; font-weight:650; }
-    input,textarea { width:100%; box-sizing:border-box; padding:11px; border:1px solid #41484d; border-radius:6px; background:#101214; color:#fff; }
+    input,textarea,select { width:100%; box-sizing:border-box; padding:11px; border:1px solid #41484d; border-radius:6px; background:#101214; color:#fff; }
     textarea { min-height:100px; resize:vertical; } .short { min-height:70px; }
     .row { display:grid; grid-template-columns:2fr 1fr 1fr; gap:12px; }
     button { margin-top:18px; padding:12px 18px; border:0; border-radius:6px; font-weight:750; cursor:pointer; }
@@ -31,7 +31,7 @@
 
   <form method="post">
     <div class="row">
-      <div><label>Project ID</label><input name="project_id" value="{{ form_data.get('project_id','') }}" placeholder="e.g. PRJ-ALEXANDER"></div>
+      <div><label>Project</label><select name="project_id"><option value="">Choose project</option>{% for p in projects %}<option value="{{ p.project_id }}" {% if form_data.get('project_id') == p.project_id %}selected{% endif %}>{{ p.name }}{% if p.client_id and clients.get(p.client_id) %} · {{ clients.get(p.client_id).name }}{% endif %}</option>{% endfor %}</select></div>
       <div><label>Price</label><input name="amount" inputmode="decimal" value="{{ form_data.get('amount','') }}" placeholder="2500.00"></div>
       <div><label>Currency</label><input name="currency" value="{{ form_data.get('currency','CAD') }}"></div>
     </div>
