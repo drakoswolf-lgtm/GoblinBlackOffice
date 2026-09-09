@@ -22,7 +22,7 @@ def test_sql_store_survives_new_store_instance(tmp_path):
     )
 
     second = SqlBlackOfficeStore(url)
-    agreement = second.agreements.get("BIZ-1", "AGR-1")
+    agreement = second.agreements.get("AGR-1", "BIZ-1")
     assert agreement is not None
     assert agreement.amount == Decimal("1234.56")
     assert agreement.status == AgreementStatus.DRAFT
@@ -40,8 +40,8 @@ def test_sql_store_enforces_tenant_scope(tmp_path):
             description="Fasteners",
         )
     )
-    assert store.expenses.get("BIZ-A", "EXP-1") is not None
-    assert store.expenses.get("BIZ-B", "EXP-1") is None
+    assert store.expenses.get("EXP-1", "BIZ-A") is not None
+    assert store.expenses.get("EXP-1", "BIZ-B") is None
     assert store.expenses.list_for_business("BIZ-B") == []
 
 
@@ -56,7 +56,7 @@ def test_sql_store_preserves_decimal_money(tmp_path):
         description="Tiny but exact",
     )
     store.expenses.save(expense)
-    loaded = store.expenses.get("BIZ-1", "EXP-MONEY")
+    loaded = store.expenses.get("EXP-MONEY", "BIZ-1")
     assert loaded is not None
     assert loaded.amount == Decimal("0.10")
     assert isinstance(loaded.amount, Decimal)
