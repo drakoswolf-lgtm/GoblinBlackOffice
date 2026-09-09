@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import date
+from io import BytesIO
 import os
 
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, send_file, url_for
 
+from app.core.documents import build_invoice_pdf
 from app.core.models import InvoiceStatus
 from app.core.runtime import business_id, office_store
 from app.office.auth import configure_specialist_auth, current_business_id
@@ -70,6 +72,19 @@ def index():
     )
 
 
+@app.route("/invoices/<invoice_id>/pdf", methods=["GET"])
+def invoice_pdf(invoice_id: str):
+    active_business_id = _business_id()
+    invoice = _store.invoices.get(invoice_id, active_business_id)
+    business = _store.businesses.get(active_business_id, active_business_id)
+    if invoice is None or business is None:
+        return ("Invoice not found.", 404)
+    project = _store.projects.get(invoice.project_id, active_business_id)
+    client = _store.clients.get(invoice.client_id, active_business_id) if invoice.client_id else None
+    pdf = build_invoice_pdf(business=business, invoice=invoice, project=project, client=client)
+    return send_file(BytesIO(pdf), mimetype="application/pdf", as_attachment=True, download_name=f"{invoice.invoice_id}.pdf")
+
+
 @app.route("/invoices/<invoice_id>/confirm", methods=["POST"])
 def confirm_invoice(invoice_id: str):
     active_business_id = _business_id()
@@ -79,4 +94,4 @@ def confirm_invoice(invoice_id: str):
     if invoice.status != InvoiceStatus.DRAFT:
         return ("Only draft invoices can be approved.", 409)
     _store.invoices.save(replace(invoice, status=InvoiceStatus.APPROVED))
-    return redirect(url_for("index", confirmed=invoice_id))
+    return redirect(url_for("invoice_pdf", invoice_id=invoice_id))
