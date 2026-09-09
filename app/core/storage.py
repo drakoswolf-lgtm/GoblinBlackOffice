@@ -1,8 +1,8 @@
 """Persistence boundaries for shared Black Office records.
 
 These protocols keep goblin workflows independent of the storage engine. The
-first production implementation can use PostgreSQL while tests and local tools
-can provide lightweight alternatives.
+production implementation can use PostgreSQL while tests and local tools use
+lightweight alternatives.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ T = TypeVar("T")
 
 class Repository(Protocol[T]):
     def save(self, record: T) -> T: ...
-    def get(self, record_id: str) -> T | None: ...
+    def get(self, record_id: str, business_id: str | None = None) -> T | None: ...
     def list_for_business(self, business_id: str) -> list[T]: ...
 
 
