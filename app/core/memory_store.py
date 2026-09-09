@@ -19,8 +19,13 @@ class InMemoryRepository(Generic[T]):
         self._records[self._id_getter(record)] = record
         return record
 
-    def get(self, record_id: str) -> T | None:
-        return self._records.get(record_id)
+    def get(self, record_id: str, business_id: str | None = None) -> T | None:
+        record = self._records.get(record_id)
+        if record is None:
+            return None
+        if business_id is not None and getattr(record, "business_id", None) != business_id:
+            return None
+        return record
 
     def list_for_business(self, business_id: str) -> list[T]:
         return [
