@@ -26,6 +26,8 @@ def index():
     active_business_id = _business_id()
     agreements = _store.agreements.list_for_business(active_business_id)
     expenses = _store.expenses.list_for_business(active_business_id)
+    projects = {p.project_id: p for p in _store.projects.list_for_business(active_business_id)}
+    clients = {c.client_id: c for c in _store.clients.list_for_business(active_business_id)}
     result = None
 
     if request.method == "POST":
@@ -42,10 +44,13 @@ def index():
             except ValueError:
                 result = type("InvalidDateResult", (), {"invoice": None, "lines": (), "errors": ("Enter a valid due date.",), "review_notes": ()})()
             else:
+                project = projects.get(agreement.project_id)
+                inferred_client_id = project.client_id if project is not None else None
+                client_id = inferred_client_id or request.form.get("client_id", "")
                 result = draft_invoice(
                     business_id=active_business_id,
                     agreement=agreement,
-                    client_id=request.form.get("client_id", ""),
+                    client_id=client_id,
                     expenses=selected_expenses,
                     include_agreement_amount=request.form.get("include_agreement_amount") == "1",
                     due_date=due_date,
@@ -53,4 +58,11 @@ def index():
                 if result.invoice is not None:
                     _store.invoices.save(result.invoice)
 
-    return render_template("squarmish/index.html", agreements=agreements, expenses=expenses, result=result)
+    return render_template(
+        "squarmish/index.html",
+        agreements=agreements,
+        expenses=expenses,
+        projects=projects,
+        clients=clients,
+        result=result,
+    )
