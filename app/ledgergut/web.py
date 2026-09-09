@@ -4,14 +4,18 @@ from __future__ import annotations
 
 import os
 import uuid
+from dataclasses import replace
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from flask import Flask, Response, redirect, render_template, request, url_for
 
+from app.core.memory_store import InMemoryBlackOfficeStore
+from app.core.models import Business
 from app.ledgergut.form_mapper import build_models
 from app.ledgergut.models import BillableStatus, PaidBy, ReimbursementStatus
 from app.ledgergut.ocr import OcrError, extract_text_from_image
+from app.ledgergut.office_adapter import receipt_record_to_expense
 from app.ledgergut.receipt_parser import ReceiptSuggestions, parse_receipt_text
 from app.ledgergut.storage import ReceiptStore, StorageError
 from app.ledgergut.validation import validate_receipt
@@ -25,6 +29,14 @@ app = Flask(__name__, template_folder=str(_HERE / "templates"))
 app.secret_key = os.environ.get("LEDGERGUT_SECRET", "ledgergut-dev-secret")
 
 _store = ReceiptStore()
+_office_store = InMemoryBlackOfficeStore.create()
+_office_business_id = os.environ.get("GBO_BUSINESS_ID", "local-default")
+_office_store.businesses.save(
+    Business(
+        business_id=_office_business_id,
+        name=os.environ.get("GBO_BUSINESS_NAME", "Local Black Office"),
+    )
+)
 
 
 def _enum_options() -> dict:
@@ -214,7 +226,7 @@ def new_receipt():
                 written_image_path = _store.image_dir / image_filename
                 written_image_path.write_bytes(image_data)
             try:
-                _store.save_receipt(record.to_dict(), image_filename)
+                record_id = _store.save_receipt(record.to_dict(), image_filename)
             except StorageError as exc:
                 # Roll back: remove the image that was just written so it does
                 # not remain on disk without a corresponding receipt record.
@@ -222,6 +234,12 @@ def new_receipt():
                     written_image_path.unlink(missing_ok=True)
                 storage_error = str(exc)
             else:
+                office_record = replace(record, record_id=record_id)
+                expense = receipt_record_to_expense(
+                    office_record,
+                    business_id=_office_business_id,
+                )
+                _office_store.expenses.save(expense)
                 return redirect(url_for("index") + "?saved=1")
 
     return _render_index(
