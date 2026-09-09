@@ -1,0 +1,1 @@
+"""Black Office application shell."""
