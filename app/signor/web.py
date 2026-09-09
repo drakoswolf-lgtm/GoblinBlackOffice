@@ -21,6 +21,9 @@ def _business_id() -> str:
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    active_business_id = _business_id()
+    projects = _store.projects.list_for_business(active_business_id)
+    clients = {c.client_id: c for c in _store.clients.list_for_business(active_business_id)}
     form_data: dict[str, str] = {}
     errors: tuple[str, ...] = ()
     agreement = None
@@ -39,11 +42,18 @@ def index():
                 payment_terms=form_data.get("payment_terms", ""),
                 change_order_terms=form_data.get("change_order_terms", ""),
             ),
-            business_id=_business_id(),
+            business_id=active_business_id,
         )
         errors = result.errors
         agreement = result.agreement
         if agreement is not None:
             _store.agreements.save(agreement)
 
-    return render_template("signor/index.html", form_data=form_data, errors=errors, agreement=agreement)
+    return render_template(
+        "signor/index.html",
+        form_data=form_data,
+        errors=errors,
+        agreement=agreement,
+        projects=projects,
+        clients=clients,
+    )
