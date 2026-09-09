@@ -11,6 +11,7 @@ from pathlib import Path
 from flask import Flask, Response, redirect, render_template, request, url_for
 
 from app.core.runtime import business_id as _office_business_id, office_store as _office_store
+from app.office.auth import configure_specialist_auth, current_business_id
 from app.ledgergut.form_mapper import build_models
 from app.ledgergut.models import BillableStatus, PaidBy, ReimbursementStatus
 from app.ledgergut.ocr import OcrError, extract_text_from_image
@@ -25,9 +26,15 @@ MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 PENDING_IMAGE_TTL = timedelta(minutes=30)
 
 app = Flask(__name__, template_folder=str(_HERE / "templates"))
-app.secret_key = os.environ.get("LEDGERGUT_SECRET", "ledgergut-dev-secret")
+app.secret_key = os.environ.get("GBO_SECRET", os.environ.get("LEDGERGUT_SECRET", "ledgergut-dev-secret"))
+app.config["GBO_AUTH_REQUIRED"] = os.environ.get("GBO_AUTH_REQUIRED", "0").lower() in {"1", "true", "yes"}
+configure_specialist_auth(app)
 
 _store = ReceiptStore()
+
+
+def _active_business_id() -> str:
+    return current_business_id() if app.config.get("GBO_AUTH_REQUIRED") else _office_business_id
 
 
 def _enum_options() -> dict:
@@ -160,10 +167,7 @@ def scan_receipt():
     form_data = request.form.to_dict()
     pending_image, image_error = _read_pending_image(required=True)
     if image_error is not None:
-        return _render_index(
-            form_data=form_data,
-            scan_error=image_error,
-        )
+        return _render_index(form_data=form_data, scan_error=image_error)
 
     assert pending_image is not None
     image_data, ext = pending_image
@@ -171,10 +175,7 @@ def scan_receipt():
         raw_text = extract_text_from_image(image_data)
         suggestions = parse_receipt_text(raw_text)
     except OcrError as exc:
-        return _render_index(
-            form_data=form_data,
-            scan_error=str(exc),
-        )
+        return _render_index(form_data=form_data, scan_error=str(exc))
 
     updated_form_data = _apply_suggestions(form_data, suggestions)
     updated_form_data["pending_image_token"] = _store_pending_image(image_data, ext)
@@ -222,10 +223,7 @@ def new_receipt():
                 storage_error = str(exc)
             else:
                 office_record = replace(record, record_id=record_id)
-                expense = receipt_record_to_expense(
-                    office_record,
-                    business_id=_office_business_id,
-                )
+                expense = receipt_record_to_expense(office_record, business_id=_active_business_id())
                 _office_store.expenses.save(expense)
                 return redirect(url_for("index") + "?saved=1")
 
