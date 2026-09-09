@@ -28,6 +28,7 @@ class AgreementStatus(str, Enum):
 
 class InvoiceStatus(str, Enum):
     DRAFT = "draft"
+    APPROVED = "approved"
     SENT = "sent"
     DUE = "due"
     PAID = "paid"

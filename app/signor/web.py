@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 import os
-from flask import Flask, render_template, request
+from flask import Flask, redirect, render_template, request, url_for
 
+from app.core.models import AgreementStatus
 from app.core.runtime import business_id, office_store
 from app.office.auth import configure_specialist_auth, current_business_id
 from app.signor.service import AgreementDraftInput, draft_agreement
@@ -57,3 +59,15 @@ def index():
         projects=projects,
         clients=clients,
     )
+
+
+@app.route("/agreements/<agreement_id>/confirm", methods=["POST"])
+def confirm_agreement(agreement_id: str):
+    active_business_id = _business_id()
+    agreement = _store.agreements.get(agreement_id, active_business_id)
+    if agreement is None:
+        return ("Agreement not found.", 404)
+    if agreement.status != AgreementStatus.DRAFT:
+        return ("Only draft agreements can be confirmed.", 409)
+    _store.agreements.save(replace(agreement, status=AgreementStatus.PROPOSED))
+    return redirect(url_for("index", confirmed=agreement_id))

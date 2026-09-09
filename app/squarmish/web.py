@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import date
 import os
 
-from flask import Flask, render_template, request
+from flask import Flask, redirect, render_template, request, url_for
 
+from app.core.models import InvoiceStatus
 from app.core.runtime import business_id, office_store
 from app.office.auth import configure_specialist_auth, current_business_id
 from app.squarmish.service import draft_invoice
@@ -66,3 +68,15 @@ def index():
         clients=clients,
         result=result,
     )
+
+
+@app.route("/invoices/<invoice_id>/confirm", methods=["POST"])
+def confirm_invoice(invoice_id: str):
+    active_business_id = _business_id()
+    invoice = _store.invoices.get(invoice_id, active_business_id)
+    if invoice is None:
+        return ("Invoice not found.", 404)
+    if invoice.status != InvoiceStatus.DRAFT:
+        return ("Only draft invoices can be approved.", 409)
+    _store.invoices.save(replace(invoice, status=InvoiceStatus.APPROVED))
+    return redirect(url_for("index", confirmed=invoice_id))
