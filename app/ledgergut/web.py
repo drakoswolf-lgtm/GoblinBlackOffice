@@ -162,6 +162,17 @@ def _apply_suggestions(form_data: dict[str, str], suggestions: ReceiptSuggestion
     return updated
 
 
+def _selected_office_project_id(form_data: dict[str, str], business_id: str) -> str | None:
+    explicit = form_data.get("office_project_id", "").strip()
+    if explicit:
+        return explicit
+    label = form_data.get("project_name", "").strip().casefold()
+    if not label:
+        return None
+    matches = [p for p in _office_store.projects.list_for_business(business_id) if p.name.strip().casefold() == label]
+    return matches[0].project_id if len(matches) == 1 else None
+
+
 @app.route("/", methods=["GET"])
 def index():
     return _render_index(saved=request.args.get("saved") == "1")
@@ -207,8 +218,9 @@ def new_receipt():
         input_errors.append(image_error)
 
     active_business_id = _active_business_id()
-    selected_project_id = form_data.get("office_project_id", "").strip() or None
-    if selected_project_id is not None and _office_store.projects.get(selected_project_id, active_business_id) is None:
+    selected_project_id = _selected_office_project_id(form_data, active_business_id)
+    explicit_project_id = form_data.get("office_project_id", "").strip()
+    if explicit_project_id and _office_store.projects.get(explicit_project_id, active_business_id) is None:
         input_errors.append("Choose a valid Office project.")
 
     findings = []
