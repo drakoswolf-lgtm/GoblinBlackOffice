@@ -102,6 +102,14 @@ class Expense:
 
 
 @dataclass(frozen=True)
+class InvoiceLineItem:
+    description: str
+    amount: Decimal
+    source_type: str
+    source_id: str
+
+
+@dataclass(frozen=True)
 class Invoice:
     invoice_id: str
     business_id: str
@@ -111,6 +119,11 @@ class Invoice:
     currency: str = "CAD"
     status: InvoiceStatus = InvoiceStatus.DRAFT
     due_date: date | None = None
+    agreement_id: str | None = None
+    subtotal: Decimal | None = None
+    tax_total: Decimal | None = None
+    line_items: tuple[InvoiceLineItem, ...] = ()
+    review_notes: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
