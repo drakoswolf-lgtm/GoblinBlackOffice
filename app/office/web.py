@@ -1,8 +1,7 @@
 """Æterna-led Black Office application shell.
 
-This composes specialist Flask applications without forcing an immediate
-rewrite of their existing routes. Ledgergut remains independently runnable and
-is mounted under /ledgergut in the shared Office surface.
+Specialist Flask applications remain independently testable and are composed
+under one Office surface while the shared platform evolves.
 """
 
 from __future__ import annotations
@@ -11,6 +10,7 @@ from flask import Flask, render_template
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 from app.ledgergut.web import app as ledgergut_app
+from app.signor.web import app as signor_app
 
 
 office_app = Flask(__name__, template_folder="templates")
@@ -29,8 +29,8 @@ def index():
         {
             "name": "SigNor",
             "role": "Agreements & scope",
-            "status": "next",
-            "href": None,
+            "status": "live",
+            "href": "/signor/",
             "note": "Words matter. Especially the ones someone forgot to define.",
         },
         {
@@ -53,5 +53,6 @@ application = DispatcherMiddleware(
     office_app,
     {
         "/ledgergut": ledgergut_app,
+        "/signor": signor_app,
     },
 )
