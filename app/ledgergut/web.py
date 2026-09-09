@@ -42,6 +42,13 @@ _store = SqlReceiptStore(_database_url, _active_business_id) if _database_url el
 _image_store = build_receipt_image_store(_store.image_dir)
 
 
+def _active_image_store():
+    """Reuse the cloud client, but follow a swapped local ReceiptStore in tests/dev."""
+    if os.environ.get("SPACES_ENDPOINT_URL", "").strip():
+        return _image_store
+    return build_receipt_image_store(_store.image_dir)
+
+
 def _enum_options() -> dict:
     return {
         "paid_by": [e.value for e in PaidBy],
@@ -236,12 +243,13 @@ def new_receipt():
         has_errors = any(f["severity"] == "error" for f in findings)
         if not has_errors and not input_errors:
             image_key = None
+            image_store = _active_image_store()
             if pending_image is not None:
                 image_data, ext = pending_image
                 image_filename = f"{uuid.uuid4().hex}.{ext}"
                 content_type = "image/png" if ext == "png" else "image/jpeg"
                 try:
-                    image_key = _image_store.put(
+                    image_key = image_store.put(
                         business_id=active_business_id,
                         filename=image_filename,
                         data=image_data,
@@ -254,7 +262,7 @@ def new_receipt():
                     record_id = _store.save_receipt(record.to_dict(), image_key)
                 except StorageError as exc:
                     if image_key is not None:
-                        _image_store.delete(image_key)
+                        image_store.delete(image_key)
                     storage_error = str(exc)
                 else:
                     office_record = replace(record, record_id=record_id)
