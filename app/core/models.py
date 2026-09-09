@@ -36,6 +36,17 @@ class InvoiceStatus(str, Enum):
 
 
 @dataclass(frozen=True)
+class User:
+    user_id: str
+    business_id: str
+    email: str
+    password_hash: str
+    display_name: str
+    onboarding_complete: bool = False
+    status: RecordStatus = RecordStatus.ACTIVE
+
+
+@dataclass(frozen=True)
 class Business:
     business_id: str
     name: str
