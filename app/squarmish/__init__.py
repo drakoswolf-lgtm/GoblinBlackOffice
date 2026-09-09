@@ -1,0 +1,1 @@
+"""Squarmish invoice specialist."""

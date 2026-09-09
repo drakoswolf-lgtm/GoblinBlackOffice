@@ -10,8 +10,7 @@ from pathlib import Path
 
 from flask import Flask, Response, redirect, render_template, request, url_for
 
-from app.core.memory_store import InMemoryBlackOfficeStore
-from app.core.models import Business
+from app.core.runtime import business_id as _office_business_id, office_store as _office_store
 from app.ledgergut.form_mapper import build_models
 from app.ledgergut.models import BillableStatus, PaidBy, ReimbursementStatus
 from app.ledgergut.ocr import OcrError, extract_text_from_image
@@ -29,14 +28,6 @@ app = Flask(__name__, template_folder=str(_HERE / "templates"))
 app.secret_key = os.environ.get("LEDGERGUT_SECRET", "ledgergut-dev-secret")
 
 _store = ReceiptStore()
-_office_store = InMemoryBlackOfficeStore.create()
-_office_business_id = os.environ.get("GBO_BUSINESS_ID", "local-default")
-_office_store.businesses.save(
-    Business(
-        business_id=_office_business_id,
-        name=os.environ.get("GBO_BUSINESS_NAME", "Local Black Office"),
-    )
-)
 
 
 def _enum_options() -> dict:
@@ -197,7 +188,6 @@ def scan_receipt():
 def new_receipt():
     form_data = request.form.to_dict()
 
-    # Read the uploaded file into memory; do NOT write to disk yet.
     pending_image, image_error = _read_pending_image(required=False)
     if pending_image is None:
         pending_image_token = form_data.get("pending_image_token", "").strip()
@@ -217,7 +207,6 @@ def new_receipt():
         findings = [f.to_dict() for f in raw_findings]
         has_errors = any(f["severity"] == "error" for f in findings)
         if not has_errors and not input_errors:
-            # Validation passed — now it is safe to persist the image.
             image_filename = None
             written_image_path: Path | None = None
             if pending_image is not None:
@@ -228,8 +217,6 @@ def new_receipt():
             try:
                 record_id = _store.save_receipt(record.to_dict(), image_filename)
             except StorageError as exc:
-                # Roll back: remove the image that was just written so it does
-                # not remain on disk without a corresponding receipt record.
                 if written_image_path is not None:
                     written_image_path.unlink(missing_ok=True)
                 storage_error = str(exc)

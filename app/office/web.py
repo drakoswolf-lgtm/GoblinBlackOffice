@@ -11,6 +11,7 @@ from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 from app.ledgergut.web import app as ledgergut_app
 from app.signor.web import app as signor_app
+from app.squarmish.web import app as squarmish_app
 
 
 office_app = Flask(__name__, template_folder="templates")
@@ -36,8 +37,8 @@ def index():
         {
             "name": "Squarmish",
             "role": "Invoices & receivables",
-            "status": "next",
-            "href": None,
+            "status": "live",
+            "href": "/squarmish/",
             "note": "Completed work is lovely. Paid work is lovelier.",
         },
     ]
@@ -54,5 +55,6 @@ application = DispatcherMiddleware(
     {
         "/ledgergut": ledgergut_app,
         "/signor": signor_app,
+        "/squarmish": squarmish_app,
     },
 )

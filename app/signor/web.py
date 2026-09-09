@@ -2,19 +2,17 @@
 
 from __future__ import annotations
 
-import os
-
 from flask import Flask, render_template, request
 
-from app.core.memory_store import InMemoryBlackOfficeStore
+from app.core.runtime import business_id, office_store
 from app.signor.service import AgreementDraftInput, draft_agreement
 
 app = Flask(__name__, template_folder="templates")
-_store = InMemoryBlackOfficeStore.create()
+_store = office_store
 
 
 def _business_id() -> str:
-    return os.environ.get("GBO_BUSINESS_ID", "local-development")
+    return business_id
 
 
 @app.route("/", methods=["GET", "POST"])
