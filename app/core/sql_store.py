@@ -7,12 +7,12 @@ service.
 
 from __future__ import annotations
 
-from dataclasses import asdict, fields
+from dataclasses import asdict
 from datetime import date, datetime
 from decimal import Decimal
 from enum import Enum
 import json
-from typing import Generic, TypeVar
+from typing import Generic, TypeVar, get_type_hints
 
 from sqlalchemy import Column, DateTime, MetaData, String, Table, Text, create_engine, delete, insert, select
 from sqlalchemy.engine import Engine
@@ -30,18 +30,18 @@ records = Table(
     Column("record_id", String(128), primary_key=True),
     Column("business_id", String(128), nullable=False, index=True),
     Column("payload", Text, nullable=False),
-    Column("created_at", DateTime(timezone=True), nullable=False, default=datetime.utcnow),
-    Column("updated_at", DateTime(timezone=True), nullable=False, default=datetime.utcnow),
+    Column("created_at", DateTime(timezone=True), nullable=False),
+    Column("updated_at", DateTime(timezone=True), nullable=False),
 )
 
 
 def _json_default(value):
     if isinstance(value, Decimal):
         return {"__decimal__": str(value)}
-    if isinstance(value, Enum):
-        return {"__enum__": value.value}
     if isinstance(value, (date, datetime)):
         return {"__date__": value.isoformat()}
+    if isinstance(value, Enum):
+        return value.value
     raise TypeError(f"Unsupported value {value!r}")
 
 
@@ -51,8 +51,6 @@ def _json_hook(value):
     if "__date__" in value:
         text = value["__date__"]
         return datetime.fromisoformat(text) if "T" in text else date.fromisoformat(text)
-    if "__enum__" in value:
-        return value["__enum__"]
     return value
 
 
@@ -62,6 +60,7 @@ class SqlRepository(Generic[T]):
         self.model_type = model_type
         self.id_field = id_field
         self.record_type = model_type.__name__.lower()
+        self.type_hints = get_type_hints(model_type)
 
     def save(self, record: T) -> T:
         payload = json.dumps(asdict(record), default=_json_default, separators=(",", ":"))
@@ -88,15 +87,20 @@ class SqlRepository(Generic[T]):
             )
         return record
 
-    def get(self, business_id: str, record_id: str) -> T | None:
+    def get(self, record_id: str, business_id: str | None = None) -> T | None:
         query = select(records.c.payload).where(
             records.c.record_type == self.record_type,
             records.c.record_id == record_id,
-            records.c.business_id == business_id,
         )
+        if business_id is not None:
+            query = query.where(records.c.business_id == business_id)
         with self.engine.connect() as connection:
-            payload = connection.execute(query).scalar_one_or_none()
-        return self._decode(payload) if payload is not None else None
+            payloads = connection.execute(query).scalars().all()
+        if not payloads:
+            return None
+        if len(payloads) > 1:
+            raise LookupError("Record ID is ambiguous across businesses; supply business_id.")
+        return self._decode(payloads[0])
 
     def list_for_business(self, business_id: str) -> list[T]:
         query = select(records.c.payload).where(
@@ -109,10 +113,7 @@ class SqlRepository(Generic[T]):
 
     def _decode(self, payload: str) -> T:
         data = json.loads(payload, object_hook=_json_hook)
-        annotations = {field.name: field.type for field in fields(self.model_type)}
-        # Dataclass constructors accept string enum values poorly, so restore the
-        # handful of enum-backed status fields explicitly.
-        for name, annotation in annotations.items():
+        for name, annotation in self.type_hints.items():
             value = data.get(name)
             if isinstance(value, str) and isinstance(annotation, type) and issubclass(annotation, Enum):
                 data[name] = annotation(value)
