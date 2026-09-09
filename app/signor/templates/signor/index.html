@@ -16,6 +16,7 @@
     textarea { min-height:100px; resize:vertical; } .short { min-height:70px; }
     .row { display:grid; grid-template-columns:2fr 1fr 1fr; gap:12px; }
     button { margin-top:18px; padding:12px 18px; border:0; border-radius:6px; font-weight:750; cursor:pointer; }
+    .confirm { background:#d8e5da; color:#101410; }
     .errors { padding:14px 18px; border:1px solid #8a4545; background:#2b1818; border-radius:8px; margin-top:20px; }
     .meta { color:#aab2b7; } pre { white-space:pre-wrap; font:inherit; line-height:1.55; }
     @media(max-width:650px){ .row { grid-template-columns:1fr; } }
@@ -49,6 +50,7 @@
     <h2>{{ agreement.title }}</h2>
     <p class="meta">{{ agreement.agreement_id }} · Project {{ agreement.project_id }}{% if agreement.amount is not none %} · {{ agreement.currency }} {{ '%.2f'|format(agreement.amount) }}{% endif %}</p>
     <pre>{{ agreement.scope }}</pre>
+    <form method="post" action="/agreements/{{ agreement.agreement_id }}/confirm"><button class="confirm" type="submit">Confirm as Ready to Present</button></form>
     <p><strong>SigNor:</strong> Words matter. Read them before anyone signs them.</p>
   </section>{% endif %}
 </main></body></html>
