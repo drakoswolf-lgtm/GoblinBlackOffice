@@ -7,15 +7,9 @@ from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 
-from app.core.models import Agreement, Expense, Invoice, InvoiceStatus
+from app.core.models import Agreement, Expense, Invoice, InvoiceLineItem, InvoiceStatus
 
-
-@dataclass(frozen=True)
-class InvoiceLine:
-    description: str
-    amount: Decimal
-    source_type: str
-    source_id: str
+InvoiceLine = InvoiceLineItem
 
 
 @dataclass(frozen=True)
@@ -85,16 +79,21 @@ def draft_invoice(
     if errors:
         return InvoiceDraftResult(None, tuple(lines), tuple(errors), tuple(notes))
 
-    total = sum((line.amount for line in lines), Decimal("0.00"))
+    subtotal = sum((line.amount for line in lines), Decimal("0.00"))
     notes.append("Tax has not been applied. Review line-level tax treatment before issuing.")
     invoice = Invoice(
         invoice_id=f"SQ-{uuid.uuid4().hex[:12].upper()}",
         business_id=business_id,
         project_id=agreement.project_id,
         client_id=client_id.strip(),
-        total=total,
+        total=subtotal,
         currency=agreement.currency.upper(),
         status=InvoiceStatus.DRAFT,
         due_date=due_date,
+        agreement_id=agreement.agreement_id,
+        subtotal=subtotal,
+        tax_total=None,
+        line_items=tuple(lines),
+        review_notes=tuple(notes),
     )
     return InvoiceDraftResult(invoice, tuple(lines), (), tuple(notes))
