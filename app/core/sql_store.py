@@ -12,7 +12,7 @@ from typing import Generic, TypeVar, get_type_hints
 from sqlalchemy import Column, DateTime, MetaData, String, Table, Text, create_engine, delete, insert, select
 from sqlalchemy.engine import Engine
 
-from app.core.models import Agreement, Business, Client, Expense, Invoice, Payment, Project, User
+from app.core.models import Agreement, Business, Client, Expense, Invoice, InvoiceLineItem, Payment, Project, User
 from app.core.storage import BlackOfficeStore
 
 T = TypeVar("T")
@@ -74,7 +74,11 @@ class SqlRepository(Generic[T]):
         data = json.loads(payload, object_hook=_json_hook)
         for name, annotation in self.type_hints.items():
             value = data.get(name)
-            if isinstance(value, str) and isinstance(annotation, type) and issubclass(annotation, Enum): data[name] = annotation(value)
+            if isinstance(value, str) and isinstance(annotation, type) and issubclass(annotation, Enum):
+                data[name] = annotation(value)
+        if self.model_type is Invoice:
+            data["line_items"] = tuple(InvoiceLineItem(**item) for item in data.get("line_items", ()))
+            data["review_notes"] = tuple(data.get("review_notes", ()))
         return self.model_type(**data)
 
 
