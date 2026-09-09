@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from io import BytesIO
 import os
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, send_file, url_for
 
+from app.core.documents import build_agreement_pdf
 from app.core.models import AgreementStatus
 from app.core.runtime import business_id, office_store
 from app.office.auth import configure_specialist_auth, current_business_id
@@ -61,6 +63,19 @@ def index():
     )
 
 
+@app.route("/agreements/<agreement_id>/pdf", methods=["GET"])
+def agreement_pdf(agreement_id: str):
+    active_business_id = _business_id()
+    agreement = _store.agreements.get(agreement_id, active_business_id)
+    business = _store.businesses.get(active_business_id, active_business_id)
+    if agreement is None or business is None:
+        return ("Agreement not found.", 404)
+    project = _store.projects.get(agreement.project_id, active_business_id)
+    client = _store.clients.get(project.client_id, active_business_id) if project is not None and project.client_id else None
+    pdf = build_agreement_pdf(business=business, agreement=agreement, project=project, client=client)
+    return send_file(BytesIO(pdf), mimetype="application/pdf", as_attachment=True, download_name=f"{agreement.agreement_id}.pdf")
+
+
 @app.route("/agreements/<agreement_id>/confirm", methods=["POST"])
 def confirm_agreement(agreement_id: str):
     active_business_id = _business_id()
@@ -70,4 +85,4 @@ def confirm_agreement(agreement_id: str):
     if agreement.status != AgreementStatus.DRAFT:
         return ("Only draft agreements can be confirmed.", 409)
     _store.agreements.save(replace(agreement, status=AgreementStatus.PROPOSED))
-    return redirect(url_for("index", confirmed=agreement_id))
+    return redirect(url_for("agreement_pdf", agreement_id=agreement_id))
