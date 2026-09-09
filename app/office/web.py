@@ -10,10 +10,18 @@ from app.squarmish.web import app as squarmish_app
 from app.office.auth import authenticate, complete_onboarding, current_business_id, current_user, register_user, sign_in
 from app.office.records import create_client, create_project
 
+_auth_required = os.environ.get("GBO_AUTH_REQUIRED", "0").lower() in {"1", "true", "yes"}
+_secret = os.environ.get("GBO_SECRET", "").strip()
+if _auth_required and not _secret:
+    raise RuntimeError("GBO_SECRET is required when authentication is enabled.")
+
 office_app = Flask(__name__, template_folder="templates")
-office_app.secret_key = os.environ.get("GBO_SECRET", "gbo-dev-secret")
+office_app.secret_key = _secret or "gbo-dev-secret"
 office_app.config["SESSION_COOKIE_NAME"] = "gbo_session"
-office_app.config["GBO_AUTH_REQUIRED"] = os.environ.get("GBO_AUTH_REQUIRED", "0").lower() in {"1", "true", "yes"}
+office_app.config["SESSION_COOKIE_HTTPONLY"] = True
+office_app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+office_app.config["SESSION_COOKIE_SECURE"] = _auth_required
+office_app.config["GBO_AUTH_REQUIRED"] = _auth_required
 
 @office_app.before_request
 def _office_auth_gate():
