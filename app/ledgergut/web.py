@@ -13,10 +13,12 @@ from flask import Flask, Response, redirect, render_template, request, url_for
 from app.core.runtime import business_id as _office_business_id, office_store as _office_store
 from app.office.auth import configure_specialist_auth, current_business_id
 from app.ledgergut.form_mapper import build_models
+from app.ledgergut.image_store import ReceiptImageStoreError, build_receipt_image_store
 from app.ledgergut.models import BillableStatus, PaidBy, ReimbursementStatus
 from app.ledgergut.ocr import OcrError, extract_text_from_image
 from app.ledgergut.office_adapter import receipt_record_to_expense
 from app.ledgergut.receipt_parser import ReceiptSuggestions, parse_receipt_text
+from app.ledgergut.sql_storage import SqlReceiptStore
 from app.ledgergut.storage import ReceiptStore, StorageError
 from app.ledgergut.validation import validate_receipt
 
@@ -30,11 +32,21 @@ app.secret_key = os.environ.get("GBO_SECRET", os.environ.get("LEDGERGUT_SECRET",
 app.config["GBO_AUTH_REQUIRED"] = os.environ.get("GBO_AUTH_REQUIRED", "0").lower() in {"1", "true", "yes"}
 configure_specialist_auth(app)
 
-_store = ReceiptStore()
-
 
 def _active_business_id() -> str:
     return current_business_id() if app.config.get("GBO_AUTH_REQUIRED") else _office_business_id
+
+
+_database_url = os.environ.get("DATABASE_URL", "").strip()
+_store = SqlReceiptStore(_database_url, _active_business_id) if _database_url else ReceiptStore()
+_image_store = build_receipt_image_store(_store.image_dir)
+
+
+def _active_image_store():
+    """Reuse the cloud client, but follow a swapped local ReceiptStore in tests/dev."""
+    if os.environ.get("SPACES_ENDPOINT_URL", "").strip():
+        return _image_store
+    return build_receipt_image_store(_store.image_dir)
 
 
 def _enum_options() -> dict:
@@ -230,28 +242,37 @@ def new_receipt():
         findings = [f.to_dict() for f in raw_findings]
         has_errors = any(f["severity"] == "error" for f in findings)
         if not has_errors and not input_errors:
-            image_filename = None
-            written_image_path: Path | None = None
+            image_key = None
+            image_store = _active_image_store()
             if pending_image is not None:
                 image_data, ext = pending_image
                 image_filename = f"{uuid.uuid4().hex}.{ext}"
-                written_image_path = _store.image_dir / image_filename
-                written_image_path.write_bytes(image_data)
-            try:
-                record_id = _store.save_receipt(record.to_dict(), image_filename)
-            except StorageError as exc:
-                if written_image_path is not None:
-                    written_image_path.unlink(missing_ok=True)
-                storage_error = str(exc)
-            else:
-                office_record = replace(record, record_id=record_id)
-                expense = receipt_record_to_expense(
-                    office_record,
-                    business_id=active_business_id,
-                    project_id=selected_project_id,
-                )
-                _office_store.expenses.save(expense)
-                return redirect(url_for("index") + "?saved=1")
+                content_type = "image/png" if ext == "png" else "image/jpeg"
+                try:
+                    image_key = image_store.put(
+                        business_id=active_business_id,
+                        filename=image_filename,
+                        data=image_data,
+                        content_type=content_type,
+                    )
+                except ReceiptImageStoreError as exc:
+                    storage_error = str(exc)
+            if storage_error is None:
+                try:
+                    record_id = _store.save_receipt(record.to_dict(), image_key)
+                except StorageError as exc:
+                    if image_key is not None:
+                        image_store.delete(image_key)
+                    storage_error = str(exc)
+                else:
+                    office_record = replace(record, record_id=record_id)
+                    expense = receipt_record_to_expense(
+                        office_record,
+                        business_id=active_business_id,
+                        project_id=selected_project_id,
+                    )
+                    _office_store.expenses.save(expense)
+                    return redirect(url_for("index") + "?saved=1")
 
     return _render_index(
         form_data=form_data,
