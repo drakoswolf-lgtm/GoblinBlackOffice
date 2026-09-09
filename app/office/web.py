@@ -15,6 +15,7 @@ from app.office.auth import authenticate, complete_onboarding, current_user, reg
 
 office_app = Flask(__name__, template_folder="templates")
 office_app.secret_key = os.environ.get("GBO_SECRET", "gbo-dev-secret")
+office_app.config["SESSION_COOKIE_NAME"] = "gbo_session"
 office_app.config["GBO_AUTH_REQUIRED"] = os.environ.get("GBO_AUTH_REQUIRED", "0").lower() in {"1", "true", "yes"}
 
 
