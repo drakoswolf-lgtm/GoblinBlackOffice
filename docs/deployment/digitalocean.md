@@ -53,8 +53,9 @@ App Platform supplies `PORT` from the configured `http_port` (8080).
 3. Create a limited Spaces access key with read/write/delete access to that bucket only.
 4. Create the App Platform app from `.do/app.yaml`.
 5. Add `DATABASE_URL`, `GBO_SECRET`, `GBO_INVITE_TOKEN`, `SPACES_BUCKET`, `SPACES_ACCESS_KEY_ID`, and `SPACES_SECRET_ACCESS_KEY` as encrypted runtime values.
-6. Deploy once and complete the release gate below.
-7. Only after the smoke tests pass, enable deploy-on-push for `main`.
+6. Deploy once. The application upgrades the connected database to the current Alembic schema revision before opening SQL-backed stores.
+7. Complete the release gate below.
+8. Only after the smoke tests pass, enable deploy-on-push for `main`.
 
 ## App Platform
 
@@ -66,7 +67,9 @@ The application must be HTTPS-only in beta because authenticated sessions use Se
 
 Use managed PostgreSQL, not the App Platform development database. `DATABASE_URL` switches both the shared Black Office records and Ledgergut receipt archive to durable SQL storage.
 
-Current schema creation uses SQLAlchemy `metadata.create_all()`. Before public/commercial launch, replace this transitional behavior with managed migrations (Alembic or equivalent).
+Schema changes are versioned with Alembic. Both SQL store initializers call the migration runner before opening durable storage, so a fresh database is upgraded to the current head automatically. The initial revision creates `office_records`, `ledgergut_receipts`, their tenant indexes, and Alembic's own version table.
+
+For an explicit operator-run migration, set `DATABASE_URL` and run `alembic -c alembic.ini upgrade head` from the project root. New schema changes must be added as revisions rather than reintroducing `metadata.create_all()` in production storage paths.
 
 ## Spaces
 
@@ -80,8 +83,9 @@ Before enabling beta users:
 2. Registration rejects a wrong beta invite code and succeeds with the configured code.
 3. Login works over HTTPS.
 4. A cross-site POST to a state-changing route is rejected.
-5. Create a client and project.
-6. Draft and confirm an agreement; verify PDF output.
-7. Upload and save a receipt; restart/redeploy the app and confirm the receipt remains.
-8. Draft and approve an invoice; verify PDF output and unresolved-tax warning.
-9. Confirm one account cannot read another business's records.
+5. Confirm the PostgreSQL database reports the expected Alembic head revision.
+6. Create a client and project.
+7. Draft and confirm an agreement; verify PDF output.
+8. Upload and save a receipt; restart/redeploy the app and confirm the receipt remains.
+9. Draft and approve an invoice; verify PDF output and unresolved-tax warning.
+10. Confirm one account cannot read another business's records.
