@@ -1,12 +1,62 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Squarmish · Invoices</title>
-<style>:root{color-scheme:dark;font-family:system-ui,sans-serif}body{margin:0;background:#111315;color:#eef1f3}main{max-width:900px;margin:auto;padding:28px 18px 64px}a{color:#bdcbd3}.eyebrow{color:#9aa4aa;text-transform:uppercase;letter-spacing:.12em;font-size:.78rem}form,.preview{margin-top:24px;padding:22px;border:1px solid #30363a;background:#181b1e;border-radius:10px}label{display:block;margin:14px 0 6px;font-weight:650}input,select{width:100%;box-sizing:border-box;padding:11px;background:#101214;color:#fff;border:1px solid #41484d;border-radius:6px}.check{display:flex;gap:9px;align-items:flex-start;margin:10px 0}.check input{width:auto;margin-top:4px}button{margin-top:18px;padding:12px 18px;border:0;border-radius:6px;font-weight:750}.confirm{background:#d8e5da;color:#101410}.errors{padding:14px 18px;border:1px solid #8a4545;background:#2b1818;border-radius:8px;margin-top:20px}.note{color:#b8c0c5}.line{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #30363a}</style></head><body><main>
-<a href="/">← Office Desk</a><p class="eyebrow">Billing & Revenue · Squarmish</p><h1>Draft the invoice.</h1><p class="note">Choose exactly what gets billed. Squarmish counts. He does not improvise.</p>
-{% if result and result.errors %}<div class="errors"><strong>Needs attention</strong><ul>{% for e in result.errors %}<li>{{e}}</li>{% endfor %}</ul></div>{% endif %}
-<form method="post"><label>Agreement</label><select name="agreement_id"><option value="">Select agreement</option>{% for a in agreements %}{% set p=projects.get(a.project_id) %}{% set c=clients.get(p.client_id) if p and p.client_id else none %}<option value="{{a.agreement_id}}">{{a.title}}{% if p %} · {{p.name}}{% endif %}{% if c %} · {{c.name}}{% endif %}</option>{% endfor %}</select>
-<label>Due date</label><input name="due_date" type="date">
-<label class="check"><input type="checkbox" name="include_agreement_amount" value="1" checked><span>Bill the agreed price as a line item</span></label>
-{% if expenses %}<label>Additional confirmed billable expenses</label>{% for e in expenses %}<label class="check"><input type="checkbox" name="expense_id" value="{{e.expense_id}}"><span>{{e.description}} · {{e.currency}} {{'%.2f'|format(e.amount)}}{% if e.billable is not sameas true %} · not confirmed billable{% endif %}</span></label>{% endfor %}{% endif %}
-<button type="submit">Draft Invoice</button></form>
-{% if result and result.invoice %}<section class="preview"><p class="eyebrow">Draft · human review required</p><h2>{{result.invoice.invoice_id}}</h2>{% for line in result.lines %}<div class="line"><span>{{line.description}}</span><strong>{{result.invoice.currency}} {{'%.2f'|format(line.amount)}}</strong></div>{% endfor %}<p><strong>Total before unresolved tax: {{result.invoice.currency}} {{'%.2f'|format(result.invoice.total)}}</strong></p>{% for n in result.review_notes %}<p class="note">{{n}}</p>{% endfor %}<form method="post" action="/invoices/{{result.invoice.invoice_id}}/confirm"><button class="confirm" type="submit">Approve Invoice for Issuing</button></form><p><strong>Squarmish:</strong> Drafted. Now make sure nobody gets billed twice for the same box of screws.</p></section>{% endif %}
-</main></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Squarmish · Invoices</title>
+  <link rel="stylesheet" href="/static/gbo.css">
+</head>
+<body>
+<main class="shell">
+  <header class="topbar">
+    <a class="brand" href="/"><span class="brand-mark">SQ</span><span>Squarmish</span></a>
+    <nav class="topnav"><a href="/">Office Desk</a><a class="optional" href="/records">Clients &amp; Projects</a></nav>
+  </header>
+
+  <section class="hero compact">
+    <p class="eyebrow">Billing &amp; Revenue</p>
+    <h1>Draft the invoice.</h1>
+    <p class="lead">Choose exactly what gets billed. Squarmish counts what the Office knows, preserves the paper trail, and leaves tax unresolved until a human actually resolves it.</p>
+  </section>
+
+  {% if result and result.errors %}<div class="errors"><strong>Needs attention</strong><ul>{% for e in result.errors %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
+
+  <form class="form-card" method="post">
+    <p class="card-kicker">Invoice draft</p>
+    <div class="grid grid-2">
+      <div>
+        <label for="agreement">Agreement</label>
+        <select id="agreement" name="agreement_id"><option value="">Select agreement</option>{% for a in agreements %}{% set p=projects.get(a.project_id) %}{% set c=clients.get(p.client_id) if p and p.client_id else none %}<option value="{{ a.agreement_id }}">{{ a.title }}{% if p %} · {{ p.name }}{% endif %}{% if c %} · {{ c.name }}{% endif %}</option>{% endfor %}</select>
+      </div>
+      <div><label for="due-date">Due date</label><input id="due-date" name="due_date" type="date"></div>
+    </div>
+
+    <label class="check"><input type="checkbox" name="include_agreement_amount" value="1" checked><span>Bill the agreed price as a line item</span></label>
+
+    {% if expenses %}
+    <hr class="divider">
+    <p class="card-kicker">Additional expenses</p>
+    {% for e in expenses %}
+    <label class="check"><input type="checkbox" name="expense_id" value="{{ e.expense_id }}"><span><strong>{{ e.description }}</strong><br><span class="muted">{{ e.currency }} {{ '%.2f'|format(e.amount) }}{% if e.billable is not sameas true %} · not confirmed billable{% endif %}</span></span></label>
+    {% endfor %}
+    {% endif %}
+
+    <div class="button-row"><button type="submit">Draft invoice</button></div>
+  </form>
+
+  {% if result and result.invoice %}
+  <section class="preview">
+    <p class="eyebrow">Draft · human review required</p>
+    <h2>{{ result.invoice.invoice_id }}</h2>
+    <div style="margin-top:18px">
+      {% for line in result.lines %}<div class="line-item"><span>{{ line.description }}</span><strong class="money">{{ result.invoice.currency }} {{ '%.2f'|format(line.amount) }}</strong></div>{% endfor %}
+    </div>
+    <p style="font-size:1.15rem"><strong>Total before unresolved tax: <span class="money">{{ result.invoice.currency }} {{ '%.2f'|format(result.invoice.total) }}</span></strong></p>
+    {% for n in result.review_notes %}<div class="alert warning">{{ n }}</div>{% endfor %}
+    <form method="post" action="/invoices/{{ result.invoice.invoice_id }}/confirm"><button class="signal" type="submit">Approve invoice for issuing</button></form>
+    <p class="muted" style="margin-bottom:0">Squarmish: Drafted. Now make sure nobody gets billed twice for the same box of screws.</p>
+  </section>
+  {% endif %}
+</main>
+</body>
+</html>
