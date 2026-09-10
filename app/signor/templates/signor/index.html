@@ -56,7 +56,7 @@
     <hr class="divider">
     <div class="card-kicker">Scope</div>
     <pre class="scope">{{ agreement.scope }}</pre>
-    <form method="post" action="/agreements/{{ agreement.agreement_id }}/confirm"><button class="signal" type="submit">Confirm as ready to present</button></form>
+    <form method="post" action="{{ url_for('confirm_agreement', agreement_id=agreement.agreement_id) }}"><button class="signal" type="submit">Confirm as ready to present</button></form>
     <p class="muted" style="margin-bottom:0">SigNor: Words matter. Read them before anyone signs them.</p>
   </section>
   {% endif %}
