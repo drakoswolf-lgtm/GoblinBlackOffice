@@ -11,6 +11,7 @@ from typing import Callable
 
 from sqlalchemy import Column, DateTime, MetaData, String, Table, Text, create_engine, insert, select
 
+from app.core.migrations import upgrade_database
 from app.ledgergut.storage import CSV_FIELDNAMES
 
 metadata = MetaData()
@@ -26,8 +27,8 @@ receipts = Table(
 
 class SqlReceiptStore:
     def __init__(self, database_url: str, business_id_provider: Callable[[], str]):
+        upgrade_database(database_url)
         self.engine = create_engine(database_url, future=True, pool_pre_ping=True)
-        metadata.create_all(self.engine)
         self._business_id_provider = business_id_provider
         self._image_dir = Path("runtime") / "ledgergut" / "images"
 
