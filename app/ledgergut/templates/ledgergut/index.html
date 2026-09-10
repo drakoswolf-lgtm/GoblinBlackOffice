@@ -41,7 +41,7 @@
     <p class="lead">Upload the receipt, let OCR do the dull first pass, then verify the numbers before Ledgergut files the expense into the Office.</p>
   </section>
 
-  {% if saved %}<div class="alert success"><strong>Receipt saved.</strong> Ledgergut has it.</div>{% endif %}
+  {% if saved %}<div class="alert success"><strong>Receipt saved successfully.</strong> Ledgergut has it.</div>{% endif %}
   {% if storage_error %}<div class="errors"><strong>Storage error:</strong> {{ storage_error }}</div>{% endif %}
   {% if scan_error %}<div class="errors"><strong>Scan unavailable:</strong> {{ scan_error }}</div>{% endif %}
   {% if scan_message %}<div class="alert warning"><strong>OCR suggestions only:</strong> {{ scan_message }}</div>{% endif %}
