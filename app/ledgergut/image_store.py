@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import mimetypes
 import os
 from pathlib import Path
 
@@ -12,6 +13,9 @@ class ReceiptImageStoreError(RuntimeError):
 
 class ReceiptImageStore:
     def put(self, *, business_id: str, filename: str, data: bytes, content_type: str) -> str:
+        raise NotImplementedError
+
+    def get(self, *, business_id: str, key: str) -> tuple[bytes, str]:
         raise NotImplementedError
 
     def delete(self, key: str) -> None:
@@ -27,6 +31,17 @@ class LocalReceiptImageStore(ReceiptImageStore):
         path = self.directory / filename
         path.write_bytes(data)
         return filename
+
+    def get(self, *, business_id: str, key: str) -> tuple[bytes, str]:
+        if Path(key).name != key:
+            raise ReceiptImageStoreError("Receipt image key is invalid.")
+        path = self.directory / key
+        try:
+            data = path.read_bytes()
+        except OSError as exc:
+            raise ReceiptImageStoreError("Receipt image is unavailable.") from exc
+        content_type = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+        return data, content_type
 
     def delete(self, key: str) -> None:
         (self.directory / key).unlink(missing_ok=True)
@@ -51,6 +66,18 @@ class S3ReceiptImageStore(ReceiptImageStore):
         except Exception as exc:
             raise ReceiptImageStoreError("Receipt image object storage is unavailable.") from exc
         return key
+
+    def get(self, *, business_id: str, key: str) -> tuple[bytes, str]:
+        expected_prefix = f"receipts/{business_id}/"
+        if not key.startswith(expected_prefix):
+            raise ReceiptImageStoreError("Receipt image does not belong to this business.")
+        try:
+            response = self.client.get_object(Bucket=self.bucket, Key=key)
+            data = response["Body"].read()
+        except Exception as exc:
+            raise ReceiptImageStoreError("Receipt image object storage is unavailable.") from exc
+        content_type = response.get("ContentType") or mimetypes.guess_type(key)[0] or "application/octet-stream"
+        return data, content_type
 
     def delete(self, key: str) -> None:
         try:
