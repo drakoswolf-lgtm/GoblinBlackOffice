@@ -1,1 +1,63 @@
-<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>Clients & Projects · Goblin Back Office</title><style>body{margin:0;background:#101214;color:#e8e8e3;font:16px system-ui}main{max-width:920px;margin:auto;padding:28px}a{color:#a9c7bd}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.card{background:#181b1e;border:1px solid #34393d;padding:20px;border-radius:10px}input,select,textarea,button{box-sizing:border-box;width:100%;margin:7px 0;padding:11px;background:#0d0f10;color:#eee;border:1px solid #464c50;border-radius:6px}button{background:#e7e2d4;color:#111;font-weight:700;cursor:pointer}.muted{color:#9ca2a4}.error{color:#efb2a9}@media(max-width:700px){.grid{grid-template-columns:1fr}}</style></head><body><main><p><a href="/">← Office Desk</a></p><h1>Clients & Projects</h1><p class="muted">Give the paperwork somewhere sensible to live before feeding it to the goblins.</p>{% if errors %}<div class="error">{% for e in errors %}<p>{{ e }}</p>{% endfor %}</div>{% endif %}<div class="grid"><section class="card"><h2>New client</h2><form method="post"><input type="hidden" name="kind" value="client"><input name="name" placeholder="Client name" required><input name="email" type="email" placeholder="Email"><input name="phone" placeholder="Phone"><button>Create client</button></form><h3>Clients</h3>{% for c in clients %}<p><strong>{{ c.name }}</strong><br><span class="muted">{{ c.client_id }}</span></p>{% else %}<p class="muted">No clients yet.</p>{% endfor %}</section><section class="card"><h2>New project</h2><form method="post"><input type="hidden" name="kind" value="project"><select name="client_id" required><option value="">Choose client</option>{% for c in clients %}<option value="{{ c.client_id }}">{{ c.name }}</option>{% endfor %}</select><input name="name" placeholder="Project name" required><textarea name="description" placeholder="Short description"></textarea><button>Create project</button></form><h3>Projects</h3>{% for p in projects %}<p><strong>{{ p.name }}</strong><br><span class="muted">{{ p.project_id }}</span></p>{% else %}<p class="muted">No projects yet.</p>{% endfor %}</section></div></main></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Clients &amp; Projects · Goblin Black Office</title>
+  <link rel="stylesheet" href="/static/gbo.css">
+</head>
+<body>
+<main class="shell">
+  <header class="topbar">
+    <a class="brand" href="/"><span class="brand-mark">GBO</span><span>Goblin Black Office</span></a>
+    <nav class="topnav"><a href="/">Office Desk</a></nav>
+  </header>
+
+  <section class="hero compact">
+    <p class="eyebrow">Office records</p>
+    <h1>Clients &amp; Projects</h1>
+    <p class="lead">Give every agreement, expense, and invoice a proper home before the specialists start moving paper around.</p>
+  </section>
+
+  {% if errors %}<div class="errors">{% for e in errors %}<div>{{ e }}</div>{% endfor %}</div>{% endif %}
+
+  <section class="grid grid-2">
+    <article class="form-card" style="margin-top:0">
+      <p class="eyebrow">Client file</p>
+      <h2>Add a client</h2>
+      <form method="post">
+        <input type="hidden" name="kind" value="client">
+        <label for="client-name">Client name</label>
+        <input id="client-name" name="name" placeholder="Alexander Hotel" required>
+        <label for="client-email">Email</label>
+        <input id="client-email" name="email" type="email" placeholder="Optional">
+        <label for="client-phone">Phone</label>
+        <input id="client-phone" name="phone" placeholder="Optional">
+        <div class="button-row"><button type="submit">Create client</button></div>
+      </form>
+      <hr class="divider">
+      <div class="card-kicker">Current clients</div>
+      {% if clients %}<div class="list" style="margin-top:12px">{% for c in clients %}<div class="list-row"><div><strong>{{ c.name }}</strong><small>{{ c.client_id }}</small></div></div>{% endfor %}</div>{% else %}<p class="muted">No clients yet.</p>{% endif %}
+    </article>
+
+    <article class="form-card" style="margin-top:0">
+      <p class="eyebrow">Project file</p>
+      <h2>Add a project</h2>
+      <form method="post">
+        <input type="hidden" name="kind" value="project">
+        <label for="project-client">Client</label>
+        <select id="project-client" name="client_id" required><option value="">Choose client</option>{% for c in clients %}<option value="{{ c.client_id }}">{{ c.name }}</option>{% endfor %}</select>
+        <label for="project-name">Project name</label>
+        <input id="project-name" name="name" placeholder="Reception desk refit" required>
+        <label for="project-description">Description</label>
+        <textarea id="project-description" class="short" name="description" placeholder="What is this job? Keep it short."></textarea>
+        <div class="button-row"><button type="submit">Create project</button></div>
+      </form>
+      <hr class="divider">
+      <div class="card-kicker">Current projects</div>
+      {% if projects %}<div class="list" style="margin-top:12px">{% for p in projects %}<div class="list-row"><div><strong>{{ p.name }}</strong><small>{{ p.project_id }}</small></div></div>{% endfor %}</div>{% else %}<p class="muted">No projects yet.</p>{% endif %}
+    </article>
+  </section>
+</main>
+</body>
+</html>
