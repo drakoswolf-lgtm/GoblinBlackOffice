@@ -282,6 +282,32 @@ def new_receipt():
     )
 
 
+@app.route("/receipts/<record_id>/image", methods=["GET"])
+def receipt_image(record_id: str):
+    active_business_id = _active_business_id()
+    try:
+        receipt = next((row for row in _store.list_receipts() if row.get("record_id") == record_id), None)
+    except StorageError:
+        return Response("Receipt store is unavailable.", status=500, mimetype="text/plain")
+    if receipt is None:
+        return Response("Receipt not found.", status=404, mimetype="text/plain")
+
+    image_key = str(receipt.get("image_filename") or "").strip()
+    if not image_key:
+        return Response("Receipt image not found.", status=404, mimetype="text/plain")
+
+    try:
+        data, content_type = _active_image_store().get(business_id=active_business_id, key=image_key)
+    except ReceiptImageStoreError:
+        return Response("Receipt image is unavailable.", status=404, mimetype="text/plain")
+
+    return Response(
+        data,
+        mimetype=content_type,
+        headers={"Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff"},
+    )
+
+
 @app.route("/export/csv")
 def export_csv():
     try:
