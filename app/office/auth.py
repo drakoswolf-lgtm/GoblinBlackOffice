@@ -6,15 +6,17 @@ from dataclasses import replace
 import hashlib
 import os
 import re
+from urllib.parse import urlsplit
 import uuid
 
-from flask import Flask, redirect, request, session
+from flask import Flask, abort, redirect, request, session
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.core.models import Business, User
 from app.core.runtime import business_id as fallback_business_id, office_store
 
 _EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+_SAFE_METHODS = {"GET", "HEAD", "OPTIONS", "TRACE"}
 
 
 def user_id_for_email(email: str) -> str:
@@ -82,10 +84,65 @@ def complete_onboarding(user: User, *, business_name: str, currency: str) -> tup
     return updated, ()
 
 
+def _origin_tuple(value: str) -> tuple[str, str] | None:
+    try:
+        parsed = urlsplit(value)
+    except ValueError:
+        return None
+    if not parsed.scheme or not parsed.netloc:
+        return None
+    return parsed.scheme.lower(), parsed.netloc.lower()
+
+
+def configure_same_origin_protection(app: Flask) -> None:
+    """Reject cross-site state-changing browser requests in production.
+
+    Modern browsers send Origin, Referer, or Fetch Metadata on ordinary form
+    submissions. Requiring one of those signals to identify the current origin
+    closes the CSRF gap without changing every existing form or API surface.
+    Local development and tests remain compatible unless explicitly enabled.
+    """
+    app.config.setdefault(
+        "GBO_SAME_ORIGIN_PROTECTION",
+        os.environ.get("GBO_ENV", "development").strip().lower() == "production",
+    )
+
+    @app.before_request
+    def _reject_cross_site_write():
+        if not app.config.get("GBO_SAME_ORIGIN_PROTECTION", False):
+            return None
+        if request.method.upper() in _SAFE_METHODS:
+            return None
+
+        expected = _origin_tuple(request.host_url)
+        origin = request.headers.get("Origin", "").strip()
+        referer = request.headers.get("Referer", "").strip()
+        fetch_site = request.headers.get("Sec-Fetch-Site", "").strip().lower()
+
+        if fetch_site == "cross-site":
+            abort(400, description="Cross-site request rejected.")
+        if origin:
+            if _origin_tuple(origin) != expected:
+                abort(400, description="Cross-site request rejected.")
+            return None
+        if referer:
+            if _origin_tuple(referer) != expected:
+                abort(400, description="Cross-site request rejected.")
+            return None
+        if fetch_site in {"same-origin", "none"}:
+            return None
+
+        abort(400, description="Missing same-origin request evidence.")
+
+
 def configure_specialist_auth(app: Flask) -> None:
     """Protect a mounted specialist when GBO_AUTH_REQUIRED is enabled."""
     app.secret_key = os.environ.get("GBO_SECRET", "gbo-dev-secret")
     app.config["SESSION_COOKIE_NAME"] = "gbo_session"
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    app.config["SESSION_COOKIE_SECURE"] = app.config.get("GBO_AUTH_REQUIRED", False)
+    configure_same_origin_protection(app)
 
     @app.before_request
     def _require_office_account():

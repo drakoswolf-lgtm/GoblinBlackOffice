@@ -1,5 +1,6 @@
 """Æterna-led Black Office application shell."""
 from __future__ import annotations
+import hmac
 import os
 from flask import Flask, redirect, render_template, request, session, url_for
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
@@ -7,11 +8,20 @@ from app.core.runtime import office_store
 from app.ledgergut.web import app as ledgergut_app
 from app.signor.web import app as signor_app
 from app.squarmish.web import app as squarmish_app
-from app.office.auth import authenticate, complete_onboarding, current_business_id, current_user, register_user, sign_in
+from app.office.auth import (
+    authenticate,
+    complete_onboarding,
+    configure_same_origin_protection,
+    current_business_id,
+    current_user,
+    register_user,
+    sign_in,
+)
 from app.office.records import create_client, create_project
 
 _auth_required = os.environ.get("GBO_AUTH_REQUIRED", "0").lower() in {"1", "true", "yes"}
 _secret = os.environ.get("GBO_SECRET", "").strip()
+_invite_token = os.environ.get("GBO_INVITE_TOKEN", "").strip()
 if _auth_required and not _secret:
     raise RuntimeError("GBO_SECRET is required when authentication is enabled.")
 
@@ -22,6 +32,8 @@ office_app.config["SESSION_COOKIE_HTTPONLY"] = True
 office_app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 office_app.config["SESSION_COOKIE_SECURE"] = _auth_required
 office_app.config["GBO_AUTH_REQUIRED"] = _auth_required
+office_app.config["GBO_INVITE_TOKEN"] = _invite_token
+configure_same_origin_protection(office_app)
 
 @office_app.before_request
 def _office_auth_gate():
@@ -46,12 +58,18 @@ def login():
 @office_app.route("/register", methods=["GET", "POST"])
 def register():
     errors = ()
+    invite_required = bool(office_app.config.get("GBO_INVITE_TOKEN", ""))
     if request.method == "POST":
-        user, errors = register_user(email=request.form.get("email", ""), password=request.form.get("password", ""), display_name=request.form.get("display_name", ""))
-        if user is not None:
-            sign_in(user)
-            return redirect(url_for("onboarding"))
-    return render_template("office/register.html", errors=errors)
+        configured_invite = str(office_app.config.get("GBO_INVITE_TOKEN", ""))
+        supplied_invite = request.form.get("invite_code", "").strip()
+        if configured_invite and not hmac.compare_digest(configured_invite, supplied_invite):
+            errors = ("A valid private-beta invite code is required.",)
+        else:
+            user, errors = register_user(email=request.form.get("email", ""), password=request.form.get("password", ""), display_name=request.form.get("display_name", ""))
+            if user is not None:
+                sign_in(user)
+                return redirect(url_for("onboarding"))
+    return render_template("office/register.html", errors=errors, invite_required=invite_required)
 
 @office_app.route("/onboarding", methods=["GET", "POST"])
 def onboarding():
