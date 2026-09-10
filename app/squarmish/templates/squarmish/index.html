@@ -53,7 +53,7 @@
     </div>
     <p style="font-size:1.15rem"><strong>Total before unresolved tax: <span class="money">{{ result.invoice.currency }} {{ '%.2f'|format(result.invoice.total) }}</span></strong></p>
     {% for n in result.review_notes %}<div class="alert warning">{{ n }}</div>{% endfor %}
-    <form method="post" action="/invoices/{{ result.invoice.invoice_id }}/confirm"><button class="signal" type="submit">Approve invoice for issuing</button></form>
+    <form method="post" action="{{ url_for('confirm_invoice', invoice_id=result.invoice.invoice_id) }}"><button class="signal" type="submit">Approve invoice for issuing</button></form>
     <p class="muted" style="margin-bottom:0">Squarmish: Drafted. Now make sure nobody gets billed twice for the same box of screws.</p>
   </section>
   {% endif %}
