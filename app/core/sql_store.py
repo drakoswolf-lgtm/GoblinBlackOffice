@@ -12,6 +12,7 @@ from typing import Generic, TypeVar, get_type_hints
 from sqlalchemy import Column, DateTime, MetaData, String, Table, Text, create_engine, delete, insert, select
 from sqlalchemy.engine import Engine
 
+from app.core.migrations import upgrade_database
 from app.core.models import Agreement, Business, Client, Expense, Invoice, InvoiceLineItem, Payment, Project, User
 from app.core.storage import BlackOfficeStore
 
@@ -84,8 +85,8 @@ class SqlRepository(Generic[T]):
 
 class SqlBlackOfficeStore(BlackOfficeStore):
     def __init__(self, database_url: str):
+        upgrade_database(database_url)
         self.engine = create_engine(database_url, future=True, pool_pre_ping=True)
-        metadata.create_all(self.engine)
         self.users = SqlRepository(self.engine, User, "user_id")
         self.businesses = SqlRepository(self.engine, Business, "business_id")
         self.clients = SqlRepository(self.engine, Client, "client_id")
