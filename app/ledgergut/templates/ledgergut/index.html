@@ -1,407 +1,209 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ledgergut — Receipt Entry</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ledgergut · Receipts &amp; Expenses</title>
+  <link rel="stylesheet" href="/static/gbo.css">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: system-ui, sans-serif;
-      background: #f5f5f5;
-      color: #222;
-      padding: 1rem;
-      max-width: 700px;
-      margin: 0 auto;
-    }
-    h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
-    h2 { font-size: 1.1rem; margin: 1.25rem 0 0.5rem; }
-    header { margin-bottom: 1rem; border-bottom: 2px solid #333; padding-bottom: 0.5rem; }
-    .alert {
-      border-radius: 4px;
-      padding: 0.75rem 1rem;
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
-    }
-    .alert.success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
-    .alert.error   { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
-    .alert ul { margin: 0.4rem 0 0 1rem; }
-    .findings { margin-bottom: 1rem; }
-    .finding {
-      border-radius: 4px;
-      padding: 0.5rem 0.75rem;
-      margin-bottom: 0.4rem;
-      font-size: 0.88rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      align-items: baseline;
-    }
-    .finding.error   { background: #f8d7da; border-left: 4px solid #dc3545; }
-    .finding.warning { background: #fff3cd; border-left: 4px solid #ffc107; }
-    .badge {
-      font-size: 0.72rem;
-      font-weight: bold;
-      padding: 0.15rem 0.4rem;
-      border-radius: 3px;
-      background: #333;
-      color: #fff;
-    }
-    .finding.error   .badge { background: #dc3545; }
-    .finding.warning .badge { background: #856404; }
-    .rule { font-weight: bold; font-size: 0.82rem; color: #555; }
-    .fields { font-size: 0.78rem; color: #666; font-style: italic; }
-    form { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 1rem; }
-    fieldset { border: none; margin-bottom: 0.75rem; }
-    legend { font-weight: bold; font-size: 0.95rem; margin-bottom: 0.5rem; color: #444; }
-    label { display: block; font-size: 0.85rem; margin-bottom: 0.15rem; color: #555; }
-    input[type="text"],
-    input[type="date"],
-    input[type="number"],
-    input[type="file"],
-    select,
-    textarea {
-      width: 100%;
-      padding: 0.45rem 0.6rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 0.95rem;
-      margin-bottom: 0.6rem;
-      background: #fafafa;
-    }
-    input:focus, select:focus, textarea:focus {
-      outline: 2px solid #4a90d9;
-      border-color: #4a90d9;
-      background: #fff;
-    }
-    textarea { resize: vertical; min-height: 3rem; }
-    .row { display: flex; gap: 0.75rem; }
-    .row > * { flex: 1; }
-    #image-preview {
-      display: none;
-      max-width: 100%;
-      max-height: 180px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      margin-top: 0.4rem;
-    }
-    .primary-btn {
-      display: block;
-      width: 100%;
-      padding: 0.85rem;
-      background: #2a7a2a;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-size: 1.05rem;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 1rem;
-    }
-    .primary-btn:hover { background: #226022; }
-    .secondary-btn {
-      background: #1a6e9f;
-    }
-    .secondary-btn:hover { background: #145477; }
-    .button-row {
-      display: flex;
-      gap: 0.75rem;
-      margin-top: 1rem;
-    }
-    .button-row .primary-btn { margin-top: 0; }
-    .hint {
-      font-size: 0.82rem;
-      color: #666;
-      margin-top: -0.2rem;
-      margin-bottom: 0.6rem;
-    }
-    .suggestion-box {
-      background: #fff3cd;
-      border: 1px solid #ffe69c;
-      color: #664d03;
-    }
-    details {
-      margin-top: 1rem;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      padding: 0.75rem 1rem;
-    }
-    details pre {
-      white-space: pre-wrap;
-      word-break: break-word;
-      font-size: 0.82rem;
-      margin-top: 0.75rem;
-    }
-    .receipts-section { margin-top: 1.5rem; }
-    .export-link {
-      display: inline-block;
-      margin-bottom: 0.75rem;
-      font-size: 0.9rem;
-      color: #1a6e9f;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.82rem;
-      background: #fff;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 0.4rem 0.6rem;
-      text-align: left;
-    }
-    th { background: #f0f0f0; font-weight: bold; }
-    tr:nth-child(even) { background: #fafafa; }
-    .empty-msg { color: #888; font-size: 0.9rem; margin-top: 0.5rem; }
-    @media (max-width: 500px) {
-      .row { flex-direction: column; gap: 0; }
-      .button-row { flex-direction: column; gap: 0.5rem; }
-      table { font-size: 0.75rem; }
-    }
+    .receipt-layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,.8fr);gap:18px;align-items:start}
+    .field-group{padding-top:18px;margin-top:18px;border-top:1px solid var(--line)}
+    .field-group:first-of-type{padding-top:0;margin-top:0;border-top:0}
+    .field-group legend{padding:0;margin:0 0 4px;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;font-weight:800}
+    fieldset{border:0;padding:0;margin:0}
+    #image-preview{display:none;width:100%;max-height:280px;object-fit:contain;margin-top:12px;border:1px solid var(--line);border-radius:10px;background:#080b0d}
+    .finding{padding:12px 14px;border-radius:9px;border:1px solid var(--line);background:var(--panel);margin-top:8px;line-height:1.45}
+    .finding.error{border-color:#73474a;background:var(--danger-bg)}
+    .finding.warning{border-color:#6d5e38;background:#211d13}
+    .badge{display:inline-block;margin-right:7px;padding:2px 6px;border:1px solid currentColor;border-radius:5px;font-size:.67rem;letter-spacing:.08em;font-weight:800}
+    .fields{display:block;margin-top:5px;color:var(--muted);font-size:.78rem}
+    details{margin-top:16px;padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+    summary{cursor:pointer;color:#d8dcda;font-weight:700}
+    details pre{white-space:pre-wrap;word-break:break-word;color:var(--muted);font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
+    .receipt-side{position:sticky;top:16px}
+    .upload-zone{padding:18px;border:1px dashed var(--line-strong);border-radius:12px;background:#0c1012}
+    .saved-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:36px 0 12px}
+    .saved-head h2{margin:4px 0 0}
+    .tiny-link{font-size:.82rem;white-space:nowrap}
+    @media(max-width:820px){.receipt-layout{grid-template-columns:1fr}.receipt-side{position:static}.saved-head{align-items:start;flex-direction:column}}
   </style>
 </head>
 <body>
-  <header>
-    <h1>🧾 Ledgergut</h1>
-    <p style="font-size:0.85rem;color:#666;">Receipt entry &amp; validation</p>
+<main class="shell">
+  <header class="topbar">
+    <a class="brand" href="/"><span class="brand-mark">LG</span><span>Ledgergut</span></a>
+    <nav class="topnav"><a href="/">Office Desk</a><a class="optional" href="/records">Clients &amp; Projects</a></nav>
   </header>
 
-  {% if saved %}
-  <div class="alert success">✓ Receipt saved successfully.</div>
-  {% endif %}
+  <section class="hero compact">
+    <p class="eyebrow">Accounting · Receipts &amp; Expenses</p>
+    <h1>Capture it once.</h1>
+    <p class="lead">Upload the receipt, let OCR do the dull first pass, then verify the numbers before Ledgergut files the expense into the Office.</p>
+  </section>
 
-  {% if storage_error %}
-  <div class="alert error">
-    <strong>Storage error:</strong> {{ storage_error }}
-  </div>
-  {% endif %}
-
-  {% if scan_error %}
-  <div class="alert error">
-    <strong>Scan unavailable:</strong> {{ scan_error }}
-  </div>
-  {% endif %}
-
-  {% if scan_message %}
-  <div class="alert suggestion-box">
-    <strong>OCR suggestions only:</strong> {{ scan_message }}
-  </div>
-  {% endif %}
-
-  {% if input_errors %}
-  <div class="alert error">
-    <strong>Please fix the following before saving:</strong>
-    <ul>
-      {% for err in input_errors %}<li>{{ err }}</li>{% endfor %}
-    </ul>
-  </div>
-  {% endif %}
+  {% if saved %}<div class="alert success"><strong>Receipt saved successfully.</strong> Ledgergut has it.</div>{% endif %}
+  {% if storage_error %}<div class="errors"><strong>Storage error:</strong> {{ storage_error }}</div>{% endif %}
+  {% if scan_error %}<div class="errors"><strong>Scan unavailable:</strong> {{ scan_error }}</div>{% endif %}
+  {% if scan_message %}<div class="alert warning"><strong>OCR suggestions only:</strong> {{ scan_message }}</div>{% endif %}
+  {% if input_errors %}<div class="errors"><strong>Please fix these before saving:</strong><ul>{% for err in input_errors %}<li>{{ err }}</li>{% endfor %}</ul></div>{% endif %}
 
   {% if findings %}
-  <div class="findings">
-    <h2>Validation Findings</h2>
+  <section class="card" style="margin-bottom:18px">
+    <p class="card-kicker">Validation findings</p>
     {% for f in findings %}
-    <div class="finding {{ f.severity }}">
-      <span class="badge">{{ f.severity|upper }}</span>
-      <span class="rule">{{ f.rule_id }}</span>
-      <span>{{ f.message }}</span>
-      {% if f.fields %}
-      <span class="fields">Fields: {{ f.fields | join(', ') }}</span>
-      {% endif %}
-    </div>
+    <div class="finding {{ f.severity }}"><span class="badge">{{ f.severity|upper }}</span><strong>{{ f.rule_id }}</strong> · {{ f.message }}{% if f.fields %}<span class="fields">Fields: {{ f.fields | join(', ') }}</span>{% endif %}</div>
     {% endfor %}
-    {% set has_errors = findings | selectattr('severity', 'equalto', 'error') | list %}
-    {% if has_errors %}
-    <p style="font-size:0.85rem;color:#721c24;margin-top:0.4rem;">
-      ⚠ Receipt not saved — fix the errors above and resubmit.
-    </p>
-    {% else %}
-    <p style="font-size:0.85rem;color:#856404;margin-top:0.4rem;">
-      ⚠ Receipt was not saved due to the warnings above. Correct or acknowledge them and resubmit.
-    </p>
-    {% endif %}
-  </div>
+  </section>
   {% endif %}
 
-  <h2>New Receipt</h2>
-  <form method="POST" action="/receipts/new" enctype="multipart/form-data" id="receipt-form">
+  <form class="receipt-layout" method="post" action="{{ url_for('new_receipt') }}" enctype="multipart/form-data" id="receipt-form">
     <textarea name="ocr_raw_text" hidden>{{ ocr_raw_text }}</textarea>
     <textarea name="ocr_confidence_notes" hidden>{{ ocr_confidence_notes | join('\n') }}</textarea>
     <input type="hidden" name="pending_image_token" value="{{ form_data.get('pending_image_token', '') }}">
 
-    <fieldset>
-      <legend>Receipt Image</legend>
-      <label for="receipt_image">Upload image (PNG / JPG)</label>
-      <input type="file" id="receipt_image" name="receipt_image" accept=".png,.jpg,.jpeg">
-      <p class="hint">Scan runs locally with Tesseract. Review every suggestion before saving. Max 10 MB.</p>
-      <img id="image-preview" alt="Receipt preview">
-    </fieldset>
-
-    <fieldset>
-      <legend>Vendor, Date &amp; Suggested Receipt Number</legend>
-      <label for="vendor_name">Vendor name</label>
-      <input type="text" id="vendor_name" name="vendor_name"
-             value="{{ form_data.get('vendor_name', '') }}" placeholder="e.g. Home Hardware">
-      <label for="receipt_date">Receipt date</label>
-      <input type="date" id="receipt_date" name="receipt_date"
-             value="{{ form_data.get('receipt_date', '') }}">
-      <label for="receipt_number">Receipt number (suggested if detected)</label>
-      <input type="text" id="receipt_number" name="receipt_number"
-             value="{{ form_data.get('receipt_number', '') }}" placeholder="e.g. RCT-00421">
-    </fieldset>
-
-    <fieldset>
-      <legend>Details</legend>
-      <label for="description">Description</label>
-      <textarea id="description" name="description" rows="2"
-                placeholder="Brief description of the expense">{{ form_data.get('description', '') }}</textarea>
-      <label for="project_name">Project name</label>
-      <input type="text" id="project_name" name="project_name"
-             value="{{ form_data.get('project_name', '') }}" placeholder="e.g. Jackson Retail">
-      <label for="expense_category">Expense category</label>
-      <input type="text" id="expense_category" name="expense_category"
-             value="{{ form_data.get('expense_category', '') }}" placeholder="e.g. materials">
-    </fieldset>
-
-    <fieldset>
-      <legend>Amounts</legend>
-      <div class="row">
-        <div>
-          <label for="subtotal">Subtotal</label>
-          <input type="text" id="subtotal" name="subtotal" inputmode="decimal"
-                 value="{{ form_data.get('subtotal', '') }}" placeholder="0.00">
+    <section class="form-card" style="margin-top:0">
+      <fieldset class="field-group">
+        <legend>Receipt identity</legend>
+        <div class="grid grid-2">
+          <div><label for="vendor_name">Vendor</label><input id="vendor_name" name="vendor_name" value="{{ form_data.get('vendor_name','') }}" placeholder="Home Hardware"></div>
+          <div><label for="receipt_date">Receipt date</label><input type="date" id="receipt_date" name="receipt_date" value="{{ form_data.get('receipt_date','') }}"></div>
         </div>
-        <div>
-          <label for="tax_amount">Tax amount</label>
-          <input type="text" id="tax_amount" name="tax_amount" inputmode="decimal"
-                 value="{{ form_data.get('tax_amount', '') }}" placeholder="0.00">
+        <label for="receipt_number">Receipt number <span class="subtle">(if detected)</span></label>
+        <input id="receipt_number" name="receipt_number" value="{{ form_data.get('receipt_number','') }}" placeholder="RCT-00421">
+      </fieldset>
+
+      <fieldset class="field-group">
+        <legend>Expense</legend>
+        <label for="description">Description</label>
+        <textarea id="description" class="short" name="description" placeholder="What did we buy and why?">{{ form_data.get('description','') }}</textarea>
+
+        {% if projects %}
+        <label for="office_project_id">Office project</label>
+        <select id="office_project_id" name="office_project_id">
+          <option value="">Unassigned</option>
+          {% for p in projects %}<option value="{{ p.project_id }}" data-project-name="{{ p.name }}" {% if form_data.get('office_project_id') == p.project_id %}selected{% endif %}>{{ p.name }}{% if p.client_id and clients.get(p.client_id) %} · {{ clients.get(p.client_id).name }}{% endif %}</option>{% endfor %}
+        </select>
+        <input type="hidden" id="project_name" name="project_name" value="{{ form_data.get('project_name','') }}">
+        {% else %}
+        <label for="project_name">Project label</label>
+        <input id="project_name" name="project_name" value="{{ form_data.get('project_name','') }}" placeholder="Jackson Retail">
+        <p class="muted" style="font-size:.82rem">Create an Office project to link expenses reliably.</p>
+        {% endif %}
+
+        <label for="expense_category">Category</label>
+        <input id="expense_category" name="expense_category" value="{{ form_data.get('expense_category','') }}" placeholder="materials">
+      </fieldset>
+
+      <fieldset class="field-group">
+        <legend>Amounts</legend>
+        <div class="grid grid-3">
+          <div><label for="subtotal">Subtotal</label><input id="subtotal" name="subtotal" inputmode="decimal" value="{{ form_data.get('subtotal','') }}" placeholder="0.00"></div>
+          <div><label for="tax_amount">Tax</label><input id="tax_amount" name="tax_amount" inputmode="decimal" value="{{ form_data.get('tax_amount','') }}" placeholder="0.00"></div>
+          <div><label for="total_amount">Total</label><input id="total_amount" name="total_amount" inputmode="decimal" value="{{ form_data.get('total_amount','') }}" placeholder="0.00"></div>
         </div>
-        <div>
-          <label for="total_amount">Total amount</label>
-          <input type="text" id="total_amount" name="total_amount" inputmode="decimal"
-                 value="{{ form_data.get('total_amount', '') }}" placeholder="0.00">
+        <label for="currency">Currency</label>
+        <input id="currency" name="currency" value="{{ form_data.get('currency','CAD') }}" placeholder="CAD" style="max-width:120px">
+      </fieldset>
+
+      <fieldset class="field-group">
+        <legend>Status</legend>
+        <div class="grid grid-3">
+          <div><label for="paid_by">Paid by</label><select id="paid_by" name="paid_by">{% for v in enums.paid_by %}<option value="{{ v }}" {% if form_data.get('paid_by','') == v %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></div>
+          <div><label for="reimbursement_status">Reimbursement</label><select id="reimbursement_status" name="reimbursement_status">{% for v in enums.reimbursement_status %}<option value="{{ v }}" {% if form_data.get('reimbursement_status','') == v %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></div>
+          <div><label for="billable_status">Billable</label><select id="billable_status" name="billable_status"><option value="">Select</option>{% for v in enums.billable_status %}<option value="{{ v }}" {% if form_data.get('billable_status','') == v %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></div>
         </div>
-      </div>
-      <label for="currency">Currency</label>
-      <input type="text" id="currency" name="currency"
-             value="{{ form_data.get('currency', 'CAD') }}" placeholder="CAD" style="width:6rem;">
-    </fieldset>
+        <div class="grid grid-2">
+          <div><label for="invoice_id">Invoice ID <span class="subtle">(if already invoiced)</span></label><input id="invoice_id" name="invoice_id" value="{{ form_data.get('invoice_id','') }}" placeholder="INV-…"></div>
+          <div><label for="submitted_by">Submitted by</label><input id="submitted_by" name="submitted_by" value="{{ form_data.get('submitted_by','') }}" placeholder="steve"></div>
+        </div>
+      </fieldset>
+    </section>
 
-    <fieldset>
-      <legend>Payment &amp; Status</legend>
-      <label for="paid_by">Paid by</label>
-      <select id="paid_by" name="paid_by">
-        {% for v in enums.paid_by %}
-        <option value="{{ v }}" {% if form_data.get('paid_by', '') == v %}selected{% endif %}>{{ v }}</option>
-        {% endfor %}
-      </select>
-      <label for="reimbursement_status">Reimbursement status</label>
-      <select id="reimbursement_status" name="reimbursement_status">
-        {% for v in enums.reimbursement_status %}
-        <option value="{{ v }}" {% if form_data.get('reimbursement_status', '') == v %}selected{% endif %}>{{ v }}</option>
-        {% endfor %}
-      </select>
-      <label for="billable_status">Billable status</label>
-      <select id="billable_status" name="billable_status">
-        <option value="">— select —</option>
-        {% for v in enums.billable_status %}
-        <option value="{{ v }}" {% if form_data.get('billable_status', '') == v %}selected{% endif %}>{{ v }}</option>
-        {% endfor %}
-      </select>
-      <label for="invoice_id">Invoice ID (if already invoiced)</label>
-      <input type="text" id="invoice_id" name="invoice_id"
-             value="{{ form_data.get('invoice_id', '') }}" placeholder="INV-…">
-    </fieldset>
+    <aside class="receipt-side">
+      <section class="card">
+        <p class="card-kicker">Receipt image</p>
+        <div class="upload-zone">
+          <label for="receipt_image" style="margin-top:0">PNG or JPG · max 10 MB</label>
+          <input type="file" id="receipt_image" name="receipt_image" accept=".png,.jpg,.jpeg">
+          <p class="muted" style="font-size:.82rem;line-height:1.45">OCR runs locally with Tesseract. Treat extracted values as suggestions until you verify them.</p>
+          <img id="image-preview" alt="Receipt preview">
+        </div>
+        <div class="button-row">
+          <button class="secondary" type="submit" formaction="{{ url_for('scan_receipt') }}" id="scan-button">Scan receipt</button>
+          <button class="signal" type="submit" id="save-button">Save Receipt</button>
+        </div>
+      </section>
 
-    <fieldset>
-      <legend>Submitted by</legend>
-      <label for="submitted_by">Your name / handle</label>
-      <input type="text" id="submitted_by" name="submitted_by"
-             value="{{ form_data.get('submitted_by', '') }}" placeholder="e.g. steve">
-    </fieldset>
-
-    <div class="button-row">
-      <button type="submit" class="primary-btn secondary-btn" formaction="/receipts/scan" id="scan-button">🔎 Scan Receipt</button>
-      <button type="submit" class="primary-btn" id="save-button">💾 Save Receipt</button>
-    </div>
+      {% if ocr_confidence_notes or ocr_raw_text %}
+      <details>
+        <summary>OCR review details</summary>
+        {% if ocr_confidence_notes %}<ul>{% for note in ocr_confidence_notes %}<li>{{ note }}</li>{% endfor %}</ul>{% endif %}
+        {% if ocr_raw_text %}<pre>{{ ocr_raw_text }}</pre>{% endif %}
+      </details>
+      {% endif %}
+    </aside>
   </form>
 
-  {% if ocr_confidence_notes or ocr_raw_text %}
-  <details>
-    <summary>OCR review details</summary>
-    {% if ocr_confidence_notes %}
-    <ul style="margin:0.75rem 0 0 1rem;">
-      {% for note in ocr_confidence_notes %}
-      <li>{{ note }}</li>
-      {% endfor %}
-    </ul>
-    {% endif %}
-    {% if ocr_raw_text %}
-    <pre>{{ ocr_raw_text }}</pre>
-    {% endif %}
-  </details>
-  {% endif %}
-
-  <section class="receipts-section">
-    <h2>Saved Receipts</h2>
+  <section>
+    <div class="saved-head">
+      <div><p class="eyebrow">Ledger</p><h2>Saved receipts</h2></div>
+      {% if receipts %}<a class="tiny-link" href="{{ url_for('export_csv') }}">Export CSV</a>{% endif %}
+    </div>
     {% if receipts %}
-    <a class="export-link" href="/export/csv">⬇ Export CSV</a>
-    <div style="overflow-x:auto;">
+    <div class="table-wrap">
       <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Date</th>
-            <th>Vendor</th>
-            <th>Total</th>
-            <th>Currency</th>
-            <th>Project</th>
-            <th>Paid by</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Date</th><th>Vendor</th><th>Total</th><th>Project</th><th>Paid by</th><th>File</th></tr></thead>
         <tbody>
           {% for rec in receipts | reverse %}
           <tr>
-            <td>{{ rec.get('record_id', '') }}</td>
             <td>{{ rec.get('receipt', {}).get('receipt_date', '') }}</td>
-            <td>{{ rec.get('receipt', {}).get('vendor_name', '') }}</td>
-            <td>{{ rec.get('receipt', {}).get('total_amount', '') }}</td>
-            <td>{{ rec.get('currency', '') }}</td>
-            <td>{{ rec.get('project_name', '') }}</td>
-            <td>{{ rec.get('paid_by', '') }}</td>
+            <td><strong>{{ rec.get('receipt', {}).get('vendor_name', '') }}</strong><br><span class="subtle">{{ rec.get('record_id','') }}</span></td>
+            <td class="money">{{ rec.get('currency','') }} {{ rec.get('receipt', {}).get('total_amount','') }}</td>
+            <td>{{ rec.get('project_name','') or 'Unassigned' }}</td>
+            <td>{{ rec.get('paid_by','') }}</td>
+            <td>{% if rec.get('image_filename') %}<a href="{{ url_for('receipt_image', record_id=rec.get('record_id')) }}" target="_blank" rel="noopener">View image</a>{% else %}<span class="subtle">None</span>{% endif %}</td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
-    {% else %}
-    <p class="empty-msg">No receipts saved yet.</p>
-    {% endif %}
+    {% else %}<p class="muted">No receipts saved yet.</p>{% endif %}
   </section>
 
-  <script>
-    var imageInput = document.getElementById('receipt_image');
-    var preview = document.getElementById('image-preview');
-    var form = document.getElementById('receipt-form');
+  <footer class="footer">Ledgergut remembers everything. This is useful until it becomes unsettling.</footer>
+</main>
 
-    imageInput.addEventListener('change', function () {
-      var file = this.files[0];
-      if (file) {
-        preview.src = URL.createObjectURL(file);
-        preview.style.display = 'block';
-      } else {
-        preview.style.display = 'none';
-      }
-    });
+<script>
+  const imageInput = document.getElementById('receipt_image');
+  const preview = document.getElementById('image-preview');
+  const form = document.getElementById('receipt-form');
+  const projectSelect = document.getElementById('office_project_id');
+  const projectName = document.getElementById('project_name');
 
-    form.addEventListener('submit', function (event) {
-      if (!event.submitter) {
-        return;
-      }
-      event.submitter.disabled = true;
-      event.submitter.textContent = event.submitter.id === 'scan-button' ? 'Scanning…' : 'Saving…';
-    });
-  </script>
+  imageInput.addEventListener('change', function () {
+    const file = this.files[0];
+    if (file) {
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = 'block';
+    } else {
+      preview.style.display = 'none';
+    }
+  });
+
+  if (projectSelect && projectName) {
+    const syncProjectName = function () {
+      const option = projectSelect.options[projectSelect.selectedIndex];
+      projectName.value = option ? (option.dataset.projectName || '') : '';
+    };
+    projectSelect.addEventListener('change', syncProjectName);
+    if (projectSelect.value) syncProjectName();
+  }
+
+  form.addEventListener('submit', function (event) {
+    if (!event.submitter) return;
+    event.submitter.disabled = true;
+    event.submitter.textContent = event.submitter.id === 'scan-button' ? 'Scanning…' : 'Saving…';
+  });
+</script>
 </body>
 </html>
