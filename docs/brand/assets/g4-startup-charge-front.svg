@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Goblin Black Office G4 startup charge front elevation</title>
+  <desc id="desc">Fictional near-future loading-screen prop: two luminous green G4 cylinders flank a central computerized progress module with a load-bearing sticky note.</desc>
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#151b1e"/>
+      <stop offset="1" stop-color="#090c0e"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#50595d"/>
+      <stop offset=".45" stop-color="#171d20"/>
+      <stop offset="1" stop-color="#343c40"/>
+    </linearGradient>
+    <linearGradient id="g4" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b8ffbd"/>
+      <stop offset=".22" stop-color="#37e96e"/>
+      <stop offset=".62" stop-color="#0a8e53"/>
+      <stop offset="1" stop-color="#034633"/>
+    </linearGradient>
+    <linearGradient id="copper" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7c321c"/>
+      <stop offset=".5" stop-color="#e89f69"/>
+      <stop offset="1" stop-color="#6f2b19"/>
+    </linearGradient>
+    <filter id="greenGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="12" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="smallGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="800" fill="url(#wall)"/>
+  <g opacity=".16" stroke="#718087" stroke-width="1">
+    <path d="M0 130H1200M0 275H1200M0 425H1200M0 585H1200"/>
+    <path d="M180 0V800M390 0V800M600 0V800M810 0V800M1020 0V800"/>
+  </g>
+
+  <text x="60" y="62" fill="#d5dddf" font-family="system-ui,sans-serif" font-size="22" letter-spacing="5">G4 STARTUP CHARGE // CANON FRONT ELEVATION</text>
+  <text x="60" y="94" fill="#74838a" font-family="system-ui,sans-serif" font-size="13" letter-spacing="3">FICTIONAL LOADING-SCREEN PROP · NOT A REAL-WORLD DEVICE</text>
+
+  <!-- mounting backplate -->
+  <rect x="155" y="150" width="890" height="525" rx="28" fill="#0d1113" stroke="#4a555a" stroke-width="4"/>
+  <path d="M185 186H1015M185 640H1015" stroke="#273035" stroke-width="3"/>
+  <g fill="#69757a">
+    <circle cx="188" cy="183" r="8"/><circle cx="1012" cy="183" r="8"/>
+    <circle cx="188" cy="642" r="8"/><circle cx="1012" cy="642" r="8"/>
+  </g>
+
+  <!-- left cylinder -->
+  <g transform="translate(230 220)">
+    <rect x="0" y="0" width="215" height="390" rx="42" fill="#101518" stroke="#647176" stroke-width="5"/>
+    <rect x="28" y="58" width="159" height="274" rx="62" fill="#052619" stroke="#738085" stroke-width="7"/>
+    <rect x="39" y="69" width="137" height="252" rx="55" fill="url(#g4)" opacity=".95" filter="url(#greenGlow)"/>
+    <path d="M62 267C101 218 148 250 161 194C169 159 116 135 75 172C45 199 58 238 102 235C142 233 157 281 111 306" fill="none" stroke="url(#copper)" stroke-width="10" stroke-linecap="round" opacity=".88"/>
+    <path d="M54 156C104 105 159 148 171 104" fill="none" stroke="#aaffc0" stroke-width="6" opacity=".6"/>
+    <rect x="25" y="19" width="165" height="52" rx="15" fill="url(#metal)" stroke="#657176" stroke-width="4"/>
+    <rect x="25" y="320" width="165" height="52" rx="15" fill="url(#metal)" stroke="#657176" stroke-width="4"/>
+    <text x="107" y="49" text-anchor="middle" fill="#a7b2b5" font-family="system-ui,sans-serif" font-size="15" font-weight="700" letter-spacing="2">G4 // A</text>
+    <text x="107" y="357" text-anchor="middle" fill="#69f28d" font-family="system-ui,sans-serif" font-size="12" letter-spacing="2">CONTAINED</text>
+  </g>
+
+  <!-- right cylinder -->
+  <g transform="translate(755 220)">
+    <rect x="0" y="0" width="215" height="390" rx="42" fill="#101518" stroke="#647176" stroke-width="5"/>
+    <rect x="28" y="58" width="159" height="274" rx="62" fill="#052619" stroke="#738085" stroke-width="7"/>
+    <rect x="39" y="69" width="137" height="252" rx="55" fill="url(#g4)" opacity=".95" filter="url(#greenGlow)"/>
+    <path d="M155 286C113 232 66 258 55 201C49 165 97 134 143 167C177 191 162 235 120 237C79 239 66 283 109 306" fill="none" stroke="url(#copper)" stroke-width="10" stroke-linecap="round" opacity=".88"/>
+    <path d="M160 148C111 104 66 145 49 104" fill="none" stroke="#aaffc0" stroke-width="6" opacity=".6"/>
+    <rect x="25" y="19" width="165" height="52" rx="15" fill="url(#metal)" stroke="#657176" stroke-width="4"/>
+    <rect x="25" y="320" width="165" height="52" rx="15" fill="url(#metal)" stroke="#657176" stroke-width="4"/>
+    <text x="107" y="49" text-anchor="middle" fill="#a7b2b5" font-family="system-ui,sans-serif" font-size="15" font-weight="700" letter-spacing="2">G4 // B</text>
+    <text x="107" y="357" text-anchor="middle" fill="#69f28d" font-family="system-ui,sans-serif" font-size="12" letter-spacing="2">CONTAINED</text>
+  </g>
+
+  <!-- armored hoses, stylized only -->
+  <path d="M445 365C478 365 478 340 510 340" fill="none" stroke="#4c585d" stroke-width="22" stroke-linecap="round"/>
+  <path d="M755 365C722 365 722 340 690 340" fill="none" stroke="#4c585d" stroke-width="22" stroke-linecap="round"/>
+  <path d="M445 365C478 365 478 340 510 340M755 365C722 365 722 340 690 340" fill="none" stroke="#7e8b90" stroke-width="4" stroke-dasharray="8 10"/>
+
+  <!-- central computer -->
+  <g>
+    <rect x="485" y="205" width="230" height="390" rx="25" fill="url(#metal)" stroke="#78858a" stroke-width="5"/>
+    <path d="M505 228H695L704 245V555L688 574H510L496 558V245Z" fill="#11171a" stroke="#313b3f" stroke-width="3"/>
+    <rect x="520" y="252" width="160" height="205" rx="18" fill="#03100c" stroke="#42524c" stroke-width="4"/>
+
+    <!-- progress ring 73% -->
+    <circle cx="600" cy="335" r="52" fill="none" stroke="#173a2a" stroke-width="13"/>
+    <circle cx="600" cy="335" r="52" fill="none" stroke="#54ff8b" stroke-width="13" stroke-linecap="round"
+            stroke-dasharray="238 327" transform="rotate(-90 600 335)" filter="url(#smallGlow)"/>
+    <text x="600" y="344" text-anchor="middle" fill="#d9ffe4" font-family="system-ui,sans-serif" font-size="29" font-weight="800">73%</text>
+    <text x="600" y="414" text-anchor="middle" fill="#63ff92" font-family="system-ui,sans-serif" font-size="19" font-weight="800" letter-spacing="4">LOADING</text>
+
+    <g fill="#64ff90" filter="url(#smallGlow)">
+      <circle cx="525" cy="500" r="5"/><circle cx="548" cy="500" r="5"/><circle cx="571" cy="500" r="5"/>
+    </g>
+    <text x="600" y="535" text-anchor="middle" fill="#7f8d91" font-family="system-ui,sans-serif" font-size="11" letter-spacing="2">GBO // STARTUP CONTROL</text>
+
+    <!-- sticky -->
+    <g transform="translate(590 453) rotate(-3)">
+      <rect x="0" y="0" width="145" height="132" rx="4" fill="#e7d59b" stroke="#aa9665" stroke-width="2"/>
+      <path d="M0 0H145V16C108 8 44 21 0 9Z" fill="#f2e3ad" opacity=".55"/>
+      <text x="12" y="27" fill="#a51e21" font-family="system-ui,sans-serif" font-size="12" font-weight="900">LOAD-BEARING STICKY</text>
+      <text x="12" y="45" fill="#a51e21" font-family="system-ui,sans-serif" font-size="12" font-weight="900">DO NOT REMOVE</text>
+      <text x="12" y="77" fill="#27251e" font-family="system-ui,sans-serif" font-size="13">Nothing important</text>
+      <text x="12" y="95" fill="#27251e" font-family="system-ui,sans-serif" font-size="13">appears to be</text>
+      <text x="12" y="113" fill="#27251e" font-family="system-ui,sans-serif" font-size="13">on fire.</text>
+    </g>
+  </g>
+
+  <!-- callout bar -->
+  <rect x="185" y="700" width="830" height="56" rx="10" fill="#101518" stroke="#2f393d"/>
+  <text x="600" y="724" text-anchor="middle" fill="#9ba8ad" font-family="system-ui,sans-serif" font-size="13" letter-spacing="2">
+    GRAPHITE FRAME · TWIN G4 CONTAINMENT · COPPER GLOXIDE FILAMENT · HARDENED PROGRESS COMPUTER
+  </text>
+  <text x="600" y="745" text-anchor="middle" fill="#67e989" font-family="system-ui,sans-serif" font-size="12" letter-spacing="2">
+    100% → AQUAMARINE-GREEN BREACH → SLATE CLEARS → GRAPHITE LOGO PLATE
+  </text>
+</svg>
