@@ -1,1 +1,35 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Goblin Back Office · Register</title><style>body{margin:0;background:#0f1114;color:#eef1f4;font:16px system-ui;padding:32px}.card{max-width:520px;margin:6vh auto;background:#171a1f;border:1px solid #303640;border-radius:16px;padding:28px}input,button{width:100%;box-sizing:border-box;padding:13px;margin:8px 0 16px;border-radius:9px;border:1px solid #3a414d;background:#0f1114;color:#fff}button{background:#e8ecef;color:#111;font-weight:700}.error{color:#ffb4b4}.muted{color:#aeb7c2}a{color:#cdd7e1}</style></head><body><main class="card"><p>Goblin Back Office</p><h1>Create your Office.</h1><p>One account. One business workspace. Three specialists waiting behind the filing cabinet.</p>{% if invite_required %}<p class="muted">Private beta access currently requires an invite code.</p>{% endif %}{% for error in errors %}<p class="error">{{ error }}</p>{% endfor %}<form method="post"><label>Your name</label><input name="display_name" required autocomplete="name"><label>Email</label><input type="email" name="email" required autocomplete="email"><label>Password</label><input type="password" name="password" minlength="10" required autocomplete="new-password">{% if invite_required %}<label>Beta invite code</label><input type="password" name="invite_code" required autocomplete="off">{% endif %}<button type="submit">Create account</button></form><p>Already have one? <a href="/login">Sign in</a>.</p></main></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Create account · Goblin Black Office</title>
+  <link rel="stylesheet" href="/static/gbo.css">
+</head>
+<body>
+<main class="auth-shell">
+  <section class="auth-card">
+    <a class="brand" href="/"><span class="brand-mark">GBO</span><span>Goblin Black Office</span></a>
+    <p class="eyebrow">Private beta</p>
+    <h1>Create your Office.</h1>
+    <p class="lead">One account, one business workspace, three specialists already arguing over whose filing cabinet this is.</p>
+    {% if invite_required %}<div class="alert warning">Private beta access currently requires an invite code.</div>{% endif %}
+    {% if errors %}<div class="errors">{% for error in errors %}<div>{{ error }}</div>{% endfor %}</div>{% endif %}
+    <form method="post">
+      <label for="display-name">Your name</label>
+      <input id="display-name" name="display_name" required autocomplete="name">
+      <label for="email">Email</label>
+      <input id="email" type="email" name="email" required autocomplete="email">
+      <label for="password">Password</label>
+      <input id="password" type="password" name="password" minlength="10" required autocomplete="new-password">
+      {% if invite_required %}
+      <label for="invite-code">Beta invite code</label>
+      <input id="invite-code" type="password" name="invite_code" required autocomplete="off">
+      {% endif %}
+      <button type="submit">Create account</button>
+    </form>
+    <p class="auth-foot">Already have an Office? <a href="/login">Sign in</a>.</p>
+  </section>
+</main>
+</body>
+</html>

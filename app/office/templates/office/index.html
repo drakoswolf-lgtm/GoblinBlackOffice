@@ -1,1 +1,57 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Goblin Black Office</title><style>:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#121416;color:#f4f0e8}*{box-sizing:border-box}body{margin:0;background:#121416}main{max-width:980px;margin:0 auto;padding:32px 20px 56px}.eyebrow{color:#9aa2a8;text-transform:uppercase;letter-spacing:.14em;font-size:.75rem}h1{margin:8px 0 10px;font-size:clamp(2rem,7vw,4.4rem);line-height:.95}.lead{max-width:680px;color:#c8cdd0;font-size:1.05rem;line-height:1.55}.desk{display:grid;gap:14px;margin-top:34px}.card{border:1px solid #31363a;border-radius:16px;background:#1a1d20;padding:20px;display:grid;gap:12px}.row{display:flex;align-items:baseline;justify-content:space-between;gap:16px}.name{font-size:1.35rem;font-weight:760}.role{color:#aeb5ba}.status{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:#b8c5ad}.note{color:#d9d5cd;line-height:1.45}a.action{width:fit-content;text-decoration:none;color:#111;background:#e7e2d8;border-radius:999px;padding:10px 14px;font-weight:700}.records{margin-top:24px;padding:18px;border:1px solid #31363a;border-radius:14px}.records a{color:#dce9e4;font-weight:700}footer{margin-top:34px;color:#747c81;font-size:.85rem}</style></head><body><main><div class="eyebrow">Goblin Black Office · Æterna Desk</div><h1>Give the paperwork<br>to the goblins.</h1><p class="lead">One office. Specialist hands. The useful answer comes first; the personality arrives only after the work earns it.</p><div class="records"><strong>Office records</strong><p>Set up the people and jobs the goblins work for.</p><a href="/records">Manage clients & projects →</a></div><section class="desk" aria-label="Black Office specialists">{% for specialist in specialists %}<article class="card"><div class="row"><div><div class="name">{{ specialist.name }}</div><div class="role">{{ specialist.role }}</div></div><div class="status">{{ specialist.status }}</div></div><div class="note">{{ specialist.note }}</div><a class="action" href="{{ specialist.href }}">Open {{ specialist.name }}</a></article>{% endfor %}</section><footer>Serious software. Unnecessarily memorable employees.</footer></main></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Goblin Black Office</title>
+  <link rel="stylesheet" href="/static/gbo.css">
+</head>
+<body>
+<main class="shell">
+  <header class="topbar">
+    <a class="brand" href="/"><span class="brand-mark">GBO</span><span>Goblin Black Office</span></a>
+    <nav class="topnav">
+      <a href="/records">Clients &amp; Projects</a>
+      {% if user %}<form method="post" action="/logout" style="margin:0"><button class="secondary" type="submit" style="min-height:36px;padding:7px 11px;width:auto">Sign out</button></form>{% endif %}
+    </nav>
+  </header>
+
+  <section class="hero">
+    <p class="eyebrow">Æterna Desk · Office online</p>
+    <h1>Give the paperwork<br>to the goblins.</h1>
+    <p class="lead">One back office for the commercial chain: define the work, capture the costs, then turn completed work into money without losing the thread between them.</p>
+  </section>
+
+  <section class="stat-strip" aria-label="Workflow summary">
+    <div class="stat"><strong>01 · Agree</strong><span>Scope and terms with SigNor</span></div>
+    <div class="stat"><strong>02 · Account</strong><span>Receipts and expenses with Ledgergut</span></div>
+    <div class="stat"><strong>03 · Invoice</strong><span>Billing and receivables with Squarmish</span></div>
+  </section>
+
+  <section class="grid grid-3" aria-label="Black Office specialists">
+    {% for specialist in specialists %}
+    <article class="card specialist-card">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div>
+          <div class="card-kicker">{{ specialist.role }}</div>
+          <h2>{{ specialist.name }}</h2>
+        </div>
+        <span class="status">{{ specialist.status }}</span>
+      </div>
+      <p class="note">{{ specialist.note }}</p>
+      <div class="actions"><a class="button" href="{{ specialist.href }}">Open {{ specialist.name }}</a></div>
+    </article>
+    {% endfor %}
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <div class="card-kicker">Office records</div>
+    <h2>People and jobs before paperwork.</h2>
+    <p>Set up clients and projects once, then let every specialist work from the same source of truth.</p>
+    <a class="button secondary" href="/records">Manage clients &amp; projects</a>
+  </section>
+
+  <footer class="footer">Serious software. Unnecessarily memorable employees.</footer>
+</main>
+</body>
+</html>

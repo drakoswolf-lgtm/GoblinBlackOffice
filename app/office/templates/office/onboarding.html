@@ -1,1 +1,27 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Goblin Back Office · Setup</title><style>body{margin:0;background:#0f1114;color:#eef1f4;font:16px system-ui;padding:32px}.card{max-width:560px;margin:7vh auto;background:#171a1f;border:1px solid #303640;border-radius:16px;padding:28px}input,select,button{width:100%;box-sizing:border-box;padding:13px;margin:8px 0 16px;border-radius:9px;border:1px solid #3a414d;background:#0f1114;color:#fff}button{background:#e8ecef;color:#111;font-weight:700}.error{color:#ffb4b4}</style></head><body><main class="card"><p>Æterna · Office Setup</p><h1>Name the place.</h1><p>I only need the essentials before the goblins start touching paperwork.</p>{% for error in errors %}<p class="error">{{ error }}</p>{% endfor %}<form method="post"><label>Business name</label><input name="business_name" required placeholder="Your contracting company"><label>Reporting currency</label><select name="currency"><option>CAD</option><option>USD</option><option>EUR</option><option>GBP</option></select><button type="submit">Open the Office</button></form></main></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Office setup · Goblin Black Office</title>
+  <link rel="stylesheet" href="/static/gbo.css">
+</head>
+<body>
+<main class="auth-shell">
+  <section class="auth-card">
+    <div class="brand"><span class="brand-mark">Æ</span><span>Æterna · Office Setup</span></div>
+    <p class="eyebrow">Final setup</p>
+    <h1>Name the place.</h1>
+    <p class="lead">I only need the essentials before the specialists start touching paperwork.</p>
+    {% if errors %}<div class="errors">{% for error in errors %}<div>{{ error }}</div>{% endfor %}</div>{% endif %}
+    <form method="post">
+      <label for="business-name">Business name</label>
+      <input id="business-name" name="business_name" required placeholder="Your contracting company">
+      <label for="currency">Reporting currency</label>
+      <select id="currency" name="currency"><option>CAD</option><option>USD</option><option>EUR</option><option>GBP</option></select>
+      <button type="submit">Open the Office</button>
+    </form>
+  </section>
+</main>
+</body>
+</html>
