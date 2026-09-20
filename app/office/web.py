@@ -18,6 +18,7 @@ from app.office.auth import (
     sign_in,
 )
 from app.office.records import create_client, create_project
+from app.office.grunts import grunt_workflow
 
 _auth_required = os.environ.get("GBO_AUTH_REQUIRED", "0").lower() in {"1", "true", "yes"}
 _secret = os.environ.get("GBO_SECRET", "").strip()
@@ -98,12 +99,22 @@ def record_desk():
         if not errors: return redirect(url_for("record_desk"))
     return render_template("office/records.html", errors=errors, clients=office_store.clients.list_for_business(bid), projects=office_store.projects.list_for_business(bid))
 
+@office_app.route("/workflows/<grunt_id>")
+def grunt_workflow_page(grunt_id: str):
+    grunt = grunt_workflow(grunt_id)
+    if grunt is None:
+        return ("Workflow not found.", 404)
+    return render_template("office/grunt_workflow.html", grunt=grunt)
+
 @office_app.route("/")
 def index():
     specialists = [
         {"name":"Ledgergut","role":"Receipts & expenses","status":"live","href":"/ledgergut/","note":"Feed me the receipt. Keep your fingers."},
         {"name":"SigNor","role":"Agreements & scope","status":"live","href":"/signor/","note":"Words matter. Especially the ones someone forgot to define."},
         {"name":"Squarmish","role":"Invoices & receivables","status":"live","href":"/squarmish/","note":"Completed work is lovely. Paid work is lovelier."},
+        {"name":"Packrat McDuffel","role":"Logistics & materials","status":"rough-in","href":"/workflows/packrat","note":"Right thing, right place, ideally before someone needs it."},
+        {"name":"Patch","role":"Operations & work orders","status":"rough-in","href":"/workflows/patch","note":"Loose ends become work orders. Work orders become finished work."},
+        {"name":"Grimscratch","role":"Risk & compliance","status":"rough-in","href":"/workflows/grimscratch","note":"Find the expensive assumption before it becomes an expensive fact."},
     ]
     return render_template("office/index.html", specialists=specialists, user=current_user())
 

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ grunt.name }} · Workflow rough-in</title>
+  <style>
+    :root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#111416;color:#f2efe8}
+    *{box-sizing:border-box}body{margin:0;background:#111416}main{max-width:980px;margin:auto;padding:28px 18px 64px}
+    a{color:#b8d1c7}.eyebrow{color:#92a09c;text-transform:uppercase;letter-spacing:.13em;font-size:.76rem}
+    h1{font-size:clamp(2rem,7vw,4.2rem);line-height:.95;margin:.35rem 0 1rem}.lead{max-width:760px;color:#c9cfcc;line-height:1.55}
+    .question{margin:24px 0;padding:18px;border-left:3px solid #9eb9aa;background:#171b1d;color:#e8ece9}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px}.card{border:1px solid #30383a;background:#191d20;border-radius:14px;padding:18px}
+    .card h2{margin-top:0}.stage{padding:13px 0;border-top:1px solid #2c3336}.stage:first-of-type{border-top:0}.stage strong{display:block;margin-bottom:4px}
+    ul{padding-left:1.15rem;color:#cbd1cf;line-height:1.5}.badge{display:inline-block;border:1px solid #56625e;border-radius:999px;padding:6px 10px;font-size:.72rem;text-transform:uppercase;letter-spacing:.1em}
+    .release{margin-top:16px;padding:16px;border:1px solid #4a5550;border-radius:12px;background:#151918}
+    @media(max-width:700px){.grid{grid-template-columns:1fr}main{padding:20px 14px 48px}.card{padding:16px}}
+  </style>
+</head>
+<body>
+<main>
+  <p><a href="/">← Office Desk</a></p>
+  <span class="badge">Wave 2 rough-in · no autonomous actions</span>
+  <p class="eyebrow">{{ grunt.role }}</p>
+  <h1>{{ grunt.name }}</h1>
+  <p class="lead">{{ grunt.mission }}</p>
+  <div class="question"><strong>Guiding question:</strong> {{ grunt.question }}</div>
+
+  <section class="grid">
+    <article class="card">
+      <h2>Intake</h2>
+      <ul>{% for item in grunt.inputs %}<li>{{ item }}</li>{% endfor %}</ul>
+    </article>
+    <article class="card">
+      <h2>Guardrails</h2>
+      <ul>{% for item in grunt.guardrails %}<li>{{ item }}</li>{% endfor %}</ul>
+    </article>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <h2>Workflow</h2>
+    {% for title, body in grunt.stages %}
+      <div class="stage"><strong>{{ loop.index }}. {{ title }}</strong><span>{{ body }}</span></div>
+    {% endfor %}
+  </section>
+
+  <section class="grid">
+    <article class="card">
+      <h2>Handoffs</h2>
+      <ul>{% for item in grunt.handoffs %}<li>{{ item }}</li>{% endfor %}</ul>
+    </article>
+    <article class="card">
+      <h2>First release boundary</h2>
+      <div class="release">{{ grunt.first_release }}</div>
+    </article>
+  </section>
+</main>
+</body>
+</html>
