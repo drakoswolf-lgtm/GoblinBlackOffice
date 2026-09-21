@@ -58,8 +58,8 @@
     <path d="M54 156C104 105 159 148 171 104" fill="none" stroke="#aaffc0" stroke-width="6" opacity=".6"/>
     <rect x="25" y="19" width="165" height="52" rx="15" fill="url(#metal)" stroke="#657176" stroke-width="4"/>
     <rect x="25" y="320" width="165" height="52" rx="15" fill="url(#metal)" stroke="#657176" stroke-width="4"/>
-    <text x="107" y="49" text-anchor="middle" fill="#a7b2b5" font-family="system-ui,sans-serif" font-size="15" font-weight="700" letter-spacing="2">G4 // A</text>
-    <text x="107" y="357" text-anchor="middle" fill="#69f28d" font-family="system-ui,sans-serif" font-size="12" letter-spacing="2">CONTAINED</text>
+    <rect x="72" y="38" width="70" height="8" rx="4" fill="#57ff87" filter="url(#smallGlow)"/>
+    <g fill="#57ff87" opacity=".85"><circle cx="88" cy="347" r="4"/><circle cx="107" cy="347" r="4"/><circle cx="126" cy="347" r="4"/></g>
   </g>
 
   <!-- right cylinder -->
@@ -71,8 +71,8 @@
     <path d="M160 148C111 104 66 145 49 104" fill="none" stroke="#aaffc0" stroke-width="6" opacity=".6"/>
     <rect x="25" y="19" width="165" height="52" rx="15" fill="url(#metal)" stroke="#657176" stroke-width="4"/>
     <rect x="25" y="320" width="165" height="52" rx="15" fill="url(#metal)" stroke="#657176" stroke-width="4"/>
-    <text x="107" y="49" text-anchor="middle" fill="#a7b2b5" font-family="system-ui,sans-serif" font-size="15" font-weight="700" letter-spacing="2">G4 // B</text>
-    <text x="107" y="357" text-anchor="middle" fill="#69f28d" font-family="system-ui,sans-serif" font-size="12" letter-spacing="2">CONTAINED</text>
+    <rect x="72" y="38" width="70" height="8" rx="4" fill="#57ff87" filter="url(#smallGlow)"/>
+    <g fill="#57ff87" opacity=".85"><circle cx="88" cy="347" r="4"/><circle cx="107" cy="347" r="4"/><circle cx="126" cy="347" r="4"/></g>
   </g>
 
   <!-- armored hoses, stylized only -->
