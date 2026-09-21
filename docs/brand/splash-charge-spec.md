@@ -35,12 +35,16 @@ Copper Gloxide is fictional in-world chemistry. Its visual role is to provide a 
 
 ### Cylinder construction
 - blackened metal end caps
-- mechanical locking collars
+- precision-machined locking collars
 - reinforced transparent containment body
 - narrow protective ribs / cage elements
-- small pressure/status glyphs
-- armored hose connection into the center module
+- recessed micro-status lights / nonverbal glyphs
+- sealed high-tech couplings into the center module
+- flush seams and compact composite/ceramic details where useful
 - no exposed fragile glass aesthetic
+- **no writing, ingredient names, G4 labels, or explanatory text on the canisters**
+
+The canisters are deliberately anonymous in normal startup mode. The names **G4**, Goblanium, Gobloleum, Tri-Glob, Liquid Goblium, Copper Gloxide, and the “smells minty” note belong to discovery-mode lore, documentation, easter eggs, or inspection views rather than the primary splash rendering.
 
 ### Fluid appearance
 The G4 reads as a dense luminous green suspension, not plain liquid.
@@ -60,11 +64,13 @@ The copper remains secondary. The cylinder reads green first, copper second.
 The center module is a compact hardened computer with:
 - graphite/blackened metal enclosure
 - protected corners
-- visible fasteners
-- small vents / service seams
+- precision recessed fasteners
+- flush service seams and narrow vents
 - one dominant rectangular screen
 - minimal physical controls
-- goblin-made labels / inspection marks used sparingly
+- recessed luminous status strips
+- sealed high-tech couplings and armored data/power runs
+- goblin-made labels / inspection marks used sparingly on the **computer or mounting frame only**
 
 The screen is not a timer.
 
@@ -237,6 +243,7 @@ The design should also crop gracefully to wider desktop/tablet layouts.
 
 Reject a future rendering if:
 - the cylinders look like ordinary bottles
+- any ingredient name, G4 label, or explanatory writing appears on the canisters
 - the computer looks like a kitchen timer
 - the sticky blocks the display
 - the copper dominates the G4 green
