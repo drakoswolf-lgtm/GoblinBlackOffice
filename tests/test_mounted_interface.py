@@ -78,3 +78,31 @@ def test_shared_runtime_contains_five_second_minimum_and_door_states():
     assert b"is-opening" in response.data
     assert b"is-whiteout" in response.data
     assert b"UPDATING" in response.data
+
+
+def test_curriculum_vitae_mounts_canonical_holographic_briefing():
+    client = Client(application, Response)
+
+    response = client.get("/onboarding")
+
+    # Development mode has no authenticated user, so the route redirects.
+    assert response.status_code in {200, 302}
+
+    runtime = client.get("/static/curriculum.js")
+    assert runtime.status_code == 200
+    assert b"data-curriculum" in runtime.data
+    assert b"is-speaking" in runtime.data
+    assert b"is-leaving-left" in runtime.data
+    assert b"data-tax-status" in runtime.data
+
+
+def test_curriculum_styles_include_holographic_command_layers():
+    client = Client(application, Response)
+
+    response = client.get("/static/gbo.css")
+
+    assert response.status_code == 200
+    assert b".curriculum-holo" in response.data
+    assert b".aeterna-briefing" in response.data
+    assert b"@keyframes holo-assemble" in response.data
+    assert b"@keyframes aeterna-breathe" in response.data
