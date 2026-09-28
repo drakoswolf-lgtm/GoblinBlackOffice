@@ -53,7 +53,7 @@
 - [x] Æterna cobalt/cyan command styling
 - [x] Æterna open / close interaction
 - [x] Curriculum VitÆ UI canon defined and approved
-- [ ] Curriculum VitÆ onboarding implementation
+- [x] Curriculum VitÆ onboarding implementation
 - [ ] Æterna persistent presence across specialist screens
 - [ ] Specialist card / navigation final click-through smoke pass
 - [ ] Mobile visual pass on phone-sized viewport
@@ -65,7 +65,7 @@
 - [x] Demo branch created
 - [x] Canon resources committed to demo branch
 - [x] Draft demo PR opened
-- [x] CI green on code-bearing head
+- [x] CI green on current code-bearing head
 - [ ] Human visual / canon review
 - [ ] Mark PR ready
 - [ ] Merge clickable build
