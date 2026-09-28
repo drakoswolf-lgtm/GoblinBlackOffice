@@ -88,7 +88,38 @@ def onboarding():
     if user is None: return redirect(url_for("login"))
     errors = ()
     if request.method == "POST":
-        updated, errors = complete_onboarding(user, business_name=request.form.get("business_name", ""), currency=request.form.get("currency", "CAD"))
+        updated, errors = complete_onboarding(
+            user,
+            business_name=request.form.get("business_name", ""),
+            currency=request.form.get("currency", "CAD"),
+            operating_name=request.form.get("operating_name", ""),
+            business_type=request.form.get("business_type", ""),
+            legal_structure=request.form.get("legal_structure", ""),
+            operating_model=request.form.get("operating_model", ""),
+            address_line1=request.form.get("address_line1", ""),
+            address_line2=request.form.get("address_line2", ""),
+            city=request.form.get("city", ""),
+            region=request.form.get("region", ""),
+            postal_code=request.form.get("postal_code", ""),
+            country=request.form.get("country", ""),
+            website=request.form.get("website", ""),
+            service_area=request.form.get("service_area", ""),
+            business_phone=request.form.get("business_phone", ""),
+            business_email=request.form.get("business_email", ""),
+            parent_business_name=request.form.get("parent_business_name", ""),
+            subsidiaries=request.form.get("subsidiaries", ""),
+            franchise_status=request.form.get("franchise_status", ""),
+            franchisor_name=request.form.get("franchisor_name", ""),
+            fiscal_year_end=request.form.get("fiscal_year_end", ""),
+            tax_registration_status=request.form.get("tax_registration_status", ""),
+            gst_hst_number=request.form.get("gst_hst_number", ""),
+            provincial_tax_number=request.form.get("provincial_tax_number", ""),
+            tax_notes=request.form.get("tax_notes", ""),
+            payment_terms=request.form.get("payment_terms", ""),
+            workforce_model=request.form.get("workforce_model", ""),
+            accounting_platform=request.form.get("accounting_platform", ""),
+            typical_services=request.form.get("typical_services", ""),
+        )
         if updated is not None: return redirect(url_for("index"))
     return render_template("office/onboarding.html", user=user, errors=errors, sticky_lines=_sticky_payload())
 
