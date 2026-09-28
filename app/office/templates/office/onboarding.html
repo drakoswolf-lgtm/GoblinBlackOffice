@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="/static/gbo.css">
 </head>
 <body>
+{% include "office/_splash.html" %}
+<script id="gbo-sticky-lines" type="application/json">{{ sticky_lines|tojson }}</script>
 <main class="auth-shell">
   <section class="auth-card">
     <div class="brand"><span class="brand-mark">Æ</span><span>Æterna · Office Setup</span></div>
@@ -23,5 +25,6 @@
     </form>
   </section>
 </main>
+<script src="/static/gbo.js" defer></script>
 </body>
 </html>
