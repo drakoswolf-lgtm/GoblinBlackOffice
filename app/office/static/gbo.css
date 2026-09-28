@@ -148,3 +148,131 @@ pre.scope { white-space: pre-wrap; font: inherit; line-height: 1.6; color: #d8dd
   .button, button { width: 100%; }
   .button-row { flex-direction: column; }
 }
+
+
+/* Canon startup sequence */
+body.splash-active { overflow: hidden; }
+.gbo-splash {
+  position: fixed; inset: 0; z-index: 1000; background: #050708; overflow: hidden;
+}
+.gbo-splash[hidden] { display: none; }
+.gbo-splash-wall {
+  position: relative; width: 100%; height: 100%; overflow: hidden;
+  background: #050708 url("/canon/startup/canon-startup-charge.webp") center/cover no-repeat;
+}
+.gbo-charge {
+  position: absolute; inset: 0; z-index: 3;
+  background: url("/canon/startup/canon-startup-charge.webp") center/cover no-repeat;
+  transition: opacity .28s ease, filter .25s linear;
+  filter: saturate(calc(.9 + var(--load, 0) * .35)) brightness(calc(.92 + var(--load, 0) * .2));
+}
+.gbo-cylinder, .gbo-controller { display: none; }
+
+.gbo-controller-screen {
+  position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%);
+  width: min(29vw, 180px); aspect-ratio: 1; border-radius: 22px;
+}
+.gbo-progress-ring {
+  --progress: 0;
+  width: 100%; aspect-ratio: 1; border-radius: 50%;
+  display: grid; place-items: center;
+  background:
+    radial-gradient(circle at center, #06110d 0 55%, transparent 56%),
+    conic-gradient(#46ff83 calc(var(--progress) * 1%), rgba(49,88,67,.55) 0);
+  box-shadow: 0 0 22px rgba(70,255,131,.22);
+  color: #eaffef; font-weight: 900; font-variant-numeric: tabular-nums;
+}
+.gbo-controller-screen > strong {
+  display: block; margin-top: 10px; color: #67ff91; text-align: center;
+  font-size: .72rem; letter-spacing: .18em;
+}
+.gbo-sticky {
+  position: absolute; left: 53%; top: 58%; width: min(34vw, 185px); z-index: 5;
+  padding: 11px 12px 13px; border: 1px solid rgba(85,66,30,.35); border-radius: 2px;
+  background: #e7d59b; color: #242016; box-shadow: 0 8px 24px rgba(0,0,0,.3);
+  transform: rotate(-3deg); animation: sticky-flicker 2.6s steps(1,end) infinite;
+}
+.gbo-sticky b { display: block; color: #a61f23; font-size: .68rem; line-height: 1.2; }
+.gbo-sticky span { display: block; margin-top: 8px; font-size: .78rem; line-height: 1.25; }
+
+.gbo-breach, .gbo-access-door, .gbo-whiteout {
+  position: absolute; inset: 0; pointer-events: none;
+}
+.gbo-breach {
+  z-index: 8; opacity: 0;
+  background:
+    radial-gradient(circle at center, rgba(53,255,141,.94) 0, rgba(28,208,172,.76) 18%, rgba(10,45,28,.1) 42%, transparent 66%);
+  mix-blend-mode: screen;
+}
+.gbo-access-door {
+  z-index: 7; opacity: 0;
+  background: url("/canon/startup/canon-access-door-closed.webp") center/cover no-repeat;
+}
+.gbo-door-half, .gbo-door-seam { display: none; }
+.gbo-splash.is-breaching .gbo-charge { opacity: .08; }
+.gbo-splash.is-breaching .gbo-breach { animation: breach-flash .62s ease-out both; }
+.gbo-splash.is-door .gbo-access-door { opacity: 1; transition: opacity .2s ease; }
+.gbo-splash.is-opening .gbo-access-door {
+  background-image: url("/canon/startup/canon-access-door-opening.webp");
+  transform: scale(1.018); transition: transform .9s cubic-bezier(.2,.7,.2,1);
+}
+.gbo-whiteout { z-index: 12; background: #fff; opacity: 0; }
+.gbo-splash.is-whiteout .gbo-whiteout { animation: whiteout .55s ease-out forwards; }
+
+@keyframes sticky-flicker {
+  0%, 93%, 100% { filter: brightness(1); }
+  94% { filter: brightness(.92); }
+  96% { filter: brightness(1.06); }
+}
+@keyframes breach-flash {
+  0% { opacity: 0; transform: scale(.8); }
+  28% { opacity: 1; transform: scale(1.02); }
+  100% { opacity: .18; transform: scale(1.16); }
+}
+@keyframes whiteout {
+  0% { opacity: 0; }
+  35% { opacity: .92; }
+  100% { opacity: 1; }
+}
+
+/* Cmdr. Æterna persistent command advice */
+.aeterna-advice {
+  position: fixed; right: 18px; bottom: 18px; z-index: 100;
+  width: min(360px, calc(100vw - 24px));
+}
+.aeterna-toggle {
+  width: auto; min-width: 220px; margin-left: auto; display: flex; gap: 10px; align-items: center;
+  border-color: #1e6bff; color: #dff8ff;
+  background: linear-gradient(180deg, rgba(7,24,45,.96), rgba(5,14,28,.96));
+  box-shadow: 0 0 0 1px rgba(57,223,255,.16), 0 16px 40px rgba(0,0,0,.35);
+}
+.aeterna-toggle:hover { color: #fff; background: #071a31; }
+.aeterna-toggle img, .aeterna-panel-head img {
+  width: 42px; height: 42px; border-radius: 10px; object-fit: cover; object-position: center 25%;
+  border: 1px solid rgba(57,223,255,.5);
+}
+.aeterna-toggle span, .aeterna-panel-head div { display: grid; text-align: left; }
+.aeterna-toggle small, .aeterna-panel-head small { color: #6fdfff; font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; }
+.aeterna-panel {
+  display: none; margin-top: 8px; padding: 16px;
+  border: 1px solid rgba(30,107,255,.78); border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(7,22,40,.98), rgba(5,14,27,.98));
+  box-shadow: 0 20px 60px rgba(0,0,0,.42), inset 0 0 28px rgba(57,223,255,.035);
+}
+.aeterna-advice.is-open .aeterna-panel { display: block; }
+.aeterna-panel-head { display: flex; gap: 11px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid rgba(57,223,255,.16); }
+.aeterna-panel p { color: #c8eaf3; line-height: 1.5; }
+.aeterna-actions { display: grid; gap: 8px; }
+.aeterna-actions a {
+  min-height: 42px; display: flex; align-items: center; padding: 9px 11px;
+  border: 1px solid rgba(57,223,255,.22); border-radius: 8px; text-decoration: none;
+  background: rgba(30,107,255,.08); color: #9eeeff;
+}
+
+@media (max-width: 760px) {
+  .gbo-controller-screen { width: min(38vw, 150px); }
+  .gbo-sticky { left: 50%; top: 61%; width: min(42vw, 170px); }
+  .aeterna-advice { right: 12px; bottom: 12px; }
+  .aeterna-toggle { min-width: 0; }
+  .aeterna-advice:not(.is-open) .aeterna-toggle span { display: none; }
+}
