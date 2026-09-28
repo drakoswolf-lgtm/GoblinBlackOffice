@@ -64,7 +64,7 @@
 - [x] Demo branch created
 - [x] Canon resources committed to demo branch
 - [x] Draft demo PR opened
-- [ ] CI green on current head
+- [x] CI green on code-bearing head
 - [ ] Human visual / canon review
 - [ ] Mark PR ready
 - [ ] Merge clickable build
