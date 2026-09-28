@@ -39,6 +39,13 @@ configure_same_origin_protection(office_app)
 
 _canon_root = Path(__file__).resolve().parents[2] / "resources" / "canon"
 
+def _sticky_payload():
+    from app.office.loading_sticky import LOAD_BEARING_STICKY_LINES
+    return [
+        {"text": line.text, "min": line.min_progress, "max": line.max_progress, "weight": line.weight}
+        for line in LOAD_BEARING_STICKY_LINES
+    ]
+
 @office_app.before_request
 def _office_auth_gate():
     if not office_app.config.get("GBO_AUTH_REQUIRED", False): return None
@@ -83,7 +90,7 @@ def onboarding():
     if request.method == "POST":
         updated, errors = complete_onboarding(user, business_name=request.form.get("business_name", ""), currency=request.form.get("currency", "CAD"))
         if updated is not None: return redirect(url_for("index"))
-    return render_template("office/onboarding.html", user=user, errors=errors)
+    return render_template("office/onboarding.html", user=user, errors=errors, sticky_lines=_sticky_payload())
 
 @office_app.route("/logout", methods=["POST"])
 def logout():
@@ -119,12 +126,7 @@ def index():
         {"name":"Patch","role":"Operations & work orders","status":"rough-in","href":"/workflows/patch","note":"Loose ends become work orders. Work orders become finished work."},
         {"name":"Grimscratch","role":"Risk & compliance","status":"rough-in","href":"/workflows/grimscratch","note":"Find the expensive assumption before it becomes an expensive fact."},
     ]
-    from app.office.loading_sticky import LOAD_BEARING_STICKY_LINES
-    sticky_lines = [
-        {"text": line.text, "min": line.min_progress, "max": line.max_progress, "weight": line.weight}
-        for line in LOAD_BEARING_STICKY_LINES
-    ]
-    return render_template("office/index.html", specialists=specialists, user=current_user(), sticky_lines=sticky_lines)
+    return render_template("office/index.html", specialists=specialists, user=current_user(), sticky_lines=_sticky_payload())
 
 @office_app.route("/canon/<path:asset_path>")
 def canon_asset(asset_path: str):
