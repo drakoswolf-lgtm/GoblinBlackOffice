@@ -2,7 +2,8 @@
 from __future__ import annotations
 import hmac
 import os
-from flask import Flask, redirect, render_template, request, session, url_for
+from pathlib import Path
+from flask import Flask, redirect, render_template, request, send_from_directory, session, url_for
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from app.core.runtime import office_store
 from app.ledgergut.web import app as ledgergut_app
@@ -35,6 +36,8 @@ office_app.config["SESSION_COOKIE_SECURE"] = _auth_required
 office_app.config["GBO_AUTH_REQUIRED"] = _auth_required
 office_app.config["GBO_INVITE_TOKEN"] = _invite_token
 configure_same_origin_protection(office_app)
+
+_canon_root = Path(__file__).resolve().parents[2] / "resources" / "canon"
 
 @office_app.before_request
 def _office_auth_gate():
@@ -116,7 +119,16 @@ def index():
         {"name":"Patch","role":"Operations & work orders","status":"rough-in","href":"/workflows/patch","note":"Loose ends become work orders. Work orders become finished work."},
         {"name":"Grimscratch","role":"Risk & compliance","status":"rough-in","href":"/workflows/grimscratch","note":"Find the expensive assumption before it becomes an expensive fact."},
     ]
-    return render_template("office/index.html", specialists=specialists, user=current_user())
+    from app.office.loading_sticky import LOAD_BEARING_STICKY_LINES
+    sticky_lines = [
+        {"text": line.text, "min": line.min_progress, "max": line.max_progress, "weight": line.weight}
+        for line in LOAD_BEARING_STICKY_LINES
+    ]
+    return render_template("office/index.html", specialists=specialists, user=current_user(), sticky_lines=sticky_lines)
+
+@office_app.route("/canon/<path:asset_path>")
+def canon_asset(asset_path: str):
+    return send_from_directory(_canon_root, asset_path)
 
 @office_app.route("/health")
 def health(): return {"status":"ok","service":"goblin-black-office"}
