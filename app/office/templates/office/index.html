@@ -7,6 +7,27 @@
   <link rel="stylesheet" href="/static/gbo.css">
 </head>
 <body>
+{% include "office/_splash.html" %}
+<script id="gbo-sticky-lines" type="application/json">{{ sticky_lines|tojson }}</script>
+
+<aside class="aeterna-advice" data-aeterna-advice aria-label="Cmdr. Æterna Skyeward advice">
+  <button class="aeterna-toggle" type="button" data-aeterna-toggle aria-expanded="false">
+    <img src="/canon/characters/canon-aeterna-headshot.webp" alt="Cmdr. Æterna Skyeward">
+    <span><strong>Cmdr. Skyeward</strong><small>Command advice</small></span>
+  </button>
+  <div class="aeterna-panel">
+    <div class="aeterna-panel-head">
+      <img src="/canon/characters/canon-aeterna-headshot.webp" alt="">
+      <div><strong>Cmdr. Æterna Skyeward</strong><small>Office command layer</small></div>
+    </div>
+    <p>Start with the record that anchors the work. I’ll route the paperwork to the correct goblin.</p>
+    <div class="aeterna-actions">
+      <a href="/records">Set up a client or project</a>
+      <a href="/signor/">Draft an agreement</a>
+    </div>
+  </div>
+</aside>
+
 <main class="shell">
   <header class="topbar">
     <a class="brand" href="/"><span class="brand-mark">GBO</span><span>Goblin Black Office</span></a>
@@ -53,5 +74,6 @@
 
   <footer class="footer">Serious software. Unnecessarily memorable employees.</footer>
 </main>
+<script src="/static/gbo.js" defer></script>
 </body>
 </html>
