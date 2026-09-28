@@ -71,14 +71,84 @@ def current_business_id() -> str:
     return str(session.get("business_id") or fallback_business_id)
 
 
-def complete_onboarding(user: User, *, business_name: str, currency: str) -> tuple[User | None, tuple[str, ...]]:
+def complete_onboarding(
+    user: User,
+    *,
+    business_name: str,
+    currency: str,
+    operating_name: str = "",
+    business_type: str = "",
+    legal_structure: str = "",
+    operating_model: str = "",
+    address_line1: str = "",
+    address_line2: str = "",
+    city: str = "",
+    region: str = "",
+    postal_code: str = "",
+    country: str = "",
+    website: str = "",
+    service_area: str = "",
+    business_phone: str = "",
+    business_email: str = "",
+    parent_business_name: str = "",
+    subsidiaries: str = "",
+    franchise_status: str = "",
+    franchisor_name: str = "",
+    fiscal_year_end: str = "",
+    tax_registration_status: str = "",
+    gst_hst_number: str = "",
+    provincial_tax_number: str = "",
+    tax_notes: str = "",
+    payment_terms: str = "",
+    workforce_model: str = "",
+    accounting_platform: str = "",
+    typical_services: str = "",
+) -> tuple[User | None, tuple[str, ...]]:
     name = business_name.strip()
     code = currency.strip().upper()
     errors: list[str] = []
     if not name: errors.append("Business name is required.")
     if len(code) != 3 or not code.isalpha(): errors.append("Currency must be a three-letter code such as CAD.")
     if errors: return None, tuple(errors)
-    office_store.businesses.save(Business(business_id=user.business_id, name=name, reporting_currency=code))
+
+    def optional(value: str) -> str | None:
+        clean = value.strip()
+        return clean or None
+
+    office_store.businesses.save(
+        Business(
+            business_id=user.business_id,
+            name=name,
+            reporting_currency=code,
+            operating_name=optional(operating_name),
+            business_type=optional(business_type),
+            legal_structure=optional(legal_structure),
+            operating_model=optional(operating_model),
+            address_line1=optional(address_line1),
+            address_line2=optional(address_line2),
+            city=optional(city),
+            region=optional(region),
+            postal_code=optional(postal_code),
+            country=optional(country),
+            website=optional(website),
+            service_area=optional(service_area),
+            business_phone=optional(business_phone),
+            business_email=optional(business_email),
+            parent_business_name=optional(parent_business_name),
+            subsidiaries=optional(subsidiaries),
+            franchise_status=optional(franchise_status),
+            franchisor_name=optional(franchisor_name),
+            fiscal_year_end=optional(fiscal_year_end),
+            tax_registration_status=optional(tax_registration_status),
+            gst_hst_number=optional(gst_hst_number),
+            provincial_tax_number=optional(provincial_tax_number),
+            tax_notes=optional(tax_notes),
+            payment_terms=optional(payment_terms),
+            workforce_model=optional(workforce_model),
+            accounting_platform=optional(accounting_platform),
+            typical_services=optional(typical_services),
+        )
+    )
     updated = replace(user, onboarding_complete=True)
     office_store.users.save(updated)
     return updated, ()
