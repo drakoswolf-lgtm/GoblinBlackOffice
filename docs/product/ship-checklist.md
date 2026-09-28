@@ -52,7 +52,8 @@
 - [x] Persistent Æterna advice box on Office Desk
 - [x] Æterna cobalt/cyan command styling
 - [x] Æterna open / close interaction
-- [ ] Curriculum VitÆ onboarding screens — **requires canon approval before commit**
+- [x] Curriculum VitÆ UI canon defined and approved
+- [ ] Curriculum VitÆ onboarding implementation
 - [ ] Æterna persistent presence across specialist screens
 - [ ] Specialist card / navigation final click-through smoke pass
 - [ ] Mobile visual pass on phone-sized viewport
