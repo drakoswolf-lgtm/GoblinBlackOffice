@@ -3,25 +3,290 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Office setup · Goblin Black Office</title>
+  <title>Curriculum VitÆ · Goblin Black Office</title>
   <link rel="stylesheet" href="/static/gbo.css">
 </head>
-<body>
-<main class="auth-shell">
-  <section class="auth-card">
-    <div class="brand"><span class="brand-mark">Æ</span><span>Æterna · Office Setup</span></div>
-    <p class="eyebrow">Final setup</p>
-    <h1>Name the place.</h1>
-    <p class="lead">I only need the essentials before the specialists start touching paperwork.</p>
-    {% if errors %}<div class="errors">{% for error in errors %}<div>{{ error }}</div>{% endfor %}</div>{% endif %}
-    <form method="post">
-      <label for="business-name">Business name</label>
-      <input id="business-name" name="business_name" required placeholder="Your contracting company">
-      <label for="currency">Reporting currency</label>
-      <select id="currency" name="currency"><option>CAD</option><option>USD</option><option>EUR</option><option>GBP</option></select>
-      <button type="submit">Open the Office</button>
-    </form>
+<body class="curriculum-body">
+{% include "office/_splash.html" %}
+<script id="gbo-sticky-lines" type="application/json">{{ sticky_lines|tojson }}</script>
+
+<main class="curriculum-shell" data-curriculum>
+  <div class="black-office-environment" aria-hidden="true">
+    <div class="office-backwall"></div>
+    <div class="office-console">
+      <div class="desk-projector desk-projector-left"></div>
+      <div class="desk-projector desk-projector-center"></div>
+      <div class="desk-projector desk-projector-right"></div>
+    </div>
+    <div class="office-lightbar"></div>
+    <img class="office-insignia" src="/canon/brand/canon-app-badge.webp" alt="">
+  </div>
+
+  <section class="curriculum-holo" aria-label="Curriculum VitÆ Intel briefing">
+    <header class="curriculum-commandbar">
+      <div class="curriculum-brand">
+        <img src="/canon/brand/canon-app-badge.webp" alt="">
+        <div><strong>CURRICULUM VITÆ</strong><span>INTEL // FIRST ENTRY</span></div>
+      </div>
+      <div class="curriculum-secure"><span></span> SECURE CHANNEL</div>
+    </header>
+
+    <div class="curriculum-grid">
+      <nav class="curriculum-rail" aria-label="Briefing sections">
+        <div class="rail-caption">BRIEFING FILE</div>
+        {% set steps = ["Commander","Organization","Structure","Finance & Tax","Operations","Deployment"] %}
+        {% for step in steps %}
+        <button type="button" class="rail-step{% if loop.first %} is-active{% endif %}" data-step-target="{{ loop.index0 }}">
+          <span class="rail-index">0{{ loop.index }}</span>
+          <span class="rail-label">{{ step }}</span>
+          <span class="rail-trace" aria-hidden="true"></span>
+        </button>
+        {% endfor %}
+      </nav>
+
+      <div class="curriculum-workspace" data-parallax-stage>
+        <div class="holo-depth-grid" aria-hidden="true"></div>
+        <div class="holo-projector-beam" aria-hidden="true"></div>
+        <div class="holo-orbit holo-orbit-one" aria-hidden="true"></div>
+        <div class="holo-orbit holo-orbit-two" aria-hidden="true"></div>
+        <aside class="aeterna-briefing" aria-label="Cmdr. Æterna Skyeward">
+          <div class="aeterna-holo-frame">
+            <div class="aeterna-projection-rings" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div class="aeterna-scanline" aria-hidden="true"></div>
+            <img src="/canon/characters/canon-aeterna-headshot.webp" alt="Cmdr. Æterna Skyeward">
+            <div class="aeterna-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+          <div class="aeterna-caption">
+            <strong>CMDR. ÆTERNA SKYEWARD</strong>
+            <span>COMMAND ADVISORY // ACTIVE</span>
+          </div>
+        </aside>
+
+        <div class="curriculum-statusbar">
+          <div>
+            <span class="status-label">INTEL COMPLETENESS</span>
+            <strong data-completeness-label>12%</strong>
+          </div>
+          <div class="intel-meter" aria-hidden="true"><span data-completeness-bar></span></div>
+          <span class="status-readout" data-section-readout>01 / COMMANDER</span>
+        </div>
+
+        {% if errors %}
+        <div class="errors curriculum-errors">{% for error in errors %}<div>{{ error }}</div>{% endfor %}</div>
+        {% endif %}
+
+        <div class="intel-table-plane">
+        <form method="post" class="curriculum-form" data-curriculum-form>
+          <section class="curriculum-screen is-active" data-screen="0" data-percent="12"
+                   data-line="It’s about time you got here, Commander. The troops are getting restless. Let’s get you into Intel for a quick briefing. Right this way, sir.">
+            <div class="screen-kicker">01 // COMMANDER IDENTITY</div>
+            <h1>Confirm command authority.</h1>
+            <p class="screen-copy">Your secure account is already established. Intel just needs to confirm who is sitting in the chair before we map the operation.</p>
+            <div class="holo-panel">
+              <div class="holo-panel-head"><strong>COMMANDER FILE</strong><span>IDENTITY VERIFIED</span></div>
+              <div class="intel-fields">
+                <label>Commander name
+                  <input value="{{ user.display_name }}" readonly aria-readonly="true">
+                </label>
+                <label>Secure account
+                  <input value="{{ user.email }}" readonly aria-readonly="true">
+                </label>
+                <div class="intel-note wide">
+                  <strong>ACCESS CREDENTIALS SECURED</strong>
+                  <span>Password was established at account creation and is not displayed inside Intel.</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="curriculum-screen" data-screen="1" data-percent="38"
+                   data-line="Good. Now tell Intel what kind of machine we’re running.">
+            <div class="screen-kicker">02 // ORGANIZATION PROFILE</div>
+            <h1>Identify the operation.</h1>
+            <p class="screen-copy">This becomes the shared organization record used by every specialist.</p>
+            <div class="holo-panel">
+              <div class="holo-panel-head"><strong>ORGANIZATION IDENTITY</strong><span>SHARED INTEL</span></div>
+              <div class="intel-fields">
+                <label class="wide">Legal business name
+                  <input name="business_name" required autocomplete="organization" placeholder="Registered or legal business name">
+                </label>
+                <label>Operating / trade name
+                  <input name="operating_name" placeholder="If different">
+                </label>
+                <label>Business type
+                  <input name="business_type" required placeholder="Contracting, retail, consulting…">
+                </label>
+                <label>Legal structure
+                  <select name="legal_structure">
+                    <option value="">Select structure</option>
+                    <option>Sole proprietorship</option><option>Partnership</option><option>Corporation</option>
+                    <option>Non-profit</option><option>Co-operative</option><option>Other</option>
+                  </select>
+                </label>
+                <label>Reporting currency
+                  <select name="currency" required>
+                    <option>CAD</option><option>USD</option><option>EUR</option><option>GBP</option>
+                  </select>
+                </label>
+                <label>Operating model
+                  <select name="operating_model" data-operating-model>
+                    <option value="">Select model</option><option>Physical</option><option>Online</option><option>Hybrid</option><option>Mobile / service-area</option>
+                  </select>
+                </label>
+                <label>Website
+                  <input name="website" type="url" placeholder="https://">
+                </label>
+                <div class="conditional-grid wide" data-address-block>
+                  <label class="wide">Street address
+                    <input name="address_line1" autocomplete="street-address" placeholder="Physical or registered address">
+                  </label>
+                  <label>Address line 2
+                    <input name="address_line2">
+                  </label>
+                  <label>City
+                    <input name="city" autocomplete="address-level2">
+                  </label>
+                  <label>Province / state
+                    <input name="region" autocomplete="address-level1">
+                  </label>
+                  <label>Postal / ZIP code
+                    <input name="postal_code" autocomplete="postal-code">
+                  </label>
+                  <label>Country
+                    <input name="country" autocomplete="country-name" placeholder="Canada">
+                  </label>
+                </div>
+                <label class="wide">Service area / operating jurisdiction
+                  <input name="service_area" placeholder="City, region, province/state, or online market">
+                </label>
+                <label>Business email
+                  <input name="business_email" type="email" autocomplete="email">
+                </label>
+                <label>Business phone
+                  <input name="business_phone" type="tel" autocomplete="tel">
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <section class="curriculum-screen" data-screen="2" data-percent="57"
+                   data-line="Now the family tree. If anyone owns, reports to, franchises, or hides behind anyone else, I want it mapped.">
+            <div class="screen-kicker">03 // STRUCTURE & RELATIONSHIPS</div>
+            <h1>Map the chain of command.</h1>
+            <p class="screen-copy">Related organizations change how records, contracts and reporting should be interpreted.</p>
+            <div class="holo-panel">
+              <div class="holo-panel-head"><strong>ORGANIZATION RELATIONSHIPS</strong><span>CONDITIONAL</span></div>
+              <div class="intel-fields">
+                <label>Parent company
+                  <input name="parent_business_name" placeholder="Leave blank if independent">
+                </label>
+                <label>Franchise status
+                  <select name="franchise_status" data-franchise-status>
+                    <option value="">Not specified</option><option value="Independent">Independent</option>
+                    <option value="Franchisee">Franchisee</option><option value="Franchisor">Franchisor</option>
+                  </select>
+                </label>
+                <label class="wide">Subsidiaries / divisions / related entities
+                  <textarea name="subsidiaries" class="short" placeholder="One per line or a short description"></textarea>
+                </label>
+                <label class="wide conditional-field" data-franchisor-field>Franchisor / franchise system
+                  <input name="franchisor_name" placeholder="Shown when franchise structure applies">
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <section class="curriculum-screen" data-screen="3" data-percent="76"
+                   data-line="Ledgergut has been staring at this section through the glass. Let’s give him something useful.">
+            <div class="screen-kicker">04 // FINANCE & TAX</div>
+            <h1>Establish the financial defaults.</h1>
+            <p class="screen-copy">We record what you tell us. The Office does not independently decide your tax obligations.</p>
+            <div class="holo-panel">
+              <div class="holo-panel-head"><strong>FINANCIAL INTELLIGENCE</strong><span>FACTS, NOT TAX ADVICE</span></div>
+              <div class="intel-fields">
+                <label>Fiscal year-end
+                  <input name="fiscal_year_end" placeholder="e.g. December 31">
+                </label>
+                <label>Default payment terms
+                  <select name="payment_terms">
+                    <option value="">Not set</option><option>Due on receipt</option><option>Net 7</option><option>Net 15</option><option>Net 30</option><option>Custom</option>
+                  </select>
+                </label>
+                <label>GST / HST registration
+                  <select name="tax_registration_status" data-tax-status>
+                    <option value="">Not specified</option><option value="Registered">Registered</option>
+                    <option value="Not registered">Not registered</option><option value="Unsure">Unsure</option>
+                  </select>
+                </label>
+                <label class="conditional-field" data-gst-field>GST / HST number
+                  <input name="gst_hst_number" placeholder="If registered">
+                </label>
+                <label>Provincial / state tax number
+                  <input name="provincial_tax_number" placeholder="PST, QST, sales tax, etc.">
+                </label>
+                <label>Accounting platform
+                  <input name="accounting_platform" placeholder="QuickBooks, Xero, spreadsheet…">
+                </label>
+                <label class="wide">Tax notes
+                  <textarea name="tax_notes" class="short" placeholder="Exemptions, unusual handling, accountant instructions, or unresolved items"></textarea>
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <section class="curriculum-screen" data-screen="4" data-percent="91"
+                   data-line="Last useful questions. Then I release you into the building.">
+            <div class="screen-kicker">05 // OPERATIONS</div>
+            <h1>Teach the Office how you work.</h1>
+            <p class="screen-copy">These defaults stop SigNor, Ledgergut and Squarmish from asking the same questions independently.</p>
+            <div class="holo-panel">
+              <div class="holo-panel-head"><strong>OPERATING DEFAULTS</strong><span>SHARED CONTEXT</span></div>
+              <div class="intel-fields">
+                <label>Workforce model
+                  <select name="workforce_model">
+                    <option value="">Not specified</option><option>Owner-operator</option><option>Employees</option>
+                    <option>Subcontractors</option><option>Employees + subcontractors</option><option>Other</option>
+                  </select>
+                </label>
+                <label class="wide">Typical services / work
+                  <textarea name="typical_services" placeholder="What does this organization usually sell, build, provide, repair, manage, or deliver?"></textarea>
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <section class="curriculum-screen deployment-screen" data-screen="5" data-percent="100"
+                   data-line="That’ll do, Commander. Intel has enough to work. I’ll stay on comms.">
+            <div class="screen-kicker">06 // DEPLOYMENT</div>
+            <h1>Command file ready.</h1>
+            <p class="screen-copy">The Office now has a common intelligence base. Every specialist starts from the same record.</p>
+            <div class="deployment-grid">
+              <div class="deployment-card"><span>SIGNOR</span><strong>Define the work</strong><p>Scope, agreements, terms.</p></div>
+              <div class="deployment-card"><span>LEDGERGUT</span><strong>Capture the costs</strong><p>Receipts and expenses.</p></div>
+              <div class="deployment-card command-card"><span>COMMAND</span><strong>Open Office Desk</strong><p>See what needs attention.</p></div>
+            </div>
+            <div class="deployment-note">Consequential actions still require command authorization.</div>
+          </section>
+
+          <footer class="curriculum-controls">
+            <button type="button" class="curriculum-back secondary" data-curriculum-back disabled>BACK</button>
+            <div class="curriculum-progress"><span data-curriculum-progress></span></div>
+            <button type="button" class="curriculum-next" data-curriculum-next>RIGHT THIS WAY</button>
+            <button type="submit" class="curriculum-deploy" data-curriculum-deploy hidden>ENTER THE BLACK OFFICE</button>
+          </footer>
+        </form>
+        </div>
+
+        <div class="aeterna-dialogue" aria-live="polite">
+          <span class="dialogue-call">Æ</span>
+          <p data-aeterna-line>It’s about time you got here, Commander. The troops are getting restless. Let’s get you into Intel for a quick briefing. Right this way, sir.</p>
+        </div>
+      </div>
+    </div>
   </section>
 </main>
+
+<script src="/static/gbo.js" defer></script>
+<script src="/static/curriculum.js" defer></script>
 </body>
 </html>

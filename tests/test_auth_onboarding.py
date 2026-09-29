@@ -29,7 +29,25 @@ def test_account_onboarding_and_specialist_access(monkeypatch):
 
     onboarded = client.post(
         "/onboarding",
-        data={"business_name": "Test Forge Contracting", "currency": "CAD"},
+        data={
+            "business_name": "Test Forge Contracting",
+            "operating_name": "Test Forge",
+            "business_type": "General contracting",
+            "legal_structure": "Corporation",
+            "operating_model": "Hybrid",
+            "address_line1": "123 Test Street",
+            "city": "Vancouver",
+            "region": "BC",
+            "postal_code": "V0V 0V0",
+            "country": "Canada",
+            "service_area": "Metro Vancouver",
+            "currency": "CAD",
+            "tax_registration_status": "Registered",
+            "gst_hst_number": "123456789RT0001",
+            "payment_terms": "Net 15",
+            "workforce_model": "Employees + subcontractors",
+            "typical_services": "Renovations and property maintenance",
+        },
     )
     assert onboarded.status_code == 302
     assert onboarded.headers["Location"].endswith("/")
@@ -50,6 +68,16 @@ def test_account_onboarding_and_specialist_access(monkeypatch):
         assert business is not None
         assert business.name == "Test Forge Contracting"
         assert business.reporting_currency == "CAD"
+        assert business.operating_name == "Test Forge"
+        assert business.business_type == "General contracting"
+        assert business.legal_structure == "Corporation"
+        assert business.operating_model == "Hybrid"
+        assert business.city == "Vancouver"
+        assert business.country == "Canada"
+        assert business.tax_registration_status == "Registered"
+        assert business.gst_hst_number == "123456789RT0001"
+        assert business.payment_terms == "Net 15"
+        assert business.workforce_model == "Employees + subcontractors"
 
 
 def test_registration_rejects_weak_password(monkeypatch):

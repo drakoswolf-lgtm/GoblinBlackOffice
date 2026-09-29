@@ -2,7 +2,8 @@
 from __future__ import annotations
 import hmac
 import os
-from flask import Flask, redirect, render_template, request, session, url_for
+from pathlib import Path
+from flask import Flask, redirect, render_template, request, send_from_directory, session, url_for
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from app.core.runtime import office_store
 from app.ledgergut.web import app as ledgergut_app
@@ -35,6 +36,15 @@ office_app.config["SESSION_COOKIE_SECURE"] = _auth_required
 office_app.config["GBO_AUTH_REQUIRED"] = _auth_required
 office_app.config["GBO_INVITE_TOKEN"] = _invite_token
 configure_same_origin_protection(office_app)
+
+_canon_root = Path(__file__).resolve().parents[2] / "resources" / "canon"
+
+def _sticky_payload():
+    from app.office.loading_sticky import LOAD_BEARING_STICKY_LINES
+    return [
+        {"text": line.text, "min": line.min_progress, "max": line.max_progress, "weight": line.weight}
+        for line in LOAD_BEARING_STICKY_LINES
+    ]
 
 @office_app.before_request
 def _office_auth_gate():
@@ -78,9 +88,40 @@ def onboarding():
     if user is None: return redirect(url_for("login"))
     errors = ()
     if request.method == "POST":
-        updated, errors = complete_onboarding(user, business_name=request.form.get("business_name", ""), currency=request.form.get("currency", "CAD"))
+        updated, errors = complete_onboarding(
+            user,
+            business_name=request.form.get("business_name", ""),
+            currency=request.form.get("currency", "CAD"),
+            operating_name=request.form.get("operating_name", ""),
+            business_type=request.form.get("business_type", ""),
+            legal_structure=request.form.get("legal_structure", ""),
+            operating_model=request.form.get("operating_model", ""),
+            address_line1=request.form.get("address_line1", ""),
+            address_line2=request.form.get("address_line2", ""),
+            city=request.form.get("city", ""),
+            region=request.form.get("region", ""),
+            postal_code=request.form.get("postal_code", ""),
+            country=request.form.get("country", ""),
+            website=request.form.get("website", ""),
+            service_area=request.form.get("service_area", ""),
+            business_phone=request.form.get("business_phone", ""),
+            business_email=request.form.get("business_email", ""),
+            parent_business_name=request.form.get("parent_business_name", ""),
+            subsidiaries=request.form.get("subsidiaries", ""),
+            franchise_status=request.form.get("franchise_status", ""),
+            franchisor_name=request.form.get("franchisor_name", ""),
+            fiscal_year_end=request.form.get("fiscal_year_end", ""),
+            tax_registration_status=request.form.get("tax_registration_status", ""),
+            gst_hst_number=request.form.get("gst_hst_number", ""),
+            provincial_tax_number=request.form.get("provincial_tax_number", ""),
+            tax_notes=request.form.get("tax_notes", ""),
+            payment_terms=request.form.get("payment_terms", ""),
+            workforce_model=request.form.get("workforce_model", ""),
+            accounting_platform=request.form.get("accounting_platform", ""),
+            typical_services=request.form.get("typical_services", ""),
+        )
         if updated is not None: return redirect(url_for("index"))
-    return render_template("office/onboarding.html", user=user, errors=errors)
+    return render_template("office/onboarding.html", user=user, errors=errors, sticky_lines=_sticky_payload())
 
 @office_app.route("/logout", methods=["POST"])
 def logout():
@@ -116,7 +157,11 @@ def index():
         {"name":"Patch","role":"Operations & work orders","status":"rough-in","href":"/workflows/patch","note":"Loose ends become work orders. Work orders become finished work."},
         {"name":"Grimscratch","role":"Risk & compliance","status":"rough-in","href":"/workflows/grimscratch","note":"Find the expensive assumption before it becomes an expensive fact."},
     ]
-    return render_template("office/index.html", specialists=specialists, user=current_user())
+    return render_template("office/index.html", specialists=specialists, user=current_user(), sticky_lines=_sticky_payload())
+
+@office_app.route("/canon/<path:asset_path>")
+def canon_asset(asset_path: str):
+    return send_from_directory(_canon_root, asset_path)
 
 @office_app.route("/health")
 def health(): return {"status":"ok","service":"goblin-black-office"}

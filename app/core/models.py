@@ -52,6 +52,33 @@ class Business:
     business_id: str
     name: str
     reporting_currency: str = "CAD"
+    operating_name: str | None = None
+    business_type: str | None = None
+    legal_structure: str | None = None
+    operating_model: str | None = None
+    address_line1: str | None = None
+    address_line2: str | None = None
+    city: str | None = None
+    region: str | None = None
+    postal_code: str | None = None
+    country: str | None = None
+    website: str | None = None
+    service_area: str | None = None
+    business_phone: str | None = None
+    business_email: str | None = None
+    parent_business_name: str | None = None
+    subsidiaries: str | None = None
+    franchise_status: str | None = None
+    franchisor_name: str | None = None
+    fiscal_year_end: str | None = None
+    tax_registration_status: str | None = None
+    gst_hst_number: str | None = None
+    provincial_tax_number: str | None = None
+    tax_notes: str | None = None
+    payment_terms: str | None = None
+    workforce_model: str | None = None
+    accounting_platform: str | None = None
+    typical_services: str | None = None
     status: RecordStatus = RecordStatus.ACTIVE
 
 

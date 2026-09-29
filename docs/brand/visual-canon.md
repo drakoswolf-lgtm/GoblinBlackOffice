@@ -327,15 +327,28 @@ Purpose:
 - move the user into initial business setup
 
 ### Visual treatment
-The onboarding should combine:
-- physical Black Office dossier / file / document language
-- graphite and paper surfaces
-- stamps, annotations, and personnel-file structure
-- Æterna's cyan/cobalt projected annotations layered over the physical material
+The onboarding is a **holographic command display projected over the Black Office environment**.
 
-This is the intentional meeting point between:
-- the goblins' physical world
-- Æterna's command interface
+It is not primarily a paper dossier, file folder, or document packet.
+
+The user remains visually inside the Black Office at all times, with the onboarding presented as a spatial command-layer projection led by Æterna.
+
+The intended meeting point is:
+- the **physical Black Office environment** beneath
+- Æterna's **cobalt/cyan command interface** above
+
+This means:
+- the environment remains physical, industrial, graphite, and near-future
+- the onboarding content appears as projected command surfaces, panes, overlays, rails, status instruments, and guided display states
+- Æterna's command layer visually sits over or within the environment rather than being represented as paper annotations over a file
+- physical Office artifacts may still appear as environmental detail, but they are supporting texture rather than the primary interaction model
+
+The primary interaction model is:
+- holographic
+- spatial
+- layered
+- command-led
+- projected over a physical Black Office backdrop
 
 ### Suggested orientation sequence
 1. Meet Æterna
@@ -344,6 +357,22 @@ This is the intentional meeting point between:
 4. Human authority / approval boundaries
 5. Your business / desk setup
 6. Enter the Black Office
+
+### Interaction model clarification
+
+Curriculum VitÆ should not be implemented as:
+- a paper intake packet
+- a physical personnel file as the main UI
+- a faux document wizard
+- a clipboard-style form stack
+
+Curriculum VitÆ should be implemented as:
+- a projected onboarding command interface
+- layered over the Black Office environment
+- guided by Æterna's command presence
+- using projected panes, progression rails, status instruments, and animated screen reconfiguration
+
+Physical desk or office elements may remain visible beneath or behind onboarding, but the onboarding itself is holographic.
 
 The exact copy remains editable. The concept and visual hierarchy are canonical.
 
@@ -375,7 +404,7 @@ Do not casually mix the two palettes.
 
 When the palettes meet, the reason should be obvious:
 - Æterna annotating a goblin record
-- Æterna appearing over a physical dossier
+- Æterna projecting command information over the physical Office environment
 - command intervention in the physical Office
 - a shared insignia rendered in the material language of its wearer
 
@@ -416,6 +445,9 @@ Do not reintroduce these without an explicit design change:
 - goblin collars without a visible role-color area
 - cyan/blue goblin interface as the default
 - green Æterna command UI as the default
+- Curriculum VitÆ implemented primarily as a paper dossier or document packet
+- physical file-folder onboarding as the dominant UI model
+- paper-first intake flow with holographic accents as the main treatment
 
 ---
 
