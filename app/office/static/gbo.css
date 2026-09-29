@@ -1357,3 +1357,64 @@ body.splash-active { overflow: hidden; }
   .curriculum-progress{grid-column:1/-1;grid-row:1}
   .aeterna-dialogue{bottom:114px}
 }
+
+
+/* Curriculum VitÆ canon correction: corporeal Æterna, holographic interface */
+.aeterna-briefing {
+  filter: drop-shadow(0 22px 32px rgba(0,0,0,.38));
+}
+.aeterna-holo-frame {
+  overflow: hidden;
+  border: 1px solid rgba(57,223,255,.32);
+  border-radius: 18px;
+  background: linear-gradient(180deg,rgba(8,20,28,.38),rgba(4,10,14,.16));
+  -webkit-mask-image: none;
+  mask-image: none;
+  box-shadow:
+    0 0 0 1px rgba(30,107,255,.08),
+    0 0 30px rgba(57,223,255,.11),
+    inset 0 0 24px rgba(57,223,255,.025);
+}
+.aeterna-holo-frame::before {
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(90deg,rgba(57,223,255,.22),transparent 18%) top left/62px 1px no-repeat,
+    linear-gradient(180deg,rgba(57,223,255,.22),transparent 18%) top left/1px 62px no-repeat,
+    linear-gradient(270deg,rgba(57,223,255,.16),transparent 18%) bottom right/62px 1px no-repeat,
+    linear-gradient(0deg,rgba(57,223,255,.16),transparent 18%) bottom right/1px 62px no-repeat;
+  filter: none;
+  pointer-events: none;
+  z-index: 3;
+}
+.aeterna-holo-frame::after {
+  opacity: .08;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+.aeterna-holo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 15%;
+  opacity: 1;
+  mix-blend-mode: normal;
+  filter: saturate(.92) contrast(1.04) brightness(1.02);
+}
+.aeterna-projection-rings {
+  inset: auto -12% -12px;
+  height: 44px;
+  z-index: 4;
+  pointer-events: none;
+}
+.aeterna-scanline {
+  opacity: .38;
+  mix-blend-mode: screen;
+}
+.aeterna-briefing.is-speaking .aeterna-holo-frame {
+  border-color: rgba(96,228,255,.52);
+  box-shadow:
+    0 0 0 1px rgba(30,107,255,.1),
+    0 0 34px rgba(57,223,255,.17),
+    inset 0 0 26px rgba(57,223,255,.035);
+}
