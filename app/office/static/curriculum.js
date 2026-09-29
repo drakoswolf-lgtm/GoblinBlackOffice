@@ -20,6 +20,8 @@
   const franchisorField = root.querySelector('[data-franchisor-field]');
   const taxStatus = root.querySelector('[data-tax-status]');
   const gstField = root.querySelector('[data-gst-field]');
+  const stage = root.querySelector('[data-parallax-stage]');
+  const tablePlane = root.querySelector('.intel-table-plane');
   let current = 0;
   let busy = false;
 
@@ -85,12 +87,14 @@
     busy = true;
     const old = screens[current];
     const direction = target > current ? 1 : -1;
+    stage?.classList.add('is-shifting');
     old.classList.add(direction > 0 ? 'is-leaving-left' : 'is-leaving-right');
     window.setTimeout(() => {
       old.classList.remove('is-leaving-left','is-leaving-right');
       updateUI(target, direction);
+      window.setTimeout(() => stage?.classList.remove('is-shifting'), 300);
       busy = false;
-    }, 220);
+    }, 280);
   }
 
   next.addEventListener('click', () => transitionTo(current + 1));
@@ -107,6 +111,20 @@
     if (!validateCurrent()) event.preventDefault();
     else root.classList.add('is-deploying');
   });
+
+  if (stage && tablePlane && window.matchMedia('(pointer:fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    stage.addEventListener('pointermove', (event) => {
+      const rect = stage.getBoundingClientRect();
+      const nx = ((event.clientX - rect.left) / rect.width) - .5;
+      const ny = ((event.clientY - rect.top) / rect.height) - .5;
+      tablePlane.style.transform = `perspective(1200px) rotateX(${2.5 - ny * 1.1}deg) rotateY(${nx * 1.1}deg) translateZ(18px)`;
+      aeterna.style.transform = `translate3d(${nx * -5}px,${ny * -3}px,80px)`;
+    });
+    stage.addEventListener('pointerleave', () => {
+      tablePlane.style.transform = '';
+      aeterna.style.transform = '';
+    });
+  }
 
   setConditionalVisibility();
   updateUI(0, 1);
