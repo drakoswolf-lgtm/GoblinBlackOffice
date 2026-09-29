@@ -46,7 +46,7 @@ Startup presentation lasts at least **5 seconds**. If the application is ready s
 
 ## Æterna's Curriculum VitÆ
 
-First-run onboarding is a command dossier led by Cmdr. Æterna Skyeward, not a generic welcome wizard.
+First-run onboarding is a holographic command briefing led by Cmdr. Æterna Skyeward, not a generic welcome wizard.
 
 Recommended sequence:
 1. Meet Æterna
@@ -56,7 +56,24 @@ Recommended sequence:
 5. Set up the business / desk
 6. Enter the Black Office
 
-Visual treatment mixes a physical dossier with Æterna's cobalt/cyan projected annotations.
+Visual treatment uses a holographic command interface projected over the Black Office environment.
+
+The onboarding should feel like a spatial command briefing, not a generic welcome wizard and not a paper dossier.
+
+The underlying world remains physical and industrial:
+- graphite
+- blackened steel
+- slate
+- restrained hardware
+- Black Office environmental detail
+
+The onboarding layer itself is projected and command-driven:
+- cobalt / electric-blue / cyan overlays
+- projected panes
+- progression rails
+- status instruments
+- controlled animation
+- screen-to-screen reconfiguration
 
 ## Office Desk
 
@@ -132,6 +149,14 @@ Cobalt, electric blue, cyan, deep blue-black, pale projected blue.
 
 Blue/cyan means command-layer guidance or annotation. Green/physical means Office machinery, records, goblin work, or physical state.
 
+### Curriculum VitÆ onboarding rule
+
+For first-run onboarding, the Black Office environment remains the physical base layer, while Æterna's command interface provides the active onboarding layer.
+
+This is a layered composition, not a mixed-format paper UI.
+
+Paper or dossier-like visuals may appear as background props or environmental detail, but they are not the primary onboarding structure.
+
 ## Uniform semantics
 
 Goblins share the Black Office uniform with non-glowing green-steel insignia and locking all-metal tie collars containing a visible role-color inlay.
@@ -144,7 +169,7 @@ Good locations:
 - load-bearing sticky
 - marginalia
 - specialist flavor text
-- onboarding dossier notes
+- onboarding command annotations
 - waiting-state copy
 - subtle assistant phrasing
 
