@@ -13,7 +13,12 @@
 <main class="curriculum-shell" data-curriculum>
   <div class="black-office-environment" aria-hidden="true">
     <div class="office-backwall"></div>
-    <div class="office-console"></div>
+    <div class="office-console">
+      <div class="desk-projector desk-projector-left"></div>
+      <div class="desk-projector desk-projector-center"></div>
+      <div class="desk-projector desk-projector-right"></div>
+    </div>
+    <div class="office-lightbar"></div>
     <img class="office-insignia" src="/canon/brand/canon-app-badge.webp" alt="">
   </div>
 
@@ -39,9 +44,14 @@
         {% endfor %}
       </nav>
 
-      <div class="curriculum-workspace">
+      <div class="curriculum-workspace" data-parallax-stage>
+        <div class="holo-depth-grid" aria-hidden="true"></div>
+        <div class="holo-projector-beam" aria-hidden="true"></div>
+        <div class="holo-orbit holo-orbit-one" aria-hidden="true"></div>
+        <div class="holo-orbit holo-orbit-two" aria-hidden="true"></div>
         <aside class="aeterna-briefing" aria-label="Cmdr. Æterna Skyeward">
           <div class="aeterna-holo-frame">
+            <div class="aeterna-projection-rings" aria-hidden="true"><i></i><i></i><i></i></div>
             <div class="aeterna-scanline" aria-hidden="true"></div>
             <img src="/canon/characters/canon-aeterna-headshot.webp" alt="Cmdr. Æterna Skyeward">
             <div class="aeterna-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
@@ -65,6 +75,7 @@
         <div class="errors curriculum-errors">{% for error in errors %}<div>{{ error }}</div>{% endfor %}</div>
         {% endif %}
 
+        <div class="intel-table-plane">
         <form method="post" class="curriculum-form" data-curriculum-form>
           <section class="curriculum-screen is-active" data-screen="0" data-percent="12"
                    data-line="It’s about time you got here, Commander. The troops are getting restless. Let’s get you into Intel for a quick briefing. Right this way, sir.">
@@ -264,6 +275,7 @@
             <button type="submit" class="curriculum-deploy" data-curriculum-deploy hidden>ENTER THE BLACK OFFICE</button>
           </footer>
         </form>
+        </div>
 
         <div class="aeterna-dialogue" aria-live="polite">
           <span class="dialogue-call">Æ</span>
