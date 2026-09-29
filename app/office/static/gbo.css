@@ -1418,3 +1418,152 @@ body.splash-active { overflow: hidden; }
     0 0 34px rgba(57,223,255,.17),
     inset 0 0 26px rgba(57,223,255,.035);
 }
+
+
+/* Curriculum VitÆ control geometry: deterministic alignment */
+.curriculum-controls {
+  display: grid;
+  grid-template-columns: 124px minmax(120px, 1fr) 184px;
+  grid-template-areas: "back progress next";
+  align-items: center;
+  column-gap: 14px;
+  row-gap: 10px;
+}
+.curriculum-controls .curriculum-back {
+  grid-area: back;
+  justify-self: start;
+}
+.curriculum-controls .curriculum-progress {
+  grid-area: progress;
+  width: 100%;
+  align-self: center;
+}
+.curriculum-controls .curriculum-next,
+.curriculum-controls .curriculum-deploy {
+  grid-area: next;
+  justify-self: end;
+}
+.curriculum-controls > button {
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+  min-height: 46px;
+  margin: 0;
+  padding: 0 14px;
+  white-space: nowrap;
+  line-height: 1;
+  text-align: center;
+}
+.curriculum-controls .curriculum-back {
+  width: 124px;
+}
+.curriculum-controls .curriculum-next,
+.curriculum-controls .curriculum-deploy {
+  width: 184px;
+}
+.curriculum-progress {
+  height: 5px;
+  margin: 0;
+}
+
+/* Keep navigation controls optically centered despite global button rules. */
+.curriculum-rail .rail-step {
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: flex-start;
+}
+.curriculum-rail .rail-index {
+  flex: 0 0 28px;
+}
+.curriculum-rail .rail-label {
+  min-width: 0;
+  line-height: 1.15;
+}
+
+/* Status instruments align to a common vertical axis. */
+.curriculum-statusbar {
+  align-items: center;
+}
+.curriculum-statusbar > div:first-child {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+.curriculum-statusbar .intel-meter {
+  width: 100%;
+}
+.curriculum-statusbar .status-readout {
+  white-space: nowrap;
+}
+
+/* Field controls maintain a common baseline and height. */
+.intel-fields input,
+.intel-fields select {
+  height: 46px;
+  min-height: 46px;
+}
+.intel-fields textarea {
+  min-height: 92px;
+}
+.intel-fields label {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .curriculum-controls {
+    grid-template-columns: 108px minmax(80px, 1fr) 150px;
+    grid-template-areas: "back progress next";
+    column-gap: 10px;
+  }
+  .curriculum-controls .curriculum-back {
+    width: 108px;
+  }
+  .curriculum-controls .curriculum-next,
+  .curriculum-controls .curriculum-deploy {
+    width: 150px;
+  }
+}
+
+@media (max-width: 560px) {
+  .curriculum-controls {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "progress progress"
+      "back next";
+    gap: 9px 10px;
+    padding: 10px;
+  }
+  .curriculum-controls .curriculum-back,
+  .curriculum-controls .curriculum-next,
+  .curriculum-controls .curriculum-deploy {
+    width: 100% !important;
+    min-width: 0;
+    justify-self: stretch;
+    font-size: .72rem;
+    letter-spacing: .025em;
+    padding-inline: 9px;
+  }
+  .curriculum-progress {
+    width: 100%;
+    grid-column: auto;
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 380px) {
+  .curriculum-controls {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "progress"
+      "next"
+      "back";
+  }
+  .curriculum-controls > button {
+    width: 100% !important;
+  }
+  .curriculum-next,
+  .curriculum-deploy {
+    font-size: .7rem !important;
+  }
+}
