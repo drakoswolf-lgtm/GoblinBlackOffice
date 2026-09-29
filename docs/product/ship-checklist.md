@@ -53,6 +53,7 @@
 - [x] Æterna cobalt/cyan command styling
 - [x] Æterna open / close interaction
 - [x] Curriculum VitÆ UI canon defined and approved
+- [x] Holographic-first Curriculum canon supersedes paper-dossier onboarding
 - [x] Curriculum VitÆ onboarding implementation
 - [ ] Æterna persistent presence across specialist screens
 - [ ] Specialist card / navigation final click-through smoke pass
