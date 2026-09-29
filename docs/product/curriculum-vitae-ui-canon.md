@@ -48,6 +48,8 @@ This line may be refined slightly for cadence, but the meaning and tone are cano
 
 Curriculum VitÆ is a **holographic command interface projected over the Black Office environment**.
 
+This supersedes any earlier paper-dossier-first onboarding direction. Paper may exist as environmental set dressing, but it is not the primary interaction metaphor.
+
 This means:
 - the user remains visually inside the Black Office at all times
 - onboarding is not presented on a blank background or generic form page
@@ -168,6 +170,8 @@ She should appear:
 - visually distinct from the field/input region
 
 She is not a static decorative portrait. She is the command presence.
+
+Æterna remains visually corporeal first. Holographic treatment belongs to her command UI, HUD, framing, and projection effects rather than making her body read as a transparent hologram.
 
 ### 6.4 Status instruments
 
