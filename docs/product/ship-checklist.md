@@ -71,26 +71,26 @@ Canonical acceptance path: `docs/product/golden-job-lifecycle.md`.
 - [x] Squarmish Invoice draft from Agreement + billable Expense
 - [x] Agreement / invoice printable PDF foundation
 - [ ] One-click Office Desk `New job` path
-- [ ] Estimate domain model and persistence
+- [x] Estimate domain model and persistence
 - [ ] Scope-to-editable-estimate service
-- [ ] MaterialPlan domain model and persistence
+- [x] MaterialPlan domain model and persistence
 - [ ] Scope-to-editable-material-plan service
-- [ ] Packrat ShoppingListItem domain implementation
-- [ ] Promote approved material plan into shopping list
-- [ ] Receipt-line to shopping-list matching
-- [ ] Real-time acquired / remaining shopping-list state
-- [ ] Patch WorkLog domain implementation
-- [ ] Actual labour capture
+- [x] Packrat ShoppingListItem domain implementation
+- [x] Promote approved material plan into shopping list
+- [x] Receipt-line to shopping-list matching
+- [x] Real-time acquired / remaining shopping-list state
+- [x] Patch WorkLog domain implementation
+- [x] Actual labour capture
 - [ ] Estimate-vs-actual project view
-- [ ] ChangeOrder domain implementation / SigNor handoff
-- [ ] Squarmish invoice from actual labour + confirmed expenses + approved changes
+- [x] ChangeOrder domain implementation / SigNor handoff
+- [x] Squarmish invoice from actual labour + confirmed expenses + approved changes
 - [ ] Invoice issue / sent state with explicit human approval
 - [ ] Outbound email integration
-- [ ] Payment domain model and manual payment recording
+- [x] Payment domain model and manual payment recording
 - [ ] Optional Square payment integration
-- [ ] Paid / partially-paid invoice state
+- [x] Paid / partially-paid invoice state
 - [ ] Running project / business ledger update from payments
-- [ ] Full end-to-end golden-path automated test
+- [x] Full end-to-end golden-path automated test
 - [ ] Full end-to-end human smoke test in live dev app
 
 ## EOD demo gate
