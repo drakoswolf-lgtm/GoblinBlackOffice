@@ -89,7 +89,7 @@ Canonical acceptance path: `docs/product/golden-job-lifecycle.md`.
 - [x] Payment domain model and manual payment recording
 - [ ] Optional Square payment integration
 - [x] Paid / partially-paid invoice state
-- [ ] Running project / business ledger update from payments
+- [x] Running project / business ledger update from payments
 - [x] Full end-to-end golden-path automated test
 - [ ] Full end-to-end human smoke test in live dev app
 
