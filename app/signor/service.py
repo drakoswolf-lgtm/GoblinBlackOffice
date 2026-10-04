@@ -1,7 +1,7 @@
-"""SigNor agreement drafting service.
+"""SigNor agreement and change-order drafting services.
 
-SigNor turns explicit human inputs into a shared Black Office Agreement. He does
-not infer missing commercial terms. Ambiguity is returned to the human instead.
+SigNor turns explicit human inputs into shared Black Office records. He does not
+infer missing commercial terms. Ambiguity is returned to the human instead.
 """
 
 from __future__ import annotations
@@ -10,7 +10,7 @@ import uuid
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 
-from app.core.models import Agreement, AgreementStatus
+from app.core.models import Agreement, AgreementStatus, ChangeOrder, ChangeOrderStatus
 
 
 @dataclass(frozen=True)
@@ -29,6 +29,12 @@ class AgreementDraftInput:
 @dataclass(frozen=True)
 class AgreementDraftResult:
     agreement: Agreement | None
+    errors: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class ChangeOrderDraftResult:
+    change_order: ChangeOrder | None
     errors: tuple[str, ...]
 
 
@@ -81,3 +87,52 @@ def draft_agreement(data: AgreementDraftInput, *, business_id: str) -> Agreement
         status=AgreementStatus.DRAFT,
     )
     return AgreementDraftResult(agreement, ())
+
+
+def draft_change_order(
+    *,
+    agreement: Agreement,
+    business_id: str,
+    title: str,
+    scope: str,
+    amount: str = "",
+    currency: str | None = None,
+) -> ChangeOrderDraftResult:
+    errors: list[str] = []
+    if agreement.business_id != business_id:
+        errors.append("Agreement does not belong to this business.")
+    if not title.strip():
+        errors.append("Change-order title is required.")
+    if not scope.strip():
+        errors.append("Change-order scope is required.")
+
+    parsed_amount: Decimal | None = None
+    if amount.strip():
+        try:
+            parsed_amount = Decimal(amount.strip()).quantize(Decimal("0.01"))
+            if parsed_amount < 0:
+                errors.append("Change-order amount cannot be negative.")
+        except InvalidOperation:
+            errors.append("Change-order amount must be a valid number.")
+
+    resolved_currency = (currency or agreement.currency).strip().upper()
+    if resolved_currency != agreement.currency.upper():
+        errors.append("Change-order currency must match the agreement currency.")
+
+    if errors:
+        return ChangeOrderDraftResult(None, tuple(errors))
+
+    return ChangeOrderDraftResult(
+        ChangeOrder(
+            change_order_id=f"CO-{uuid.uuid4().hex[:12].upper()}",
+            business_id=business_id,
+            project_id=agreement.project_id,
+            agreement_id=agreement.agreement_id,
+            title=title.strip(),
+            scope=scope.strip(),
+            amount=parsed_amount,
+            currency=resolved_currency,
+            status=ChangeOrderStatus.DRAFT,
+        ),
+        (),
+    )
