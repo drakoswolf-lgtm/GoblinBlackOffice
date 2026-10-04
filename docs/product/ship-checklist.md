@@ -61,6 +61,38 @@
 - [ ] Touch-target / overflow check
 - [ ] Refresh / return-visit splash behavior check
 
+## Golden job lifecycle
+
+Canonical acceptance path: `docs/product/golden-job-lifecycle.md`.
+
+- [x] Shared Client / Project records
+- [x] SigNor Agreement draft
+- [x] Ledgergut receipt / Expense foundation
+- [x] Squarmish Invoice draft from Agreement + billable Expense
+- [x] Agreement / invoice printable PDF foundation
+- [ ] One-click Office Desk `New job` path
+- [ ] Estimate domain model and persistence
+- [ ] Scope-to-editable-estimate service
+- [ ] MaterialPlan domain model and persistence
+- [ ] Scope-to-editable-material-plan service
+- [ ] Packrat ShoppingListItem domain implementation
+- [ ] Promote approved material plan into shopping list
+- [ ] Receipt-line to shopping-list matching
+- [ ] Real-time acquired / remaining shopping-list state
+- [ ] Patch WorkLog domain implementation
+- [ ] Actual labour capture
+- [ ] Estimate-vs-actual project view
+- [ ] ChangeOrder domain implementation / SigNor handoff
+- [ ] Squarmish invoice from actual labour + confirmed expenses + approved changes
+- [ ] Invoice issue / sent state with explicit human approval
+- [ ] Outbound email integration
+- [ ] Payment domain model and manual payment recording
+- [ ] Optional Square payment integration
+- [ ] Paid / partially-paid invoice state
+- [ ] Running project / business ledger update from payments
+- [ ] Full end-to-end golden-path automated test
+- [ ] Full end-to-end human smoke test in live dev app
+
 ## EOD demo gate
 
 - [x] Demo branch created
@@ -93,7 +125,7 @@
 - [ ] Multi-user / team roles
 - [ ] Agreements: explicit client acceptance workflow
 - [ ] Invoices: explicit sent state
-- [ ] Payments / Stripe
+- [ ] Payments / processor integration
 - [ ] Outbound email
 - [ ] Tax configuration
 - [ ] Custom domain
