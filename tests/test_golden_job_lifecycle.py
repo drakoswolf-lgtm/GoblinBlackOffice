@@ -10,6 +10,7 @@ from app.core.job_lifecycle import (
     record_payment,
     record_project_work,
 )
+from app.core.ledger import summarize_project_ledger
 from app.core.memory_store import InMemoryBlackOfficeStore
 from app.core.models import Agreement, AgreementStatus, ChangeOrderStatus, InvoiceStatus
 from app.ledgergut.models import BillableStatus, ReceiptExtraction, ReceiptLineItem, ReceiptRecord
@@ -134,6 +135,20 @@ def test_job_survives_estimate_receipt_work_invoice_and_payment():
     assert final_payment.summary.balance == Decimal("0.00")
     stored = store.invoices.get(invoice.invoice_id, "BIZ-1")
     assert stored is not None and stored.status == InvoiceStatus.PAID
+
+    ledger = summarize_project_ledger(
+        business_id="BIZ-1",
+        project_id="PRJ-1",
+        invoices=tuple(store.invoices.list_for_business("BIZ-1")),
+        payments=tuple(store.payments.list_for_business("BIZ-1")),
+        expenses=tuple(store.expenses.list_for_business("BIZ-1")),
+        currency="CAD",
+    )
+    assert ledger.invoiced == Decimal("377.00")
+    assert ledger.paid == Decimal("377.00")
+    assert ledger.outstanding == Decimal("0.00")
+    assert ledger.expenses == Decimal("27.00")
+    assert ledger.net_cash == Decimal("350.00")
 
 
 def test_unassigned_expense_is_not_silently_pulled_into_project_invoice():
