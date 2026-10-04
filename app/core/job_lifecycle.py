@@ -13,7 +13,7 @@ from decimal import Decimal, InvalidOperation
 import uuid
 
 from app.core.ledger import InvoicePaymentSummary, summarize_invoice_payments
-from app.core.models import Agreement, Estimate, Expense, Invoice, Payment, ShoppingListItem, WorkLog
+from app.core.models import Agreement, Estimate, Expense, Invoice, MaterialPlan, Payment, ShoppingListItem
 from app.core.storage import BlackOfficeStore
 from app.ledgergut.models import ReceiptRecord
 from app.ledgergut.office_adapter import receipt_record_to_expense
@@ -37,7 +37,7 @@ def _decimal(value, field_name: str) -> Decimal:
 @dataclass(frozen=True)
 class JobPlanDraft:
     estimate: Estimate | None
-    material_plan: object | None
+    material_plan: MaterialPlan | None
     shopping_items: tuple[ShoppingListItem, ...]
     errors: tuple[str, ...]
     review_notes: tuple[str, ...]
@@ -52,6 +52,7 @@ class ReceiptAppliedResult:
 @dataclass(frozen=True)
 class PaymentRecordedResult:
     payment: Payment
+    invoice: Invoice
     summary: InvoicePaymentSummary
 
 
@@ -234,7 +235,7 @@ def draft_project_invoice(
     expenses = tuple(
         expense
         for expense in store.expenses.list_for_business(business_id)
-        if expense.project_id in {None, agreement.project_id}
+        if expense.project_id == agreement.project_id
     )
     work_logs = tuple(
         log
@@ -286,4 +287,7 @@ def record_payment(
     )
     store.payments.save(payment)
     payments = tuple(store.payments.list_for_business(invoice.business_id))
-    return PaymentRecordedResult(payment, summarize_invoice_payments(invoice, payments))
+    summary = summarize_invoice_payments(invoice, payments)
+    updated_invoice = replace(invoice, status=summary.status)
+    store.invoices.save(updated_invoice)
+    return PaymentRecordedResult(payment, updated_invoice, summary)
