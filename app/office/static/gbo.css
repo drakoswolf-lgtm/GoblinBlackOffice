@@ -107,6 +107,7 @@ input::placeholder, textarea::placeholder { color: #657177; }
 .alert ul, .errors ul { margin-bottom: 0; }
 
 .stat-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin: 28px 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: var(--line); }
+.stat-strip.stat-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .stat { padding: 18px; background: var(--panel); }
 .stat strong { display: block; margin-bottom: 4px; font-size: 1.15rem; }
 .stat span { color: var(--muted); font-size: .82rem; }
@@ -142,7 +143,7 @@ pre.scope { white-space: pre-wrap; font: inherit; line-height: 1.6; color: #d8dd
   .topbar { margin-bottom: 28px; }
   .topnav .optional { display: none; }
   .grid-2, .grid-3, .form-row { grid-template-columns: 1fr; }
-  .stat-strip { grid-template-columns: 1fr; }
+  .stat-strip, .stat-strip.stat-4 { grid-template-columns: 1fr; }
   .specialist-card { min-height: 0; }
   .form-card, .preview { padding: 18px; }
   .button, button { width: 100%; }
