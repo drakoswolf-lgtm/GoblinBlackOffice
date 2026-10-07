@@ -361,6 +361,7 @@ def job_workbench(project_id: str):
     message_text = {
         "agreement-ready": "Agreement marked ready to present. PDF remains available here.",
         "plan-saved": "Estimate and material plan saved. Packrat has the shopping list.",
+        "receipt-saved": "Receipt filed. Packrat reconciled any confident item matches into the shopping list.",
         "work-saved": "Actual labour recorded.",
         "invoice-drafted": "Invoice draft created. Review it before issuing.",
         "invoice-approved": "Invoice approved for issuing. PDF remains available here.",
