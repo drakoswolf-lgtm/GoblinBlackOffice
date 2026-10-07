@@ -102,17 +102,22 @@ def draft_job_plan(
         return JobPlanDraft(None, None, (), tuple(errors), tuple(notes))
 
     estimate_id = f"EST-{uuid.uuid4().hex[:12].upper()}"
-    material_result = draft_material_plan(
-        business_id=business_id,
-        project_id=agreement.project_id,
-        title=f"{agreement.title} materials",
-        requirements=materials,
-        agreement_id=agreement.agreement_id,
-        estimate_id=estimate_id,
-        notes="Editable material plan derived for human review.",
-    )
-    if material_result.errors:
-        return JobPlanDraft(None, None, (), material_result.errors, tuple(notes))
+    material_plan = None
+    shopping_items: tuple[ShoppingListItem, ...] = ()
+    if materials:
+        material_result = draft_material_plan(
+            business_id=business_id,
+            project_id=agreement.project_id,
+            title=f"{agreement.title} materials",
+            requirements=materials,
+            agreement_id=agreement.agreement_id,
+            estimate_id=estimate_id,
+            notes="Editable material plan derived for human review.",
+        )
+        if material_result.errors:
+            return JobPlanDraft(None, None, (), material_result.errors, tuple(notes))
+        material_plan = material_result.plan
+        shopping_items = material_result.items
 
     materials_subtotal = Decimal("0.00")
     unknown_costs: list[str] = []
@@ -148,8 +153,8 @@ def draft_job_plan(
     )
     return JobPlanDraft(
         estimate=estimate,
-        material_plan=material_result.plan,
-        shopping_items=material_result.items,
+        material_plan=material_plan,
+        shopping_items=shopping_items,
         errors=(),
         review_notes=tuple(notes),
     )
@@ -161,10 +166,12 @@ def persist_job_plan(
     *,
     approve_materials: bool = False,
 ) -> JobPlanDraft:
-    if draft.errors or draft.estimate is None or draft.material_plan is None:
+    if draft.errors or draft.estimate is None:
         raise ValueError("Cannot persist an invalid job plan draft.")
-    plan = replace(draft.material_plan, approved=approve_materials)
     store.estimates.save(draft.estimate)
+    if draft.material_plan is None:
+        return draft
+    plan = replace(draft.material_plan, approved=approve_materials)
     store.material_plans.save(plan)
     for item in draft.shopping_items:
         store.shopping_items.save(item)
