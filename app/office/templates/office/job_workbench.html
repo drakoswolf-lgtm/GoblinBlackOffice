@@ -22,7 +22,7 @@
   {% if message %}<div class="alert success"><strong>{{ message }}</strong></div>{% endif %}
   {% if errors %}<div class="errors"><strong>Needs attention</strong><ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
 
-  <section class="stat-strip" aria-label="Project summary">
+  <section class="stat-strip stat-4" aria-label="Project summary">
     <div class="stat"><strong>{% if latest_estimate %}{{ currency }} {{ '%.2f'|format(latest_estimate.total_estimate) }}{% else %}Not planned{% endif %}</strong><span>Latest estimate</span></div>
     <div class="stat"><strong>{{ actual_hours }} h</strong><span>Actual labour logged</span></div>
     <div class="stat"><strong>{{ currency }} {{ '%.2f'|format(expense_total) }}</strong><span>Recorded project expenses</span></div>
@@ -178,7 +178,7 @@
     {% else %}<p class="muted">No invoices drafted yet.</p>{% endif %}
   </section>
 
-  <section class="stat-strip" style="margin-top:18px" aria-label="Project ledger">
+  <section class="stat-strip stat-4" style="margin-top:18px" aria-label="Project ledger">
     <div class="stat"><strong>{{ currency }} {{ '%.2f'|format(ledger.invoiced) }}</strong><span>Issued / approved</span></div>
     <div class="stat"><strong>{{ currency }} {{ '%.2f'|format(ledger.paid) }}</strong><span>Paid</span></div>
     <div class="stat"><strong>{{ currency }} {{ '%.2f'|format(ledger.expenses) }}</strong><span>Expenses</span></div>
