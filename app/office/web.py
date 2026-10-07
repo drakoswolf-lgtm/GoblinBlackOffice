@@ -339,7 +339,12 @@ def job_workbench(project_id: str):
     agreements = [a for a in office_store.agreements.list_for_business(bid) if a.project_id == project_id]
     estimates = [e for e in office_store.estimates.list_for_business(bid) if e.project_id == project_id]
     material_plans = [p for p in office_store.material_plans.list_for_business(bid) if p.project_id == project_id]
-    shopping_items = [i for i in office_store.shopping_items.list_for_business(bid) if i.project_id == project_id]
+    approved_plan_ids = {plan.material_plan_id for plan in material_plans if plan.approved}
+    shopping_items = [
+        item
+        for item in office_store.shopping_items.list_for_business(bid)
+        if item.project_id == project_id and item.material_plan_id in approved_plan_ids
+    ]
     work_logs = [w for w in office_store.work_logs.list_for_business(bid) if w.project_id == project_id]
     expenses = [e for e in office_store.expenses.list_for_business(bid) if e.project_id == project_id]
     invoices = [i for i in office_store.invoices.list_for_business(bid) if i.project_id == project_id]
