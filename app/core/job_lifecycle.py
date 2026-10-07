@@ -172,6 +172,14 @@ def persist_job_plan(
     if draft.material_plan is None:
         return draft
     plan = replace(draft.material_plan, approved=approve_materials)
+    if approve_materials:
+        for existing in store.material_plans.list_for_business(draft.estimate.business_id):
+            if (
+                existing.project_id == draft.estimate.project_id
+                and existing.material_plan_id != plan.material_plan_id
+                and existing.approved
+            ):
+                store.material_plans.save(replace(existing, approved=False))
     store.material_plans.save(plan)
     for item in draft.shopping_items:
         store.shopping_items.save(item)
