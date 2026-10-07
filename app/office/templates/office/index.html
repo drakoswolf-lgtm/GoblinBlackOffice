@@ -50,6 +50,25 @@
     <div class="stat"><strong>03 · Invoice</strong><span>Billing and receivables with Squarmish</span></div>
   </section>
 
+  {% if projects %}
+  <section class="card" style="margin-bottom:16px">
+    <div class="card-kicker">Active jobs</div>
+    <h2>Pick up where you left off.</h2>
+    <div class="list" style="margin-top:14px">
+      {% for project in projects|reverse %}
+      {% set client = clients.get(project.client_id) if project.client_id else none %}
+      <div class="list-row">
+        <div>
+          <strong>{{ project.name }}</strong>
+          <small>{% if client %}{{ client.name }} · {% endif %}{{ project.project_id }}</small>
+        </div>
+        <a class="button secondary" href="/jobs/{{ project.project_id }}">Open job</a>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
   <section class="grid grid-3" aria-label="Black Office specialists">
     {% for specialist in specialists %}
     <article class="card specialist-card">
