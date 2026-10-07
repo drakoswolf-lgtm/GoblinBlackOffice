@@ -91,8 +91,11 @@ def build_receipt_image_store(local_directory: Path) -> ReceiptImageStore:
     bucket = os.environ.get("SPACES_BUCKET", "").strip()
     access_key = os.environ.get("SPACES_ACCESS_KEY_ID", "").strip()
     secret_key = os.environ.get("SPACES_SECRET_ACCESS_KEY", "").strip()
+    storage_credentials = [bucket, access_key, secret_key]
+    if not any(storage_credentials):
+        return LocalReceiptImageStore(local_directory)
     configured = [endpoint, bucket, access_key, secret_key]
-    if any(configured) and not all(configured):
+    if not all(configured):
         raise RuntimeError("Spaces configuration is incomplete; endpoint, bucket, access key, and secret key are all required.")
     if all(configured):
         return S3ReceiptImageStore(
