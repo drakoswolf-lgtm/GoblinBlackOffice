@@ -397,6 +397,9 @@ def grunt_workflow_page(grunt_id: str):
 
 @office_app.route("/")
 def index():
+    bid = current_business_id()
+    projects = office_store.projects.list_for_business(bid)
+    clients = {client.client_id: client for client in office_store.clients.list_for_business(bid)}
     specialists = [
         {"name":"Ledgergut","role":"Receipts & expenses","status":"live","href":"/ledgergut/","note":"Feed me the receipt. Keep your fingers."},
         {"name":"SigNor","role":"Agreements & scope","status":"live","href":"/signor/","note":"Words matter. Especially the ones someone forgot to define."},
@@ -405,7 +408,14 @@ def index():
         {"name":"Patch","role":"Operations & work orders","status":"rough-in","href":"/workflows/patch","note":"Loose ends become work orders. Work orders become finished work."},
         {"name":"Grimscratch","role":"Risk & compliance","status":"rough-in","href":"/workflows/grimscratch","note":"Find the expensive assumption before it becomes an expensive fact."},
     ]
-    return render_template("office/index.html", specialists=specialists, user=current_user(), sticky_lines=_sticky_payload())
+    return render_template(
+        "office/index.html",
+        specialists=specialists,
+        projects=projects,
+        clients=clients,
+        user=current_user(),
+        sticky_lines=_sticky_payload(),
+    )
 
 @office_app.route("/canon/<path:asset_path>")
 def canon_asset(asset_path: str):
