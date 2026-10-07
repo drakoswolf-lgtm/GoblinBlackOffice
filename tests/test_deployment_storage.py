@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from app.ledgergut.image_store import LocalReceiptImageStore
+from app.ledgergut.image_store import LocalReceiptImageStore, build_receipt_image_store
 from app.ledgergut.sql_storage import SqlReceiptStore
 
 
@@ -29,3 +29,27 @@ def test_local_receipt_image_store_round_trip(tmp_path: Path):
     assert (tmp_path / key).read_bytes() == b"abc"
     store.delete(key)
     assert not (tmp_path / key).exists()
+
+
+def test_endpoint_metadata_without_spaces_credentials_uses_local_storage(tmp_path: Path, monkeypatch):
+    monkeypatch.setenv("SPACES_ENDPOINT_URL", "https://tor1.digitaloceanspaces.com")
+    monkeypatch.setenv("SPACES_REGION", "tor1")
+    monkeypatch.delenv("SPACES_BUCKET", raising=False)
+    monkeypatch.delenv("SPACES_ACCESS_KEY_ID", raising=False)
+    monkeypatch.delenv("SPACES_SECRET_ACCESS_KEY", raising=False)
+
+    store = build_receipt_image_store(tmp_path)
+
+    assert isinstance(store, LocalReceiptImageStore)
+
+
+def test_partial_spaces_credentials_still_fail_loudly(tmp_path: Path, monkeypatch):
+    import pytest
+
+    monkeypatch.setenv("SPACES_ENDPOINT_URL", "https://tor1.digitaloceanspaces.com")
+    monkeypatch.setenv("SPACES_BUCKET", "receipts")
+    monkeypatch.delenv("SPACES_ACCESS_KEY_ID", raising=False)
+    monkeypatch.delenv("SPACES_SECRET_ACCESS_KEY", raising=False)
+
+    with pytest.raises(RuntimeError, match="Spaces configuration is incomplete"):
+        build_receipt_image_store(tmp_path)
