@@ -32,6 +32,11 @@ def index():
     errors: tuple[str, ...] = ()
     agreement = None
 
+    if request.method == "GET":
+        requested_project_id = request.args.get("project_id", "").strip()
+        if requested_project_id and _store.projects.get(requested_project_id, active_business_id) is not None:
+            form_data["project_id"] = requested_project_id
+
     if request.method == "POST":
         form_data = request.form.to_dict()
         result = draft_agreement(
