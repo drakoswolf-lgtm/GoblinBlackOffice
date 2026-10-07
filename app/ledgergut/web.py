@@ -292,11 +292,14 @@ def new_receipt():
                             project_id=None,
                         )
                         _office_store.expenses.save(expense)
-                    if selected_project_id:
+                    if selected_project_id and request.script_root.rstrip("/") == "/ledgergut":
                         return redirect(
                             f"/jobs/{selected_project_id}?message=receipt-saved"
                         )
-                    return redirect(url_for("index") + "?saved=1")
+                    query = "?saved=1"
+                    if selected_project_id:
+                        query += f"&project_id={selected_project_id}"
+                    return redirect(url_for("index") + query)
 
     return _render_index(
         form_data=form_data,
