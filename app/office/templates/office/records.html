@@ -55,7 +55,7 @@
       </form>
       <hr class="divider">
       <div class="card-kicker">Current projects</div>
-      {% if projects %}<div class="list" style="margin-top:12px">{% for p in projects %}<div class="list-row"><div><strong>{{ p.name }}</strong><small>{{ p.project_id }}</small></div></div>{% endfor %}</div>{% else %}<p class="muted">No projects yet.</p>{% endif %}
+      {% if projects %}<div class="list" style="margin-top:12px">{% for p in projects %}<div class="list-row"><div><strong>{{ p.name }}</strong><small>{{ p.project_id }}</small></div><a class="button secondary" href="/jobs/{{ p.project_id }}">Open job</a></div>{% endfor %}</div>{% else %}<p class="muted">No projects yet.</p>{% endif %}
     </article>
   </section>
 </main>
