@@ -70,7 +70,8 @@ Canonical acceptance path: `docs/product/golden-job-lifecycle.md`.
 - [x] Ledgergut receipt / Expense foundation
 - [x] Squarmish Invoice draft from Agreement + billable Expense
 - [x] Agreement / invoice printable PDF foundation
-- [ ] One-click Office Desk `New job` path
+- [x] One-click Office Desk `New job` path
+- [x] Connected project workbench for planning, receipts, labour, invoicing, payments, and ledger
 - [x] Estimate domain model and persistence
 - [ ] Scope-to-editable-estimate service
 - [x] MaterialPlan domain model and persistence
