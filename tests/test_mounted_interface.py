@@ -106,3 +106,13 @@ def test_curriculum_styles_include_holographic_command_layers():
     assert b".aeterna-briefing" in response.data
     assert b"@keyframes holo-assemble" in response.data
     assert b"@keyframes aeterna-breathe" in response.data
+
+
+def test_startup_sequence_is_session_scoped_with_explicit_replay():
+    client = Client(application, Response)
+    runtime = client.get("/static/gbo.js")
+    assert runtime.status_code == 200
+    assert b"gbo.startup.seen" in runtime.data
+    assert b"sessionStorage" in runtime.data
+    assert b"params.get('splash') === '1'" in runtime.data
+    assert b"params.get('updating') === '1'" in runtime.data
