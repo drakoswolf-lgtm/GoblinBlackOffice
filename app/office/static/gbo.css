@@ -150,6 +150,13 @@ pre.scope { white-space: pre-wrap; font: inherit; line-height: 1.6; color: #d8dd
   .button-row { flex-direction: column; }
 }
 
+@media (max-width: 560px) {
+  .topbar { align-items: flex-start; flex-wrap: wrap; gap: 10px; }
+  .topnav { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
+  .list-row { grid-template-columns: 1fr; }
+  .list-row .button { width: 100%; }
+}
+
 
 /* Canon startup sequence */
 body.splash-active { overflow: hidden; }
