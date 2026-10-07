@@ -90,4 +90,4 @@ def confirm_agreement(agreement_id: str):
     if agreement.status != AgreementStatus.DRAFT:
         return ("Only draft agreements can be confirmed.", 409)
     _store.agreements.save(replace(agreement, status=AgreementStatus.PROPOSED))
-    return redirect(url_for("agreement_pdf", agreement_id=agreement_id))
+    return redirect(f"/jobs/{agreement.project_id}?message=agreement-ready")
