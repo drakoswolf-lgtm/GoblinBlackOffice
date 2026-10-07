@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ project.name }} · Job Workbench</title>
+  <link rel="stylesheet" href="/static/gbo.css">
+</head>
+<body>
+<main class="shell">
+  <header class="topbar">
+    <a class="brand" href="/"><span class="brand-mark">GBO</span><span>Job Workbench</span></a>
+    <nav class="topnav"><a href="/">Office Desk</a><a href="/records">Records</a></nav>
+  </header>
+
+  <section class="hero compact">
+    <p class="eyebrow">Active project{% if client %} · {{ client.name }}{% endif %}</p>
+    <h1>{{ project.name }}</h1>
+    {% if project.description %}<p class="lead">{{ project.description }}</p>{% endif %}
+  </section>
+
+  {% if message %}<div class="alert success"><strong>{{ message }}</strong></div>{% endif %}
+  {% if errors %}<div class="errors"><strong>Needs attention</strong><ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
+
+  <section class="stat-strip" aria-label="Project summary">
+    <div class="stat"><strong>{% if latest_estimate %}{{ currency }} {{ '%.2f'|format(latest_estimate.total_estimate) }}{% else %}Not planned{% endif %}</strong><span>Latest estimate</span></div>
+    <div class="stat"><strong>{{ actual_hours }} h</strong><span>Actual labour logged</span></div>
+    <div class="stat"><strong>{{ currency }} {{ '%.2f'|format(expense_total) }}</strong><span>Recorded project expenses</span></div>
+    <div class="stat"><strong>{{ currency }} {{ '%.2f'|format(ledger.outstanding) }}</strong><span>Outstanding issued invoices</span></div>
+  </section>
+
+  <section class="grid grid-2" style="margin-top:18px">
+    <article class="card">
+      <p class="card-kicker">01 · SigNor</p>
+      <h2>Agreement</h2>
+      {% if agreements %}
+        {% set agreement=agreements[-1] %}
+        <p><strong>{{ agreement.title }}</strong></p>
+        <p class="muted">{{ agreement.status.value }}{% if agreement.amount is not none %} · {{ agreement.currency }} {{ '%.2f'|format(agreement.amount) }}{% endif %}</p>
+        <div class="actions">
+          <a class="button secondary" href="/signor/agreements/{{ agreement.agreement_id }}/pdf">PDF</a>
+          <a class="button" href="/signor/?project_id={{ project.project_id }}">Draft another agreement</a>
+        </div>
+      {% else %}
+        <p>Define the scope before planning or billing the job.</p>
+        <a class="button signal" href="/signor/?project_id={{ project.project_id }}">Draft agreement</a>
+      {% endif %}
+    </article>
+
+    <article class="card">
+      <p class="card-kicker">02 · Packrat</p>
+      <h2>Materials &amp; receipts</h2>
+      <p>{{ shopping_items|length }} shopping-list items · {{ expenses|length }} project expenses.</p>
+      <a class="button" href="/ledgergut/?project_id={{ project.project_id }}">Feed Ledgergut a receipt</a>
+    </article>
+  </section>
+
+  {% if agreements %}
+  <form class="form-card" method="post">
+    <input type="hidden" name="action" value="plan">
+    <p class="card-kicker">Estimate + material plan</p>
+    <div class="grid grid-3">
+      <div>
+        <label for="plan-agreement">Agreement</label>
+        <select id="plan-agreement" name="agreement_id">{% for a in agreements %}<option value="{{ a.agreement_id }}">{{ a.title }}</option>{% endfor %}</select>
+      </div>
+      <div><label for="labour_hours">Estimated labour hours</label><input id="labour_hours" name="labour_hours" inputmode="decimal"></div>
+      <div><label for="labour_rate">Labour rate</label><input id="labour_rate" name="labour_rate" inputmode="decimal"></div>
+    </div>
+    <label for="materials_text">Materials</label>
+    <textarea id="materials_text" name="materials_text" placeholder="1x6 cedar fence board | 145 | ea | 7.49&#10;4x4 cedar post | 10 | ea | 34.95"></textarea>
+    <p class="muted" style="font-size:.82rem">Beta format: description | quantity | unit | estimated unit cost. These are explicit human-reviewed requirements, not AI takeoff claims.</p>
+    <div class="grid grid-2">
+      <div><label for="other_cost">Other estimated cost</label><input id="other_cost" name="other_cost" inputmode="decimal" value="0"></div>
+      <div><label for="assumptions">Estimate assumptions</label><input id="assumptions" name="assumptions" placeholder="Normal access, no demolition…"></div>
+    </div>
+    <label class="check"><input type="checkbox" name="approve_materials" value="1" checked><span>Approve these materials into Packrat's live shopping list</span></label>
+    <div class="button-row"><button type="submit">Save estimate &amp; material plan</button></div>
+  </form>
+  {% endif %}
+
+  <section class="card" style="margin-top:18px">
+    <p class="card-kicker">Live shopping list</p>
+    <h2>Packrat</h2>
+    {% if shopping_items %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Item</th><th>Required</th><th>Acquired</th><th>Remaining</th><th>Actual cost</th></tr></thead>
+        <tbody>
+          {% for item in shopping_items %}
+          <tr>
+            <td><strong>{{ item.description }}</strong></td>
+            <td>{{ item.quantity_required }} {{ item.unit }}</td>
+            <td>{{ item.quantity_acquired }} {{ item.unit }}</td>
+            <td>{{ item.quantity_remaining }} {{ item.unit }}</td>
+            <td class="money">{{ currency }} {{ '%.2f'|format(item.actual_cost) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<p class="muted">No material plan yet.</p>{% endif %}
+  </section>
+
+  <section class="grid grid-2" style="margin-top:18px">
+    <form class="form-card" method="post" style="margin-top:0">
+      <input type="hidden" name="action" value="work">
+      <p class="card-kicker">03 · Patch</p>
+      <h2>Record actual labour</h2>
+      <label for="work-description">Work completed</label>
+      <input id="work-description" name="description" placeholder="Set posts and frame panels">
+      <div class="grid grid-3">
+        <div><label for="hours">Hours</label><input id="hours" name="hours" inputmode="decimal"></div>
+        <div><label for="occurred_on">Date</label><input id="occurred_on" name="occurred_on" type="date"></div>
+        <div><label for="rate_override">Rate override</label><input id="rate_override" name="rate_override" inputmode="decimal"></div>
+      </div>
+      <label class="check"><input type="checkbox" name="billable" value="1" checked><span>Billable labour</span></label>
+      <div class="button-row"><button type="submit">Record labour</button></div>
+    </form>
+
+    <article class="card">
+      <p class="card-kicker">Actual work</p>
+      <h2>{{ actual_hours }} hours logged</h2>
+      {% if work_logs %}
+        {% for log in work_logs %}<div class="line-item"><span>{{ log.description }}{% if log.occurred_on %}<br><span class="subtle">{{ log.occurred_on }}</span>{% endif %}</span><strong>{{ log.hours }} h</strong></div>{% endfor %}
+      {% else %}<p class="muted">No labour entered yet.</p>{% endif %}
+    </article>
+  </section>
+
+  {% if agreements %}
+  <form class="form-card" method="post">
+    <input type="hidden" name="action" value="invoice">
+    <p class="card-kicker">04 · Squarmish</p>
+    <h2>Draft final invoice</h2>
+    <div class="grid grid-3">
+      <div><label for="invoice-agreement">Agreement</label><select id="invoice-agreement" name="agreement_id">{% for a in agreements %}<option value="{{ a.agreement_id }}">{{ a.title }}</option>{% endfor %}</select></div>
+      <div><label for="invoice-rate">Default labour rate</label><input id="invoice-rate" name="labour_rate" inputmode="decimal" value="{% if latest_estimate and latest_estimate.labour_rate is not none %}{{ latest_estimate.labour_rate }}{% endif %}"></div>
+      <div><label for="due_date">Due date</label><input id="due_date" name="due_date" type="date"></div>
+    </div>
+    <label class="check"><input type="checkbox" name="include_agreement_amount" value="1"><span>Also bill the agreement amount as a line item</span></label>
+    <p class="muted" style="font-size:.82rem">Project-linked billable receipts, actual billable labour and approved change orders are pulled from the shared Office record.</p>
+    <div class="button-row"><button type="submit">Draft invoice from actuals</button></div>
+  </form>
+  {% endif %}
+
+  <section class="card" style="margin-top:18px">
+    <p class="card-kicker">Invoices &amp; payment</p>
+    {% if invoices %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Invoice</th><th>Status</th><th>Total</th><th>Document</th></tr></thead>
+        <tbody>
+        {% for inv in invoices|reverse %}
+          <tr>
+            <td>{{ inv.invoice_id }}</td><td>{{ inv.status.value }}</td><td class="money">{{ inv.currency }} {{ '%.2f'|format(inv.total) }}</td>
+            <td>
+              <a href="/squarmish/invoices/{{ inv.invoice_id }}/pdf">PDF</a>
+              {% if inv.status.value == 'draft' %}
+              <form method="post" action="/squarmish/invoices/{{ inv.invoice_id }}/confirm" style="display:inline;margin-left:8px"><button class="secondary" type="submit" style="width:auto;min-height:34px;padding:6px 9px">Approve</button></form>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <form method="post" style="margin-top:20px">
+      <input type="hidden" name="action" value="payment">
+      <p class="card-kicker">Record payment</p>
+      <div class="grid grid-3">
+        <div><label for="payment-invoice">Invoice</label><select id="payment-invoice" name="invoice_id">{% for inv in invoices %}<option value="{{ inv.invoice_id }}">{{ inv.invoice_id }} · {{ inv.status.value }}</option>{% endfor %}</select></div>
+        <div><label for="amount">Amount received</label><input id="amount" name="amount" inputmode="decimal"></div>
+        <div><label for="received_on">Received on</label><input id="received_on" name="received_on" type="date"></div>
+      </div>
+      <div class="button-row"><button type="submit">Record payment</button></div>
+    </form>
+    {% else %}<p class="muted">No invoices drafted yet.</p>{% endif %}
+  </section>
+
+  <section class="stat-strip" style="margin-top:18px" aria-label="Project ledger">
+    <div class="stat"><strong>{{ currency }} {{ '%.2f'|format(ledger.invoiced) }}</strong><span>Issued / approved</span></div>
+    <div class="stat"><strong>{{ currency }} {{ '%.2f'|format(ledger.paid) }}</strong><span>Paid</span></div>
+    <div class="stat"><strong>{{ currency }} {{ '%.2f'|format(ledger.expenses) }}</strong><span>Expenses</span></div>
+    <div class="stat"><strong>{{ currency }} {{ '%.2f'|format(ledger.net_cash) }}</strong><span>Net cash</span></div>
+  </section>
+
+  <footer class="footer">One job. One record. Several suspiciously efficient goblins.</footer>
+</main>
+</body>
+</html>
