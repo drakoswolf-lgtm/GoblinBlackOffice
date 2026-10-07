@@ -86,8 +86,6 @@ def _parse_material_requirements(raw: str):
             )
         except ValueError as exc:
             errors.append(f"Material line {number}: {exc}")
-    if not requirements and not errors:
-        errors.append("Add at least one material line for this beta planning pass.")
     return tuple(requirements), tuple(errors)
 
 
