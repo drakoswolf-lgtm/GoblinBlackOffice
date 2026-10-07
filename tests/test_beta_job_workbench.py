@@ -170,3 +170,17 @@ def test_specialist_approvals_return_to_project_workbench():
     assert response.headers["Location"].endswith(
         f"/jobs/{project.project_id}?message=invoice-approved"
     )
+
+
+def test_existing_project_can_be_resumed_from_office_desk_and_records():
+    project = _project("Resume")
+    client = Client(application, Response)
+
+    desk = client.get("/")
+    assert desk.status_code == 200
+    assert project.name.encode() in desk.data
+    assert f'href="/jobs/{project.project_id}"'.encode() in desk.data
+
+    records = client.get("/records")
+    assert records.status_code == 200
+    assert f'href="/jobs/{project.project_id}"'.encode() in records.data
