@@ -187,3 +187,29 @@ def test_unassigned_expense_is_not_silently_pulled_into_project_invoice():
     assert result.invoice is not None
     assert result.invoice.total == Decimal("40.00")
     assert all(line.source_id != "REC-UNASSIGNED" for line in result.invoice.line_items)
+
+
+def test_labour_only_job_plan_persists_without_material_plan():
+    store = InMemoryBlackOfficeStore.create()
+    agreement = _agreement()
+    store.agreements.save(agreement)
+
+    plan = draft_job_plan(
+        business_id="BIZ-1",
+        agreement=agreement,
+        labour_hours="3.5",
+        labour_rate="40",
+        materials=(),
+        assumptions="Labour-only service call.",
+    )
+
+    assert plan.errors == ()
+    assert plan.estimate is not None
+    assert plan.estimate.total_estimate == Decimal("140.00")
+    assert plan.material_plan is None
+    assert plan.shopping_items == ()
+
+    persisted = persist_job_plan(store, plan, approve_materials=True)
+    assert persisted.material_plan is None
+    assert len(store.estimates.list_for_business("BIZ-1")) == 1
+    assert store.material_plans.list_for_business("BIZ-1") == []
