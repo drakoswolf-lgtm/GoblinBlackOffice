@@ -122,6 +122,9 @@ def test_saving_project_receipt_updates_packrat_shopping_quantities():
     )
 
     assert response.status_code == 302
+    assert response.headers["Location"].endswith(
+        f"/jobs/{project.project_id}?message=receipt-saved"
+    )
     items = [
         item
         for item in office_store.shopping_items.list_for_business(business_id)
