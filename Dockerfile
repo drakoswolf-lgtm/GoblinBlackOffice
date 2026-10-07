@@ -12,6 +12,7 @@ WORKDIR /app
 COPY pyproject.toml README.md alembic.ini ./
 COPY app ./app
 COPY migrations ./migrations
+COPY resources ./resources
 COPY run_black_office.py ./
 
 RUN pip install --no-cache-dir .
