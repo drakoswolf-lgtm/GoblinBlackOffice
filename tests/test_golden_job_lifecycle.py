@@ -213,3 +213,50 @@ def test_labour_only_job_plan_persists_without_material_plan():
     assert persisted.material_plan is None
     assert len(store.estimates.list_for_business("BIZ-1")) == 1
     assert store.material_plans.list_for_business("BIZ-1") == []
+
+
+def test_approving_revised_material_plan_retires_previous_live_plan():
+    store = InMemoryBlackOfficeStore.create()
+    agreement = _agreement()
+    store.agreements.save(agreement)
+
+    first = draft_job_plan(
+        business_id="BIZ-1",
+        agreement=agreement,
+        labour_hours="8",
+        labour_rate="40",
+        materials=(
+            MaterialRequirementInput(
+                description="1x6 cedar fence board",
+                quantity="100",
+                unit="ea",
+                estimated_unit_cost="7.00",
+            ),
+        ),
+    )
+    assert first.errors == ()
+    first = persist_job_plan(store, first, approve_materials=True)
+    assert first.material_plan is not None and first.material_plan.approved
+
+    revised = draft_job_plan(
+        business_id="BIZ-1",
+        agreement=agreement,
+        labour_hours="8",
+        labour_rate="40",
+        materials=(
+            MaterialRequirementInput(
+                description="1x6 cedar fence board",
+                quantity="112",
+                unit="ea",
+                estimated_unit_cost="7.00",
+            ),
+        ),
+    )
+    assert revised.errors == ()
+    revised = persist_job_plan(store, revised, approve_materials=True)
+    assert revised.material_plan is not None and revised.material_plan.approved
+
+    plans = store.material_plans.list_for_business("BIZ-1")
+    live = [plan for plan in plans if plan.project_id == "PRJ-1" and plan.approved]
+    assert len(live) == 1
+    assert live[0].material_plan_id == revised.material_plan.material_plan_id
