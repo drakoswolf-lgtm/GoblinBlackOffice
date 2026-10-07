@@ -20,3 +20,20 @@ jobs:
         run: python -m pip install --upgrade pip && pip install -e ".[dev]"
       - name: Run tests
         run: pytest -q
+      - name: Build production image
+        run: docker build -t goblin-black-office-ci .
+      - name: Smoke production image
+        run: |
+          docker run -d --name gbo-ci -p 8080:8080 goblin-black-office-ci
+          trap 'docker rm -f gbo-ci >/dev/null 2>&1 || true' EXIT
+          for attempt in {1..20}; do
+            if curl --fail --silent http://127.0.0.1:8080/health >/dev/null; then
+              break
+            fi
+            if [ "$attempt" -eq 20 ]; then
+              docker logs gbo-ci
+              exit 1
+            fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8080/canon/brand/canon-app-badge.webp >/dev/null
