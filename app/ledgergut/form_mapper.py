@@ -9,6 +9,7 @@ from app.ledgergut.models import (
     BillableStatus,
     PaidBy,
     ReceiptExtraction,
+    ReceiptLineItem,
     ReceiptRecord,
     ReimbursementStatus,
 )
@@ -43,6 +44,36 @@ def _safe_enum(cls, raw: str, default):
         return default
 
 
+def _parse_line_items(raw: str) -> tuple[tuple[ReceiptLineItem, ...], list[str]]:
+    items: list[ReceiptLineItem] = []
+    errors: list[str] = []
+    for number, raw_line in enumerate(raw.splitlines(), start=1):
+        line = raw_line.strip()
+        if not line:
+            continue
+        parts = [part.strip() for part in line.split("|")]
+        if len(parts) != 3:
+            errors.append(
+                f"Purchased item line {number}: use description | quantity | unit price."
+            )
+            continue
+        name, quantity_raw, price_raw = parts
+        if not name:
+            errors.append(f"Purchased item line {number}: description is required.")
+            continue
+        try:
+            items.append(
+                ReceiptLineItem(
+                    name=name,
+                    quantity=quantity_raw,
+                    unit_price=price_raw,
+                )
+            )
+        except ValueError as exc:
+            errors.append(f"Purchased item line {number}: {exc}")
+    return tuple(items), errors
+
+
 def build_models(
     form: dict[str, str],
 ) -> tuple[ReceiptRecord | None, list[str]]:
@@ -68,6 +99,9 @@ def build_models(
     if err:
         errors.append(err)
 
+    line_items, line_item_errors = _parse_line_items(form.get("line_items_text", ""))
+    errors.extend(line_item_errors)
+
     if errors:
         return None, errors
 
@@ -76,6 +110,7 @@ def build_models(
     extraction = ReceiptExtraction(
         vendor_name=form.get("vendor_name", "").strip() or None,
         receipt_date=receipt_date,
+        line_items=line_items,
         subtotal=subtotal,
         tax_amount=tax_amount,
         total_amount=total_amount,
