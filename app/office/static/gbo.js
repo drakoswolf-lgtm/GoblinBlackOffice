@@ -1,4 +1,13 @@
 (() => {
+  const advice = document.querySelector('[data-aeterna-advice]');
+  const toggle = document.querySelector('[data-aeterna-toggle]');
+  if (advice && toggle) {
+    toggle.addEventListener('click', () => {
+      const expanded = advice.classList.toggle('is-open');
+      toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    });
+  }
+
   const splash = document.querySelector('[data-gbo-splash]');
   if (!splash) return;
 
@@ -10,6 +19,24 @@
   const lines = linesNode ? JSON.parse(linesNode.textContent || '[]') : [];
   const params = new URLSearchParams(window.location.search);
   const updating = params.get('updating') === '1';
+  const forceSplash = params.get('splash') === '1' || updating;
+  const sessionKey = 'gbo.startup.seen';
+  let seenThisSession = false;
+
+  try {
+    seenThisSession = window.sessionStorage.getItem(sessionKey) === '1';
+  } catch (_) {
+    seenThisSession = false;
+  }
+
+  if (seenThisSession && !forceSplash) {
+    splash.hidden = true;
+    splash.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('splash-active');
+    document.body.classList.add('gbo-entered');
+    return;
+  }
+
   const minMs = 5000;
   const start = performance.now();
   let progress = 0;
@@ -50,6 +77,11 @@
 
   function finish() {
     draw(100);
+    try {
+      window.sessionStorage.setItem(sessionKey, '1');
+    } catch (_) {
+      // Storage can be unavailable in hardened/private browser contexts.
+    }
     splash.classList.add('is-breaching');
     window.setTimeout(() => splash.classList.add('is-door'), 450);
     window.setTimeout(() => splash.classList.add('is-opening'), 1050);
@@ -74,13 +106,4 @@
   }
 
   requestAnimationFrame(tick);
-
-  const advice = document.querySelector('[data-aeterna-advice]');
-  const toggle = document.querySelector('[data-aeterna-toggle]');
-  if (advice && toggle) {
-    toggle.addEventListener('click', () => {
-      const expanded = advice.classList.toggle('is-open');
-      toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-    });
-  }
 })();
