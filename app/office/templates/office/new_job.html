@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>New Job · Goblin Black Office</title>
+  <link rel="stylesheet" href="/static/gbo.css">
+</head>
+<body>
+<main class="shell">
+  <header class="topbar">
+    <a class="brand" href="/"><span class="brand-mark">GBO</span><span>Goblin Black Office</span></a>
+    <nav class="topnav"><a href="/">Office Desk</a><a href="/records">Clients &amp; Projects</a></nav>
+  </header>
+
+  <section class="hero compact">
+    <p class="eyebrow">Project intake</p>
+    <h1>Open a new job.</h1>
+    <p class="lead">Create the project once. SigNor, Packrat, Ledgergut, Patch and Squarmish will all work from the same record.</p>
+  </section>
+
+  {% if errors %}<div class="errors"><strong>Needs attention</strong><ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
+
+  <form class="form-card" method="post">
+    <p class="card-kicker">Client</p>
+    {% if clients %}
+    <label for="client_id">Existing client</label>
+    <select id="client_id" name="client_id">
+      <option value="">Create a new client below</option>
+      {% for client in clients %}<option value="{{ client.client_id }}" {% if form_data.get('client_id') == client.client_id %}selected{% endif %}>{{ client.name }}</option>{% endfor %}
+    </select>
+    <hr class="divider">
+    {% endif %}
+
+    <div class="grid grid-3">
+      <div><label for="client_name">New client name</label><input id="client_name" name="client_name" value="{{ form_data.get('client_name','') }}"></div>
+      <div><label for="client_email">Email</label><input id="client_email" name="client_email" type="email" value="{{ form_data.get('client_email','') }}"></div>
+      <div><label for="client_phone">Phone</label><input id="client_phone" name="client_phone" value="{{ form_data.get('client_phone','') }}"></div>
+    </div>
+
+    <hr class="divider">
+    <p class="card-kicker">Job</p>
+    <label for="project_name">Project name</label>
+    <input id="project_name" name="project_name" value="{{ form_data.get('project_name','') }}" placeholder="Cedar fence · West 12th">
+    <label for="description">Initial brief</label>
+    <textarea id="description" name="description" placeholder="What were you hired to do?">{{ form_data.get('description','') }}</textarea>
+
+    <div class="button-row"><button class="signal" type="submit">Open job</button></div>
+  </form>
+</main>
+</body>
+</html>
