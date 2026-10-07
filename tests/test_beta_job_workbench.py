@@ -5,7 +5,7 @@ from werkzeug.test import Client
 from werkzeug.wrappers import Response
 
 from app.core.job_lifecycle import draft_job_plan, persist_job_plan
-from app.core.models import Agreement, AgreementStatus
+from app.core.models import Agreement, AgreementStatus, Invoice, InvoiceStatus
 from app.core.runtime import business_id, office_store
 from app.ledgergut.form_mapper import build_models
 from app.office.records import create_client, create_project
@@ -131,3 +131,42 @@ def test_saving_project_receipt_updates_packrat_shopping_quantities():
     assert items[0].quantity_acquired == Decimal("2")
     assert items[0].quantity_remaining == Decimal("8")
     assert items[0].actual_cost == Decimal("14.98")
+
+
+def test_specialist_approvals_return_to_project_workbench():
+    project = _project("Handoff")
+    agreement = Agreement(
+        agreement_id="AGR-HANDOFF",
+        business_id=business_id,
+        project_id=project.project_id,
+        title="Handoff agreement",
+        scope="Defined scope.",
+        amount=Decimal("100.00"),
+        currency="CAD",
+        status=AgreementStatus.DRAFT,
+    )
+    office_store.agreements.save(agreement)
+
+    client = Client(application, Response)
+    response = client.post(f"/signor/agreements/{agreement.agreement_id}/confirm")
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith(
+        f"/jobs/{project.project_id}?message=agreement-ready"
+    )
+
+    invoice = Invoice(
+        invoice_id="SQ-HANDOFF",
+        business_id=business_id,
+        project_id=project.project_id,
+        client_id=project.client_id or "",
+        total=Decimal("100.00"),
+        currency="CAD",
+        status=InvoiceStatus.DRAFT,
+        agreement_id=agreement.agreement_id,
+    )
+    office_store.invoices.save(invoice)
+    response = client.post(f"/squarmish/invoices/{invoice.invoice_id}/confirm")
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith(
+        f"/jobs/{project.project_id}?message=invoice-approved"
+    )
