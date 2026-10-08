@@ -13,7 +13,22 @@ from sqlalchemy import Column, DateTime, MetaData, String, Table, Text, create_e
 from sqlalchemy.engine import Engine
 
 from app.core.migrations import upgrade_database
-from app.core.models import Agreement, Business, Client, Expense, Invoice, InvoiceLineItem, Payment, Project, User
+from app.core.models import (
+    Agreement,
+    Business,
+    ChangeOrder,
+    Client,
+    Estimate,
+    Expense,
+    Invoice,
+    InvoiceLineItem,
+    MaterialPlan,
+    Payment,
+    Project,
+    ShoppingListItem,
+    User,
+    WorkLog,
+)
 from app.core.storage import BlackOfficeStore
 
 T = TypeVar("T")
@@ -92,6 +107,11 @@ class SqlBlackOfficeStore(BlackOfficeStore):
         self.clients = SqlRepository(self.engine, Client, "client_id")
         self.projects = SqlRepository(self.engine, Project, "project_id")
         self.agreements = SqlRepository(self.engine, Agreement, "agreement_id")
+        self.estimates = SqlRepository(self.engine, Estimate, "estimate_id")
+        self.material_plans = SqlRepository(self.engine, MaterialPlan, "material_plan_id")
+        self.shopping_items = SqlRepository(self.engine, ShoppingListItem, "shopping_item_id")
+        self.work_logs = SqlRepository(self.engine, WorkLog, "work_log_id")
+        self.change_orders = SqlRepository(self.engine, ChangeOrder, "change_order_id")
         self.expenses = SqlRepository(self.engine, Expense, "expense_id")
         self.invoices = SqlRepository(self.engine, Invoice, "invoice_id")
         self.payments = SqlRepository(self.engine, Payment, "payment_id")

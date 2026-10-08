@@ -94,4 +94,4 @@ def confirm_invoice(invoice_id: str):
     if invoice.status != InvoiceStatus.DRAFT:
         return ("Only draft invoices can be approved.", 409)
     _store.invoices.save(replace(invoice, status=InvoiceStatus.APPROVED))
-    return redirect(url_for("invoice_pdf", invoice_id=invoice_id))
+    return redirect(f"/jobs/{invoice.project_id}?message=invoice-approved")

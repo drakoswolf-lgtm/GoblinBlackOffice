@@ -5,7 +5,21 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable, Generic, TypeVar
 
-from .models import Agreement, Business, Client, Expense, Invoice, Payment, Project, User
+from .models import (
+    Agreement,
+    Business,
+    ChangeOrder,
+    Client,
+    Estimate,
+    Expense,
+    Invoice,
+    MaterialPlan,
+    Payment,
+    Project,
+    ShoppingListItem,
+    User,
+    WorkLog,
+)
 
 T = TypeVar("T")
 
@@ -38,6 +52,11 @@ class InMemoryBlackOfficeStore:
     clients: InMemoryRepository[Client]
     projects: InMemoryRepository[Project]
     agreements: InMemoryRepository[Agreement]
+    estimates: InMemoryRepository[Estimate]
+    material_plans: InMemoryRepository[MaterialPlan]
+    shopping_items: InMemoryRepository[ShoppingListItem]
+    work_logs: InMemoryRepository[WorkLog]
+    change_orders: InMemoryRepository[ChangeOrder]
     expenses: InMemoryRepository[Expense]
     invoices: InMemoryRepository[Invoice]
     payments: InMemoryRepository[Payment]
@@ -50,6 +69,11 @@ class InMemoryBlackOfficeStore:
             clients=InMemoryRepository(lambda item: item.client_id),
             projects=InMemoryRepository(lambda item: item.project_id),
             agreements=InMemoryRepository(lambda item: item.agreement_id),
+            estimates=InMemoryRepository(lambda item: item.estimate_id),
+            material_plans=InMemoryRepository(lambda item: item.material_plan_id),
+            shopping_items=InMemoryRepository(lambda item: item.shopping_item_id),
+            work_logs=InMemoryRepository(lambda item: item.work_log_id),
+            change_orders=InMemoryRepository(lambda item: item.change_order_id),
             expenses=InMemoryRepository(lambda item: item.expense_id),
             invoices=InMemoryRepository(lambda item: item.invoice_id),
             payments=InMemoryRepository(lambda item: item.payment_id),

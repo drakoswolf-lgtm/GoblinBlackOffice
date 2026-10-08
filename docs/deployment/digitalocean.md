@@ -20,6 +20,18 @@ Expected base monthly cost at the current published rates:
 
 The app spec intentionally has `deploy_on_push: false` until database and secret configuration are complete. Do not enable automatic deploys before the release gate passes.
 
+## Temporary zero-cost-data internal beta
+
+For a first human smoke test, the existing App Platform service can run **without** managed PostgreSQL or Spaces. This mode is intentionally disposable:
+
+- omit `DATABASE_URL` to use the in-memory Black Office store;
+- leave `SPACES_BUCKET`, `SPACES_ACCESS_KEY_ID`, and `SPACES_SECRET_ACCESS_KEY` unset to use local receipt-image storage;
+- `SPACES_ENDPOINT_URL` / `SPACES_REGION` may remain present as future-storage metadata without forcing the S3 backend;
+- keep `GBO_SECRET` configured whenever `GBO_AUTH_REQUIRED=1`;
+- data and locally stored receipt images may disappear on restart, rebuild, or redeploy.
+
+This mode is suitable for an owner-operated walkthrough of splash → onboarding → job → receipt → labour → invoice → payment. It is **not** suitable for external beta users or any test where persistence is expected.
+
 ## Required application settings
 
 Safe values are already present in `.do/app.yaml` where appropriate. The following must be injected as secrets or resource-specific values during provisioning:

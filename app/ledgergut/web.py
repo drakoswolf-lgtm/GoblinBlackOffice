@@ -10,6 +10,7 @@ from pathlib import Path
 
 from flask import Flask, Response, redirect, render_template, request, url_for
 
+from app.core.job_lifecycle import ingest_receipt_for_project
 from app.core.runtime import business_id as _office_business_id, office_store as _office_store
 from app.office.auth import configure_specialist_auth, current_business_id
 from app.ledgergut.form_mapper import build_models
@@ -187,7 +188,18 @@ def _selected_office_project_id(form_data: dict[str, str], business_id: str) -> 
 
 @app.route("/", methods=["GET"])
 def index():
-    return _render_index(saved=request.args.get("saved") == "1")
+    active_business_id = _active_business_id()
+    form_data: dict[str, str] = {}
+    project_id = request.args.get("project_id", "").strip()
+    if project_id:
+        project = _office_store.projects.get(project_id, active_business_id)
+        if project is not None:
+            form_data["office_project_id"] = project.project_id
+            form_data["project_name"] = project.name
+    return _render_index(
+        form_data=form_data,
+        saved=request.args.get("saved") == "1",
+    )
 
 
 @app.route("/receipts/scan", methods=["POST"])
@@ -266,13 +278,28 @@ def new_receipt():
                     storage_error = str(exc)
                 else:
                     office_record = replace(record, record_id=record_id)
-                    expense = receipt_record_to_expense(
-                        office_record,
-                        business_id=active_business_id,
-                        project_id=selected_project_id,
-                    )
-                    _office_store.expenses.save(expense)
-                    return redirect(url_for("index") + "?saved=1")
+                    if selected_project_id:
+                        ingest_receipt_for_project(
+                            _office_store,
+                            office_record,
+                            business_id=active_business_id,
+                            project_id=selected_project_id,
+                        )
+                    else:
+                        expense = receipt_record_to_expense(
+                            office_record,
+                            business_id=active_business_id,
+                            project_id=None,
+                        )
+                        _office_store.expenses.save(expense)
+                    if selected_project_id and request.script_root.rstrip("/") == "/ledgergut":
+                        return redirect(
+                            f"/jobs/{selected_project_id}?message=receipt-saved"
+                        )
+                    query = "?saved=1"
+                    if selected_project_id:
+                        query += f"&project_id={selected_project_id}"
+                    return redirect(url_for("index") + query)
 
     return _render_index(
         form_data=form_data,

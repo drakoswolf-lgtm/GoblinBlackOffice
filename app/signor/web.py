@@ -32,6 +32,11 @@ def index():
     errors: tuple[str, ...] = ()
     agreement = None
 
+    if request.method == "GET":
+        requested_project_id = request.args.get("project_id", "").strip()
+        if requested_project_id and _store.projects.get(requested_project_id, active_business_id) is not None:
+            form_data["project_id"] = requested_project_id
+
     if request.method == "POST":
         form_data = request.form.to_dict()
         result = draft_agreement(
@@ -85,4 +90,4 @@ def confirm_agreement(agreement_id: str):
     if agreement.status != AgreementStatus.DRAFT:
         return ("Only draft agreements can be confirmed.", 409)
     _store.agreements.save(replace(agreement, status=AgreementStatus.PROPOSED))
-    return redirect(url_for("agreement_pdf", agreement_id=agreement_id))
+    return redirect(f"/jobs/{agreement.project_id}?message=agreement-ready")

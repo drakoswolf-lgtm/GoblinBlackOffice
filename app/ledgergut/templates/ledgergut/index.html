@@ -103,6 +103,10 @@
         </div>
         <label for="currency">Currency</label>
         <input id="currency" name="currency" value="{{ form_data.get('currency','CAD') }}" placeholder="CAD" style="max-width:120px">
+
+        <label for="line_items_text">Purchased items <span class="subtle">(for project shopping-list matching)</span></label>
+        <textarea id="line_items_text" class="short" name="line_items_text" placeholder="1x6 cedar fence board | 20 | 7.49&#10;4x4 cedar post | 2 | 34.95">{{ form_data.get('line_items_text','') }}</textarea>
+        <p class="muted" style="font-size:.82rem">One item per line: description | quantity | unit price. Verify these against the receipt before saving.</p>
       </fieldset>
 
       <fieldset class="field-group">
