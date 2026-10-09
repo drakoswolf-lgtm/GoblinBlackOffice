@@ -1796,6 +1796,7 @@ body.splash-active { overflow: hidden; }
   font-weight:850;
   letter-spacing:.08em;
   text-decoration:none;
+  text-transform:uppercase;
 }
 .command-primary {
   border:1px solid #6eeaff;
