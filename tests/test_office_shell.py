@@ -9,7 +9,8 @@ def test_office_desk_loads() -> None:
     response = client.get("/")
 
     assert response.status_code == 200
-    assert b"Give the paperwork" in response.data
+    assert b"Command Desk" in response.data
+    assert b"Give the paperwork" not in response.data
     assert b"Ledgergut" in response.data
     assert b"SigNor" in response.data
     assert b"Squarmish" in response.data
