@@ -3,97 +3,124 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Goblin Black Office</title>
+  <title>Goblin Black Office · Command</title>
   <link rel="stylesheet" href="/static/gbo.css">
 </head>
-<body>
+<body class="command-body">
 {% include "office/_splash.html" %}
 <script id="gbo-sticky-lines" type="application/json">{{ sticky_lines|tojson }}</script>
 
-<aside class="aeterna-advice" data-aeterna-advice aria-label="Cmdr. Æterna Skyeward advice">
-  <button class="aeterna-toggle" type="button" data-aeterna-toggle aria-expanded="false">
-    <img src="/canon/characters/canon-aeterna-headshot.webp" alt="Cmdr. Æterna Skyeward">
-    <span><strong>Cmdr. Skyeward</strong><small>Command advice</small></span>
-  </button>
-  <div class="aeterna-panel">
-    <div class="aeterna-panel-head">
-      <img src="/canon/characters/canon-aeterna-headshot.webp" alt="">
-      <div><strong>Cmdr. Æterna Skyeward</strong><small>Office command layer</small></div>
-    </div>
-    <p>Start with the record that anchors the work. I’ll route the paperwork to the correct goblin.</p>
-    <div class="aeterna-actions">
-      <a href="/jobs/new">Open a new job</a>
-      <a href="/records">Manage clients or projects</a>
-    </div>
-  </div>
-</aside>
+<div class="command-environment" aria-hidden="true">
+  <div class="command-backwall"></div>
+  <div class="command-console"></div>
+  <div class="command-haze"></div>
+  <img class="command-insignia" src="/canon/brand/canon-app-badge.webp" alt="">
+</div>
 
-<main class="shell">
-  <header class="topbar">
-    <a class="brand" href="/"><span class="brand-mark">GBO</span><span>Goblin Black Office</span></a>
-    <nav class="topnav">
-      <a href="/records">Clients &amp; Projects</a>
-      {% if user %}<form method="post" action="/logout" style="margin:0"><button class="secondary" type="submit" style="min-height:36px;padding:7px 11px;width:auto">Sign out</button></form>{% endif %}
+<main class="command-stage">
+  <header class="command-bar">
+    <a class="command-brand" href="/">
+      <img src="/canon/brand/canon-app-badge.webp" alt="">
+      <span><strong>GOBLIN BLACK OFFICE</strong><small>COMMAND // ONLINE</small></span>
+    </a>
+    <nav class="command-nav">
+      <a href="/records">RECORDS</a>
+      {% if user %}<form method="post" action="/logout"><button class="command-link" type="submit">SIGN OUT</button></form>{% endif %}
     </nav>
   </header>
 
-  <section class="hero">
-    <p class="eyebrow">Æterna Desk · Office online</p>
-    <h1>Give the paperwork<br>to the goblins.</h1>
-    <p class="lead">One back office for the commercial chain: define the work, capture the costs, then turn completed work into money without losing the thread between them.</p>
-    <div class="actions"><a class="button signal" href="/jobs/new">Open a new job</a></div>
-  </section>
+  <div class="command-layout">
+    <section class="command-workspace" aria-label="Black Office command surface">
+      <div class="command-scanline" aria-hidden="true"></div>
+      <div class="command-orbit command-orbit-one" aria-hidden="true"></div>
+      <div class="command-orbit command-orbit-two" aria-hidden="true"></div>
 
-  <section class="stat-strip" aria-label="Workflow summary">
-    <div class="stat"><strong>01 · Agree</strong><span>Scope and terms with SigNor</span></div>
-    <div class="stat"><strong>02 · Account</strong><span>Receipts and expenses with Ledgergut</span></div>
-    <div class="stat"><strong>03 · Invoice</strong><span>Billing and receivables with Squarmish</span></div>
-  </section>
-
-  {% if projects %}
-  <section class="card" style="margin-bottom:16px">
-    <div class="card-kicker">Active jobs</div>
-    <h2>Pick up where you left off.</h2>
-    <div class="list" style="margin-top:14px">
-      {% for project in projects|reverse %}
-      {% set client = clients.get(project.client_id) if project.client_id else none %}
-      <div class="list-row">
-        <div>
-          <strong>{{ project.name }}</strong>
-          <small>{% if client %}{{ client.name }} · {% endif %}{{ project.project_id }}</small>
+      <header class="command-heading">
+        <p class="command-kicker">ÆTERNA DESK // ACTIVE OPERATIONS</p>
+        <h1>Command Desk</h1>
+        <p>Open the job. Keep every agreement, receipt, hour, invoice and payment tied to the same project spine.</p>
+        <div class="command-primary-actions">
+          <a class="command-primary" href="/jobs/new">+ OPEN NEW JOB</a>
+          <a class="command-secondary" href="/records">CLIENTS &amp; PROJECTS</a>
         </div>
-        <a class="button secondary" href="/jobs/{{ project.project_id }}">Open job</a>
-      </div>
-      {% endfor %}
-    </div>
-  </section>
-  {% endif %}
+      </header>
 
-  <section class="grid grid-3" aria-label="Black Office specialists">
-    {% for specialist in specialists %}
-    <article class="card specialist-card">
-      <div style="display:flex;align-items:center;gap:12px">
-        <div>
-          <div class="card-kicker">{{ specialist.role }}</div>
-          <h2>{{ specialist.name }}</h2>
+      <section class="command-module command-active-jobs">
+        <header class="command-module-head">
+          <span>ACTIVE JOBS</span>
+          <small>{{ projects|length }} PROJECT{% if projects|length != 1 %}S{% endif %}</small>
+        </header>
+        {% if projects %}
+        <div class="command-job-list">
+          {% for project in projects|reverse %}
+          {% set client = clients.get(project.client_id) if project.client_id else none %}
+          <a class="command-job" href="/jobs/{{ project.project_id }}">
+            <span class="command-job-signal"></span>
+            <span class="command-job-copy">
+              <strong>{{ project.name }}</strong>
+              <small>{% if client %}{{ client.name }} // {% endif %}{{ project.project_id }}</small>
+            </span>
+            <span class="command-job-open">OPEN ›</span>
+          </a>
+          {% endfor %}
         </div>
-        <span class="status">{{ specialist.status }}</span>
+        {% else %}
+        <div class="command-empty">
+          <strong>NO ACTIVE JOBS</strong>
+          <span>The Office is idle. Give the goblins something billable to do.</span>
+        </div>
+        {% endif %}
+      </section>
+
+      <section class="command-module">
+        <header class="command-module-head">
+          <span>SPECIALIST CHANNELS</span>
+          <small>SHARED PROJECT INTELLIGENCE</small>
+        </header>
+        <div class="command-channels">
+          {% for specialist in specialists %}
+          <a class="command-channel" href="{{ specialist.href }}">
+            <span class="command-channel-index">0{{ loop.index }}</span>
+            <span class="command-channel-copy">
+              <small>{{ specialist.role }}</small>
+              <strong>{{ specialist.name }}</strong>
+              <em>{{ specialist.note }}</em>
+            </span>
+            <span class="command-channel-state">{{ specialist.status }}</span>
+          </a>
+          {% endfor %}
+        </div>
+      </section>
+    </section>
+
+    <aside class="command-aeterna is-open" data-aeterna-advice aria-label="Cmdr. Æterna Skyeward advice">
+      <div class="command-aeterna-frame">
+        <div class="command-aeterna-glow" aria-hidden="true"></div>
+        <img src="/canon/characters/canon-aeterna-headshot.webp" alt="Cmdr. Æterna Skyeward">
       </div>
-      <p class="note">{{ specialist.note }}</p>
-      <div class="actions"><a class="button" href="{{ specialist.href }}">Open {{ specialist.name }}</a></div>
-    </article>
-    {% endfor %}
-  </section>
+      <div class="command-aeterna-id">
+        <span>CMDR. ÆTERNA SKYEWARD</span>
+        <small>COMMAND ADVISORY // ACTIVE</small>
+      </div>
+      <button class="command-aeterna-toggle" type="button" data-aeterna-toggle aria-expanded="true">
+        COMMAND ADVICE
+      </button>
+      <div class="command-aeterna-panel aeterna-panel">
+        <p>Start with the job. The Office will route the agreement, purchases, labour and billing from there.</p>
+        <div class="command-aeterna-actions">
+          <a href="/jobs/new">OPEN NEW JOB</a>
+          <a href="/records">OPEN RECORDS</a>
+        </div>
+      </div>
+    </aside>
+  </div>
 
-  <section class="card" style="margin-top:16px">
-    <div class="card-kicker">Office records</div>
-    <h2>People and jobs before paperwork.</h2>
-    <p>Set up clients and projects once, then let every specialist work from the same source of truth.</p>
-    <a class="button secondary" href="/records">Manage clients &amp; projects</a>
-  </section>
-
-  <footer class="footer">Serious software. Unnecessarily memorable employees.</footer>
+  <footer class="command-footer">
+    <span>BLACK OFFICE // COMMAND LINK STABLE</span>
+    <span>Consequential actions remain human-authorized.</span>
+  </footer>
 </main>
+
 <script src="/static/gbo.js" defer></script>
 </body>
 </html>
