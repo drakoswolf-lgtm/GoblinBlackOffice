@@ -116,3 +116,26 @@ def test_startup_sequence_is_session_scoped_with_explicit_replay():
     assert b"sessionStorage" in runtime.data
     assert b"params.get('splash') === '1'" in runtime.data
     assert b"params.get('updating') === '1'" in runtime.data
+
+
+def test_office_desk_uses_holographic_command_surface_not_legacy_dashboard():
+    client = Client(application, Response)
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert b'class="command-body"' in response.data
+    assert b'class="command-workspace"' in response.data
+    assert b"Command Desk" in response.data
+    assert b"OPEN NEW JOB" in response.data
+    assert b"Give the paperwork" not in response.data
+
+
+def test_startup_uses_mobile_safe_canon_presentation():
+    client = Client(application, Response)
+    splash = client.get("/")
+    css = client.get("/static/gbo.css")
+
+    assert b"gbo-boot-console" in splash.data
+    assert b"gbo-progress-meter" in splash.data
+    assert b'background-size:contain' in css.data
+    assert b'canon-access-door-opening.webp' in css.data
