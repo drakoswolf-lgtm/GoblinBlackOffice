@@ -126,7 +126,7 @@ def test_office_desk_uses_holographic_command_surface_not_legacy_dashboard():
     assert b'class="command-body"' in response.data
     assert b'class="command-workspace"' in response.data
     assert b"Command Desk" in response.data
-    assert b"OPEN NEW JOB" in response.data
+    assert b"Open a new job" in response.data
     assert b"Give the paperwork" not in response.data
 
 
