@@ -37,3 +37,39 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8080/canon/brand/canon-app-badge.webp >/dev/null
+
+  browser-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Chromium
+        run: |
+          npm init -y >/dev/null
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Build and run beta container
+        run: |
+          docker build -t goblin-black-office-visual-ci .
+          docker run -d --name gbo-visual -p 8080:8080 goblin-black-office-visual-ci
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:8080/health >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs gbo-visual
+          exit 1
+      - name: Verify desktop and mobile in Chromium
+        run: node tests/ui_smoke.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gbo-command-surface-visual-smoke
+          path: artifacts/ui/
+          if-no-files-found: ignore
+      - name: Clean up beta container
+        if: always()
+        run: docker rm -f gbo-visual || true
