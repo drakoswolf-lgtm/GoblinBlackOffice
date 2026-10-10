@@ -1,6 +1,7 @@
 """Beta heart checks: fail-closed configuration and a real authenticated job."""
 from decimal import Decimal
 
+from flask import Flask
 import pytest
 from werkzeug.test import Client
 from werkzeug.wrappers import Response
@@ -9,7 +10,7 @@ from app.core.deployment import validate_deployment_settings
 from app.core.models import AgreementStatus, InvoiceStatus
 from app.core.runtime import office_store
 from app.ledgergut.web import app as ledgergut_app
-from app.office.auth import user_id_for_email
+from app.office.auth import configure_same_origin_protection, configure_trusted_proxy_proto, user_id_for_email
 from app.office.web import application, office_app
 from app.signor.web import app as signor_app
 from app.squarmish.web import app as squarmish_app
@@ -60,6 +61,44 @@ def test_real_database_supports_multiple_workers_and_local_memory_does_not():
     with pytest.raises(RuntimeError, match="multiple workers"):
         validate_deployment_settings({"GBO_ENV": "development", "WEB_CONCURRENCY": "3"})
 
+
+
+def test_trusted_digitalocean_https_scheme_keeps_post_security(monkeypatch):
+    monkeypatch.setenv("GBO_TRUST_PROXY_PROTO", "1")
+    app = Flask(__name__)
+    app.config["GBO_SAME_ORIGIN_PROTECTION"] = True
+    configure_trusted_proxy_proto(app)
+    configure_same_origin_protection(app)
+
+    @app.post("/write")
+    def write():
+        return "written", 200
+
+    client = app.test_client()
+    # Container connection is HTTP; trusted ingress says the external request
+    # was HTTPS. A real HTTPS browser Origin must therefore be permitted.
+    headers = {
+        "Origin": "https://beta.example",
+        "X-Forwarded-Proto": "https",
+    }
+    ok = client.post("/write", base_url="http://beta.example", headers=headers)
+    assert ok.status_code == 200
+
+    # Cross-site origins still cannot mutate business data.
+    blocked = client.post(
+        "/write",
+        base_url="http://beta.example",
+        headers={**headers, "Origin": "https://attacker.example"},
+    )
+    assert blocked.status_code == 400
+
+    # The proxy must assert HTTPS. A spoofed Origin with internal HTTP remains rejected.
+    wrong_scheme = client.post(
+        "/write",
+        base_url="http://beta.example",
+        headers={**headers, "X-Forwarded-Proto": "http"},
+    )
+    assert wrong_scheme.status_code == 400
 
 def test_authenticated_client_to_invoice_to_payment_browser_contract(monkeypatch):
     # Exercise the actual DispatcherMiddleware routes with the same login cookie.
