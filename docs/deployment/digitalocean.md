@@ -50,6 +50,7 @@ The spec supplies:
 
 - `GBO_AUTH_REQUIRED=1`
 - `GBO_ENV=production`
+- `GBO_TRUST_PROXY_PROTO=1` (only on DigitalOcean App Platform's trusted ingress)
 - `SPACES_REGION=tor1`
 - `SPACES_ENDPOINT_URL=https://tor1.digitaloceanspaces.com`
 - `WEB_CONCURRENCY=1` (owner-only ephemeral smoke, also safe with PostgreSQL)
@@ -58,6 +59,8 @@ The spec supplies:
 `GBO_ENV=production` also enables same-origin protection for state-changing browser requests. POST/PUT/PATCH/DELETE requests must present same-origin `Origin`, `Referer`, or Fetch Metadata evidence; cross-site writes are rejected before application logic runs.
 
 App Platform supplies `PORT` from the configured `http_port` (8080).
+
+**HTTPS / POST regression:** DigitalOcean terminates TLS at ingress and forwards the original scheme in `X-Forwarded-Proto`, stripping client-supplied values. `GBO_TRUST_PROXY_PROTO=1` tells the Flask apps to trust only the forwarded scheme, not forwarded IP or Host. Without this setting, secure browser form submissions can be misidentified as cross-site (HTTPS Origin versus internal HTTP request). Do **not** enable this flag on a directly exposed Gunicorn server. Verify legitimate HTTPS POST succeeds and mismatched Origin is still rejected.
 
 **Deployment guard:** when `GBO_ENV=production`, startup refuses disabled authentication, missing session secret, missing invite code, or missing `DATABASE_URL` unless the explicit owner-only smoke flag is set. In-memory mode refuses worker counts other than one. A production SQL connection must use PostgreSQL. These errors are intentional: a green health check must not disguise an exposed or split-brain beta.
 
