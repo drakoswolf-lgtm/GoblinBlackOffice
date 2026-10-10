@@ -29,6 +29,34 @@ try {
     if (!(await splash.isVisible())) {
       throw Error(spec.name + ": First-run splash failed to display");
     }
+    const expectedFilm = spec.name === "mobile"
+      ? "gbo-opening-mobile.mp4"
+      : "gbo-opening-desktop.mp4";
+    await page.waitForFunction(() => {
+      const film = document.querySelector("[data-gbo-film]");
+      return film && film.readyState >= 2 && film.videoWidth > 0 && film.videoHeight > 0;
+    }, null, { timeout: 12000 });
+    const filmStatus = await page.locator("[data-gbo-film]").evaluate((film) => ({
+      src: film.currentSrc,
+      width: film.videoWidth,
+      height: film.videoHeight,
+      duration: film.duration,
+      muted: film.muted,
+      paused: film.paused,
+      currentTime: film.currentTime,
+    }));
+    if (!filmStatus.src.endsWith(expectedFilm)) {
+      throw Error(spec.name + ": Wrong cinematic master: " + JSON.stringify(filmStatus));
+    }
+    if (filmStatus.paused || filmStatus.duration < 8 || filmStatus.duration > 15) {
+      throw Error(spec.name + ": Cinematic film did not start and decode: " + JSON.stringify(filmStatus));
+    }
+    if ((spec.name === "mobile") !== (filmStatus.height > filmStatus.width)) {
+      throw Error(spec.name + ": Master aspect ratio is incorrect: " + JSON.stringify(filmStatus));
+    }
+    if (!filmStatus.muted || !(await splash.evaluate((node) => node.classList.contains("is-film")))) {
+      throw Error(spec.name + ": Video autoplay setup or cinematic overlay failed");
+    }
     const startupSize = await page.locator(".gbo-charge").evaluate(
       (node) => getComputedStyle(node).backgroundSize,
     );
