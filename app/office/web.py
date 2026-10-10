@@ -425,6 +425,10 @@ def index():
 
 @office_app.route("/canon/<path:asset_path>")
 def canon_asset(asset_path: str):
+    # Some minimal container images lack the OS MIME mapping for .webp.
+    # Send the approved image plates with an explicit, browser-safe type.
+    if asset_path.lower().endswith(".webp"):
+        return send_from_directory(_canon_root, asset_path, mimetype="image/webp")
     return send_from_directory(_canon_root, asset_path)
 
 @office_app.route("/health")
