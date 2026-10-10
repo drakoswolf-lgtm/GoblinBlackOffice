@@ -12,11 +12,25 @@ from collections.abc import Mapping
 _TRUE = {"1", "true", "yes"}
 
 
+def normalize_database_url(url: str) -> str:
+    """Use our installed psycopg 3 driver for provider-issued PostgreSQL URLs.
+
+    SQLAlchemy 2.0 interprets plain postgresql:// as psycopg2, but GBO
+    intentionally installs psycopg[binary], not psycopg2. Preserve the
+    remainder of the DSN (including SSL parameters) without logging secrets.
+    """
+    clean = url.strip()
+    for prefix in ("postgresql://", "postgres://"):
+        if clean.startswith(prefix):
+            return "postgresql+psycopg://" + clean[len(prefix):]
+    return clean
+
+
 def validate_deployment_settings(settings: Mapping[str, str] | None = None) -> None:
     env = os.environ if settings is None else settings
     production = env.get("GBO_ENV", "development").strip().lower() == "production"
     auth_enabled = env.get("GBO_AUTH_REQUIRED", "").strip().lower() in _TRUE
-    database_url = env.get("DATABASE_URL", "").strip()
+    database_url = normalize_database_url(env.get("DATABASE_URL", ""))
     owner_smoke = env.get("GBO_INTERNAL_SMOKE_TEST", "").strip().lower() in _TRUE
 
     if production:
@@ -31,7 +45,7 @@ def validate_deployment_settings(settings: Mapping[str, str] | None = None) -> N
                 "Production requires DATABASE_URL for durable records. "
                 "For an explicitly disposable owner-only test, set GBO_INTERNAL_SMOKE_TEST=1."
             )
-        if database_url and not database_url.startswith(("postgresql://", "postgresql+psycopg://")):
+        if database_url and not database_url.startswith("postgresql+psycopg://"):
             raise RuntimeError("Production DATABASE_URL must use PostgreSQL; local SQLite is not durable.")
 
     if not database_url:
