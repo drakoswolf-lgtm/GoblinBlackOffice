@@ -47,7 +47,7 @@
 
       <section class="command-module command-active-jobs">
         <header class="command-module-head">
-          <span>ACTIVE JOBS</span>
+          <span>OPEN PROJECTS</span>
           <small>{{ projects|length }} PROJECT{% if projects|length != 1 %}S{% endif %}</small>
         </header>
         {% if projects %}
@@ -60,7 +60,7 @@
               <strong>{{ project.name }}</strong>
               <small>{% if client %}{{ client.name }} // {% endif %}{{ project.project_id }}</small>
             </span>
-            <span class="command-job-open">OPEN ›</span>
+            <span class="command-job-open">{{ project.status.value|upper }} ›</span>
           </a>
           {% endfor %}
         </div>
@@ -110,6 +110,7 @@
         <div class="command-aeterna-actions">
           <a href="/jobs/new">Open a new job</a>
           <a href="/records">OPEN RECORDS</a>
+          <a href="/settings/documents">DOCUMENT BRANDING</a>
         </div>
       </div>
     </aside>
