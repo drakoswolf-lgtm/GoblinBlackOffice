@@ -125,3 +125,30 @@ def test_rejects_unknown_pricing_basis():
         name="Invalid model", pricing_model="surprise!",
     )
     assert errors
+
+
+def test_receipt_scan_populates_review_fields_and_preserves_mode(monkeypatch):
+    from io import BytesIO
+    from PIL import Image
+    import app.ledgergut.web as ledger_web
+
+    monkeypatch.setattr(
+        ledger_web, "extract_text_from_image",
+        lambda payload: "HOME HARDWARE\\n2026-10-10\\nSUBTOTAL 20.00\\nGST 1.00\\nTOTAL 21.00",
+    )
+    image = Image.new("RGB", (320, 400), "white")
+    stream = BytesIO()
+    image.save(stream, format="JPEG")
+    stream.seek(0)
+    client = Client(application, Response)
+    response = client.post(
+        "/ledgergut/receipts/scan",
+        data={"receipt_image": (stream, "receipt.jpg"), "entry_mode": "camera",
+              "line_description": "", "line_quantity": "", "line_unit_price": ""},
+        content_type="multipart/form-data",
+    )
+    assert response.status_code == 200
+    assert b'value="HOME HARDWARE"' in response.data
+    assert b'value="21.00"' in response.data
+    assert b'data-receipt-review' in response.data
+    assert b'name="entry_mode" id="entry_mode" value="camera"' in response.data
