@@ -139,3 +139,14 @@ def test_startup_uses_mobile_safe_canon_presentation():
     assert b"gbo-progress-meter" in splash.data
     assert b'background-size:contain' in css.data
     assert b'canon-access-door-opening.webp' in css.data
+
+
+def test_canon_black_office_environment_asset_resolves():
+    client = Client(application, Response)
+    asset = client.get("/canon/environments/canon-black-office-command.svg")
+    css = client.get("/static/gbo.css")
+
+    assert asset.status_code == 200
+    assert asset.headers["Content-Type"].startswith("image/svg+xml")
+    assert b'<svg xmlns="http://www.w3.org/2000/svg"' in asset.data
+    assert b'canon-black-office-command.svg' in css.data
