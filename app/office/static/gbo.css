@@ -2184,3 +2184,16 @@ body.splash-active { overflow: hidden; }
     background-size:100% auto;
   }
 }
+
+/* Canon environment plate: physical graphite office beneath the holograms. */
+.command-environment {
+  background: #05080a url("/canon/environments/canon-black-office-command.svg") center 56% / cover no-repeat;
+}
+.command-backwall { opacity: .18; }
+.command-console { opacity: .18; }
+@media (max-width: 680px) {
+  .command-environment { background-position: 50% center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .command-scanline, .command-orbit { animation: none !important; }
+}
