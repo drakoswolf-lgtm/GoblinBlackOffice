@@ -27,6 +27,10 @@ services:
         value: production
         scope: RUN_TIME
         type: GENERAL
+      - key: GBO_TRUST_PROXY_PROTO
+        value: "1"
+        scope: RUN_TIME
+        type: GENERAL
       - key: SPACES_REGION
         value: tor1
         scope: RUN_TIME
