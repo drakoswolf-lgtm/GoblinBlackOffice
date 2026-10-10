@@ -98,7 +98,10 @@ try {
     );
     if (!backgroundResponse.ok() ||
         !backgroundResponse.headers()["content-type"]?.includes("image/webp")) {
-      throw Error(spec.name + ": Approved physical office plate failed to load");
+      throw Error(spec.name + ": Approved office plate request failed: " +
+        JSON.stringify({ status: backgroundResponse.status(), contentType:
+          backgroundResponse.headers()["content-type"], url: backgroundResponse.url(),
+          body: (await backgroundResponse.text()).slice(0, 180) }));
     }
     const decode = await page.evaluate(async (url) => {
       const art = new Image();
