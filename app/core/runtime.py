@@ -8,9 +8,13 @@ from __future__ import annotations
 
 import os
 
+from app.core.deployment import validate_deployment_settings
 from app.core.memory_store import InMemoryBlackOfficeStore
 from app.core.models import Business
 from app.core.sql_store import SqlBlackOfficeStore
+
+# Guard production access and worker topology before any store is opened.
+validate_deployment_settings()
 
 business_id = os.environ.get("GBO_BUSINESS_ID", "local-development")
 database_url = os.environ.get("DATABASE_URL", "").strip()
