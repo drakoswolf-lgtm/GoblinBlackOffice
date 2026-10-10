@@ -2299,3 +2299,38 @@ body.splash-active { overflow: hidden; }
     background: linear-gradient(180deg, rgba(4,16,23,.44), rgba(2,9,14,.39));
   }
 }
+
+
+/* Beta Mk.III operational panels */
+.beta-line-rows { display:grid;gap:10px;margin:12px 0; }
+.beta-line-row { display:grid;grid-template-columns:minmax(0,2.1fr) minmax(70px,.7fr) minmax(70px,.7fr) minmax(90px,1fr) auto;gap:8px;align-items:end;padding:10px;border:1px solid rgba(57,223,255,.16);border-radius:10px;background:rgba(7,22,29,.34); }
+.beta-line-row.receipt-line {grid-template-columns:minmax(0,2.1fr) minmax(74px,.7fr) minmax(95px,1fr) auto}
+.beta-line-row label {font-size:.68rem;margin:0;min-width:0}
+.beta-line-row input {width:100%;min-width:0;margin-top:5px}
+.beta-line-row button {width:auto;min-width:38px;min-height:40px;padding:7px 9px}
+.beta-entry-choices {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0}
+.beta-entry-choices button {min-height:110px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px;padding:12px;white-space:normal;text-align:center}
+.beta-entry-choices .choice-icon {font-size:1.7rem}
+.beta-review[hidden],.beta-intake[hidden],.beta-camera[hidden],[data-pdf-dialog][hidden] {display:none!important}
+.beta-camera {padding:12px;border:1px solid rgba(57,223,255,.2);border-radius:12px}
+.beta-camera video {width:100%;max-height:65vh;object-fit:contain;background:#020609;border-radius:8px}
+.beta-project-actions {display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+.beta-project-actions form {margin:0}
+.beta-status {text-transform:uppercase;letter-spacing:.1em}
+.pdf-modal {width:min(95vw,980px);max-width:none;height:min(92dvh,1000px);max-height:none;position:fixed;inset:0;margin:auto;padding:12px;border:1px solid rgba(57,223,255,.6);border-radius:14px;background:#071016;color:#e5f9ff;box-shadow:0 0 60px rgba(44,180,210,.18);overflow:hidden}
+.pdf-modal::backdrop {background:rgba(0,5,10,.85)}
+.pdf-modal header {display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pdf-modal header button {width:auto;min-height:36px}
+.pdf-modal iframe {width:100%;height:calc(100% - 115px);border:1px solid rgba(57,223,255,.18);background:#fff;margin:10px 0}
+.pdf-modal footer {display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.pdf-modal footer a {color:#88e9f5}
+.pdf-modal footer p {margin:0;font-size:.7rem;color:#afc8d0}
+@media(max-width:620px){
+  .beta-line-row,.beta-line-row.receipt-line {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .beta-line-row label:first-child {grid-column:1 / -1}
+  .beta-line-row button {justify-self:end}
+  .beta-entry-choices {grid-template-columns:1fr}
+  .beta-entry-choices button {min-height:68px;flex-direction:row}
+  .pdf-modal {height:95dvh;width:98vw;padding:8px}
+  .pdf-modal iframe {height:calc(100% - 150px)}
+}
