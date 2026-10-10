@@ -7,10 +7,12 @@ from pathlib import Path
 from alembic import command
 from alembic.config import Config
 
+from app.core.deployment import normalize_database_url
+
 
 def upgrade_database(database_url: str | None = None) -> None:
     """Upgrade the configured database to the current schema head."""
-    url = (database_url or os.environ.get("DATABASE_URL", "")).strip()
+    url = normalize_database_url(database_url or os.environ.get("DATABASE_URL", ""))
     if not url:
         raise RuntimeError("DATABASE_URL is required to run database migrations.")
 
