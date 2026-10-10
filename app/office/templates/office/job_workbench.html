@@ -40,7 +40,7 @@
     <div class="stat"><strong>{{ currency }} {{ '%.2f'|format(ledger.outstanding) }}</strong><span>Outstanding issued invoices</span></div>
   </section>
 
-  <section class="grid grid-2" style="margin-top:18px">
+  <section class="grid grid-3" style="margin-top:18px">
     <article class="card">
       <p class="card-kicker">01 · SigNor</p>
       <h2>Agreement</h2>
@@ -59,10 +59,17 @@
     </article>
 
     <article class="card">
-      <p class="card-kicker">02 · Packrat</p>
-      <h2>Materials &amp; receipts</h2>
-      <p>{{ shopping_items|length }} shopping-list items · {{ expenses|length }} project expenses.</p>
-      <a class="button" href="/ledgergut/?project_id={{ project.project_id }}">Feed Ledgergut a receipt</a>
+      <p class="card-kicker">02 · Ledgergut</p>
+      <h2>Receipts &amp; Expenses</h2>
+      <p>{{ expenses|length }} recorded project expenses.</p>
+      <a class="button signal" href="/ledgergut/?project_id={{ project.project_id }}">Scan Receipt / Enter Expense</a>
+    </article>
+
+    <article class="card">
+      <p class="card-kicker">03 · Packrat</p>
+      <h2>Materials &amp; Shopping</h2>
+      <p>{{ shopping_items|length }} shopping-list items to track.</p>
+      <a class="button secondary" href="#packrat-shopping">Open Shopping List</a>
     </article>
   </section>
 
@@ -112,7 +119,7 @@
   </form>
   {% endif %}
 
-  <section class="card" style="margin-top:18px">
+  <section class="card" id="packrat-shopping" style="margin-top:18px">
     <p class="card-kicker">Live shopping list</p>
     <h2>Packrat</h2>
     {% if shopping_items %}
