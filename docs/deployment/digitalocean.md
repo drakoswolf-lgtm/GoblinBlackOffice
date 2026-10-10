@@ -24,10 +24,11 @@ The app spec intentionally has `deploy_on_push: false` until database and secret
 
 For a first human smoke test, the existing App Platform service can run **without** managed PostgreSQL or Spaces. This mode is intentionally disposable:
 
-- omit `DATABASE_URL` to use the in-memory Black Office store;
+- set `GBO_INTERNAL_SMOKE_TEST=1` and omit `DATABASE_URL` to explicitly permit a disposable, owner-only in-memory Black Office store;
 - leave `SPACES_BUCKET`, `SPACES_ACCESS_KEY_ID`, and `SPACES_SECRET_ACCESS_KEY` unset to use local receipt-image storage;
 - `SPACES_ENDPOINT_URL` / `SPACES_REGION` may remain present as future-storage metadata without forcing the S3 backend;
-- keep `GBO_SECRET` configured whenever `GBO_AUTH_REQUIRED=1`;
+- set `WEB_CONCURRENCY=1` so every request reaches the same in-memory store;
+- keep `GBO_AUTH_REQUIRED=1`, `GBO_SECRET`, and `GBO_INVITE_TOKEN` configured in production;
 - data and locally stored receipt images may disappear on restart, rebuild, or redeploy.
 
 This mode is suitable for an owner-operated walkthrough of splash → onboarding → job → receipt → labour → invoice → payment. It is **not** suitable for external beta users or any test where persistence is expected.
@@ -51,12 +52,16 @@ The spec supplies:
 - `GBO_ENV=production`
 - `SPACES_REGION=tor1`
 - `SPACES_ENDPOINT_URL=https://tor1.digitaloceanspaces.com`
-- `WEB_CONCURRENCY=2`
+- `WEB_CONCURRENCY=1` (owner-only ephemeral smoke, also safe with PostgreSQL)
 - `WEB_THREADS=4`
 
 `GBO_ENV=production` also enables same-origin protection for state-changing browser requests. POST/PUT/PATCH/DELETE requests must present same-origin `Origin`, `Referer`, or Fetch Metadata evidence; cross-site writes are rejected before application logic runs.
 
 App Platform supplies `PORT` from the configured `http_port` (8080).
+
+**Deployment guard:** when `GBO_ENV=production`, startup refuses disabled authentication, missing session secret, missing invite code, or missing `DATABASE_URL` unless the explicit owner-only smoke flag is set. In-memory mode refuses worker counts other than one. A production SQL connection must use PostgreSQL. These errors are intentional: a green health check must not disguise an exposed or split-brain beta.
+
+Remove `GBO_INTERNAL_SMOKE_TEST` and configure managed PostgreSQL before admitting external testers. A successful internal smoke test does not establish persistence across redeployments.
 
 ## Provisioning order
 
