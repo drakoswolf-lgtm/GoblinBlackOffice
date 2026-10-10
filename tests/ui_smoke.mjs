@@ -29,6 +29,12 @@ try {
     if (!(await splash.isVisible())) {
       throw Error(spec.name + ": First-run splash failed to display");
     }
+    const startupSize = await page.locator(".gbo-charge").evaluate(
+      (node) => getComputedStyle(node).backgroundSize,
+    );
+    if (spec.name === "mobile" && startupSize !== "cover") {
+      throw Error("Mobile ignition art is letterboxed: " + startupSize);
+    }
     await page.screenshot({ path: "artifacts/ui/" + spec.name + "-startup.png" });
 
     await page.waitForFunction(
