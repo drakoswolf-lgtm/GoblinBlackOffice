@@ -2201,3 +2201,11 @@ body.splash-active { overflow: hidden; }
 /* Keep the environment above the opaque body paint and below every control. */
 .command-environment { z-index: 0; pointer-events: none; }
 .command-stage { position: relative; z-index: 1; }
+
+/* Portrait beta: use the entire display, not a postcard in empty black space. */
+@media (max-aspect-ratio: 4/5) {
+  .gbo-charge, .gbo-access-door {
+    background-size: cover;
+    background-position: center center;
+  }
+}
