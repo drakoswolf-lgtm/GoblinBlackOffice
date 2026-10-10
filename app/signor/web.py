@@ -78,7 +78,7 @@ def agreement_pdf(agreement_id: str):
     project = _store.projects.get(agreement.project_id, active_business_id)
     client = _store.clients.get(project.client_id, active_business_id) if project is not None and project.client_id else None
     pdf = build_agreement_pdf(business=business, agreement=agreement, project=project, client=client)
-    return send_file(BytesIO(pdf), mimetype="application/pdf", as_attachment=True, download_name=f"{agreement.agreement_id}.pdf")
+    return send_file(BytesIO(pdf), mimetype="application/pdf", as_attachment=request.args.get("download") == "1", download_name=f"{agreement.agreement_id}.pdf")
 
 
 @app.route("/agreements/<agreement_id>/confirm", methods=["POST"])
