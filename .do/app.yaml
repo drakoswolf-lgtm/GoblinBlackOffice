@@ -36,7 +36,7 @@ services:
         scope: RUN_TIME
         type: GENERAL
       - key: WEB_CONCURRENCY
-        value: "2"
+        value: "1"
         scope: RUN_TIME
         type: GENERAL
       - key: WEB_THREADS
