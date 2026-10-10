@@ -82,7 +82,7 @@ def invoice_pdf(invoice_id: str):
     project = _store.projects.get(invoice.project_id, active_business_id)
     client = _store.clients.get(invoice.client_id, active_business_id) if invoice.client_id else None
     pdf = build_invoice_pdf(business=business, invoice=invoice, project=project, client=client)
-    return send_file(BytesIO(pdf), mimetype="application/pdf", as_attachment=True, download_name=f"{invoice.invoice_id}.pdf")
+    return send_file(BytesIO(pdf), mimetype="application/pdf", as_attachment=request.args.get("download") == "1", download_name=f"{invoice.invoice_id}.pdf")
 
 
 @app.route("/invoices/<invoice_id>/confirm", methods=["POST"])
