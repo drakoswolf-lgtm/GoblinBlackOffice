@@ -2,6 +2,8 @@
 from __future__ import annotations
 import hmac
 import os
+from dataclasses import replace
+from itertools import zip_longest
 from datetime import date
 from decimal import Decimal
 from pathlib import Path
@@ -15,6 +17,7 @@ from app.core.job_lifecycle import (
     record_project_work,
 )
 from app.core.ledger import summarize_project_ledger
+from app.core.models import RecordStatus
 from app.core.runtime import office_store
 from app.ledgergut.web import app as ledgergut_app
 from app.signor.web import app as signor_app
@@ -89,6 +92,38 @@ def _parse_material_requirements(raw: str):
         except ValueError as exc:
             errors.append(f"Material line {number}: {exc}")
     return tuple(requirements), tuple(errors)
+
+def _parse_structured_materials(form):
+    """Read user-facing material fields without requiring separator characters."""
+    names = form.getlist("material_description")
+    quantities = form.getlist("material_quantity")
+    units = form.getlist("material_unit")
+    prices = form.getlist("material_price")
+    requirements, errors = [], []
+    for number, (name, qty, unit, price) in enumerate(
+        zip_longest(names, quantities, units, prices, fillvalue=""), start=1
+    ):
+        if not any(str(part).strip() for part in (name, qty, unit, price)):
+            continue
+        try:
+            requirements.append(MaterialRequirementInput(
+                description=name.strip(), quantity=qty.strip(),
+                unit=unit.strip() or "ea",
+                estimated_unit_cost=price.strip() or None,
+            ))
+        except ValueError as exc:
+            errors.append(f"Material row {number}: {exc}")
+    return tuple(requirements), tuple(errors)
+
+
+def _form_material_rows(form):
+    return list(zip_longest(
+        form.getlist("material_description"),
+        form.getlist("material_quantity"),
+        form.getlist("material_unit"),
+        form.getlist("material_price"), fillvalue=""
+    )) or [("", "", "ea", "")]
+
 
 
 def _parse_optional_date(raw: str):
@@ -190,7 +225,7 @@ def record_desk():
         if request.form.get("kind") == "client":
             _, errors = create_client(business_id=bid, name=request.form.get("name", ""), email=request.form.get("email", ""), phone=request.form.get("phone", ""))
         elif request.form.get("kind") == "project":
-            _, errors = create_project(business_id=bid, client_id=request.form.get("client_id", ""), name=request.form.get("name", ""), description=request.form.get("description", ""))
+            _, errors = create_project(business_id=bid, client_id=request.form.get("client_id", ""), name=request.form.get("name", ""), description=request.form.get("description", ""), pricing_model=request.form.get("pricing_model", "undetermined"))
         if not errors: return redirect(url_for("record_desk"))
     return render_template("office/records.html", errors=errors, clients=office_store.clients.list_for_business(bid), projects=office_store.projects.list_for_business(bid))
 
@@ -221,6 +256,7 @@ def new_job():
                 client_id=client_id,
                 name=request.form.get("project_name", ""),
                 description=request.form.get("description", ""),
+                pricing_model=request.form.get("pricing_model", "undetermined"),
             )
             if project is not None:
                 return redirect(url_for("job_workbench", project_id=project.project_id))
@@ -247,13 +283,27 @@ def job_workbench(project_id: str):
     if request.method == "POST":
         action = request.form.get("action", "").strip()
 
-        if action == "plan":
+        if action == "project_status":
+            desired = request.form.get("status", "").strip()
+            if desired not in {"active", "completed", "archived"}:
+                errors.append("Choose a valid project status.")
+            else:
+                # Preserve expenses, agreements, invoices and payments when closing.
+                office_store.projects.save(replace(project, status=RecordStatus(desired)))
+                if desired == "archived":
+                    return redirect(url_for("record_desk"))
+                return redirect(url_for("job_workbench", project_id=project_id, message="status-" + desired))
+
+        elif action == "plan":
             agreement = office_store.agreements.get(request.form.get("agreement_id", "").strip(), bid)
             if agreement is None or agreement.project_id != project_id:
                 errors.append("Choose an agreement for this project.")
-            requirements, material_errors = _parse_material_requirements(
-                request.form.get("materials_text", "")
-            )
+            if "material_description" in request.form:
+                requirements, material_errors = _parse_structured_materials(request.form)
+            else:
+                requirements, material_errors = _parse_material_requirements(
+                    request.form.get("materials_text", "")
+                )
             errors.extend(material_errors)
             if not errors and agreement is not None:
                 draft = draft_job_plan(
@@ -371,6 +421,8 @@ def job_workbench(project_id: str):
         "invoice-drafted": "Invoice draft created. Review it before issuing.",
         "invoice-approved": "Invoice approved for issuing. PDF remains available here.",
         "payment-recorded": "Payment recorded and ledger updated.",
+        "status-active": "Project reopened.",
+        "status-completed": "Field work marked complete. Billing and payment records remain available.",
     }.get(message, "")
 
     return render_template(
@@ -389,6 +441,8 @@ def job_workbench(project_id: str):
         actual_hours=actual_hours,
         expense_total=expense_total,
         currency=currency,
+        material_rows=_form_material_rows(request.form) if request.method == "POST" else [("", "", "ea", "")],
+        form_data=request.form if request.method == "POST" else {},
         errors=tuple(errors),
         message=message_text,
     )
@@ -404,7 +458,7 @@ def grunt_workflow_page(grunt_id: str):
 @office_app.route("/")
 def index():
     bid = current_business_id()
-    projects = office_store.projects.list_for_business(bid)
+    projects = [p for p in office_store.projects.list_for_business(bid) if p.status != RecordStatus.ARCHIVED]
     clients = {client.client_id: client for client in office_store.clients.list_for_business(bid)}
     specialists = [
         {"name":"Ledgergut","role":"Receipts & expenses","status":"live","href":"/ledgergut/","note":"Feed me the receipt. Keep your fingers."},
