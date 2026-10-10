@@ -3,10 +3,11 @@ from decimal import Decimal
 
 from flask import Flask
 import pytest
+from sqlalchemy import create_engine
 from werkzeug.test import Client
 from werkzeug.wrappers import Response
 
-from app.core.deployment import validate_deployment_settings
+from app.core.deployment import normalize_database_url, validate_deployment_settings
 from app.core.models import AgreementStatus, InvoiceStatus
 from app.core.runtime import office_store
 from app.ledgergut.web import app as ledgergut_app
@@ -99,6 +100,24 @@ def test_trusted_digitalocean_https_scheme_keeps_post_security(monkeypatch):
         headers={**headers, "X-Forwarded-Proto": "http"},
     )
     assert wrong_scheme.status_code == 400
+
+
+@pytest.mark.parametrize("prefix", ["postgresql://", "postgres://", "postgresql+psycopg://"])
+def test_managed_postgres_dsn_selects_installed_psycopg3(prefix):
+    # The password stays URL-encoded and sslmode=require is preserved.
+    original = prefix + "doadmin:pa%25ss%40word@private-host:25060/defaultdb?sslmode=require"
+    canonical = normalize_database_url(original)
+    assert canonical == (
+        "postgresql+psycopg://doadmin:pa%25ss%40word@private-host:25060/defaultdb?sslmode=require"
+    )
+    # Engine initialization succeeds without importing the uninstalled psycopg2.
+    engine = create_engine(canonical)
+    assert engine.dialect.driver == "psycopg"
+    engine.dispose()
+
+
+def test_non_postgres_test_database_urls_are_unchanged():
+    assert normalize_database_url("sqlite:///:memory:") == "sqlite:///:memory:"
 
 def test_authenticated_client_to_invoice_to_payment_browser_contract(monkeypatch):
     # Exercise the actual DispatcherMiddleware routes with the same login cookie.

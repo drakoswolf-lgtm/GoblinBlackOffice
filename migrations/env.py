@@ -5,6 +5,8 @@ import os
 from alembic import context
 from sqlalchemy import create_engine, pool
 
+from app.core.deployment import normalize_database_url
+
 config = context.config
 target_metadata = None
 
@@ -13,7 +15,7 @@ def _database_url() -> str:
     url = config.attributes.get("database_url") or os.environ.get("DATABASE_URL")
     if not url:
         raise RuntimeError("DATABASE_URL is required to run database migrations.")
-    return str(url)
+    return normalize_database_url(str(url))
 
 
 def run_migrations_offline() -> None:
