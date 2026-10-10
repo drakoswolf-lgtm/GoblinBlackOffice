@@ -38,7 +38,7 @@
   <section class="hero compact">
     <p class="eyebrow">Accounting · Receipts &amp; Expenses</p>
     <h1>Capture it once.</h1>
-    <p class="lead">Upload the receipt, let OCR do the dull first pass, then verify the numbers before Ledgergut files the expense into the Office.</p>
+    <p class="lead">Scan with your camera, upload a receipt, or enter the expense manually. Verify OCR suggestions before saving.</p>
   </section>
 
   {% if saved %}<div class="alert success"><strong>Receipt saved successfully.</strong> Ledgergut has it.</div>{% endif %}
@@ -56,12 +56,33 @@
   </section>
   {% endif %}
 
+  {% set review_open = ocr_raw_text or form_data.get('entry_mode') == 'manual' or input_errors or findings %}
   <form class="receipt-layout" method="post" action="{{ url_for('new_receipt') }}" enctype="multipart/form-data" id="receipt-form">
+    <input type="hidden" name="entry_mode" id="entry_mode" value="{{ form_data.get('entry_mode','') }}">
+    <input type="file" id="receipt_image" name="receipt_image" accept="image/png,image/jpeg" hidden>
+    <section class="card beta-intake" data-receipt-choices {% if review_open %}hidden{% endif %} style="grid-column:1/-1">
+      <p class="card-kicker">Ledgergut // Receipt intake</p>
+      <h2>Choose an entry method</h2>
+      <div class="beta-entry-choices">
+        <button type="button" data-camera-start><span class="choice-icon" aria-hidden="true">📷</span>Scan with Camera</button>
+        <button type="button" data-upload-start><span class="choice-icon" aria-hidden="true">⬆</span>Upload Image</button>
+        <button type="button" data-manual-start><span class="choice-icon" aria-hidden="true">✎</span>Enter Manually</button>
+      </div>
+      <div class="beta-camera" data-camera-panel hidden>
+        <video data-camera-view playsinline muted autoplay aria-label="Camera preview"></video>
+        <div class="button-row">
+          <button type="button" data-camera-shutter>Capture Receipt</button>
+          <button type="button" class="secondary" data-camera-cancel>Cancel</button>
+        </div>
+      </div>
+      <p class="muted" role="status" aria-live="polite" data-scan-status>Images stay private to this account. OCR suggestions always require your review.</p>
+      <noscript><p class="muted">JavaScript is required for camera capture. Use the accessible direct upload form when scripts are enabled.</p></noscript>
+    </section>
     <textarea name="ocr_raw_text" hidden>{{ ocr_raw_text }}</textarea>
     <textarea name="ocr_confidence_notes" hidden>{{ ocr_confidence_notes | join('\n') }}</textarea>
     <input type="hidden" name="pending_image_token" value="{{ form_data.get('pending_image_token', '') }}">
 
-    <section class="form-card" style="margin-top:0">
+    <section class="form-card beta-review" data-receipt-review style="margin-top:0" {% if not review_open %}hidden{% endif %}>
       <fieldset class="field-group">
         <legend>Receipt identity</legend>
         <div class="grid grid-2">
@@ -104,9 +125,29 @@
         <label for="currency">Currency</label>
         <input id="currency" name="currency" value="{{ form_data.get('currency','CAD') }}" placeholder="CAD" style="max-width:120px">
 
-        <label for="line_items_text">Purchased items <span class="subtle">(for project shopping-list matching)</span></label>
-        <textarea id="line_items_text" class="short" name="line_items_text" placeholder="1x6 cedar fence board | 20 | 7.49&#10;4x4 cedar post | 2 | 34.95">{{ form_data.get('line_items_text','') }}</textarea>
-        <p class="muted" style="font-size:.82rem">One item per line: description | quantity | unit price. Verify these against the receipt before saving.</p>
+        <div data-repeatable-rows>
+          <p class="card-kicker">Purchased items (for shopping-list matching)</p>
+          <div class="beta-line-rows" data-row-list>
+            {% for row in line_rows %}
+            <div class="beta-line-row receipt-line" data-entry-row>
+              <label>Item <input name="line_description" value="{{ row[0] }}" placeholder="Cedar board"></label>
+              <label>Quantity <input name="line_quantity" value="{{ row[1] }}" type="number" step="any" min="0" inputmode="decimal"></label>
+              <label>Unit price <input name="line_unit_price" value="{{ row[2] }}" type="number" step="0.01" min="0" inputmode="decimal"></label>
+              <button type="button" class="secondary" data-remove-row aria-label="Remove purchased item">✕</button>
+            </div>
+            {% endfor %}
+          </div>
+          <template data-row-template>
+            <div class="beta-line-row receipt-line" data-entry-row>
+              <label>Item <input name="line_description" placeholder="Item description"></label>
+              <label>Quantity <input name="line_quantity" type="number" step="any" min="0" inputmode="decimal"></label>
+              <label>Unit price <input name="line_unit_price" type="number" step="0.01" min="0" inputmode="decimal"></label>
+              <button type="button" class="secondary" data-remove-row aria-label="Remove purchased item">✕</button>
+            </div>
+          </template>
+          <button type="button" class="secondary" data-add-row>Add Item</button>
+          <p class="muted" style="font-size:.82rem">Review every item before saving. Leave blank if not applicable.</p>
+        </div>
       </fieldset>
 
       <fieldset class="field-group">
@@ -123,17 +164,16 @@
       </fieldset>
     </section>
 
-    <aside class="receipt-side">
+    <aside class="receipt-side beta-review" data-receipt-review {% if not review_open %}hidden{% endif %}>
       <section class="card">
         <p class="card-kicker">Receipt image</p>
         <div class="upload-zone">
-          <label for="receipt_image" style="margin-top:0">PNG or JPG · max 10 MB</label>
-          <input type="file" id="receipt_image" name="receipt_image" accept=".png,.jpg,.jpeg">
-          <p class="muted" style="font-size:.82rem;line-height:1.45">OCR runs locally with Tesseract. Treat extracted values as suggestions until you verify them.</p>
-          <img id="image-preview" alt="Receipt preview">
+          <p class="muted">Verify OCR suggestions against the original receipt, or adjust manual entries.</p>
+          <img id="image-preview" alt="Receipt image preview">
+          <button class="secondary" type="button" data-upload-start>Choose a different image</button>
         </div>
         <div class="button-row">
-          <button class="secondary" type="submit" formaction="{{ url_for('scan_receipt') }}" id="scan-button">Scan receipt</button>
+          <button class="secondary" type="submit" formaction="{{ url_for('scan_receipt') }}" id="scan-button" hidden>Scan receipt</button>
           <button class="signal" type="submit" id="save-button">Save Receipt</button>
         </div>
       </section>
@@ -176,19 +216,91 @@
 
   <footer class="footer">Ledgergut remembers everything. This is useful until it becomes unsettling.</footer>
 </main>
+<script src="/static/beta-forms.js" defer></script>
 
 <script>
+  const choices = document.querySelector('[data-receipt-choices]');
+  const reviews = document.querySelectorAll('[data-receipt-review]');
+  const modeInput = document.getElementById('entry_mode');
+  const cameraPanel = document.querySelector('[data-camera-panel]');
+  const cameraView = document.querySelector('[data-camera-view]');
+  const scanStatus = document.querySelector('[data-scan-status]');
+  const scanButton = document.getElementById('scan-button');
+  let cameraStream = null;
+  function stopCamera() {
+    if (cameraStream) cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream = null;
+    cameraView.srcObject = null;
+    cameraPanel.hidden = true;
+  }
+  function revealReview(mode) {
+    modeInput.value = mode;
+    choices.hidden = true;
+    reviews.forEach(section => section.hidden = false);
+  }
   const imageInput = document.getElementById('receipt_image');
   const preview = document.getElementById('image-preview');
   const form = document.getElementById('receipt-form');
   const projectSelect = document.getElementById('office_project_id');
   const projectName = document.getElementById('project_name');
 
+  document.querySelectorAll('[data-upload-start]').forEach(button => button.addEventListener('click', () => {
+    stopCamera();
+    imageInput.removeAttribute('capture');
+    imageInput.click();
+  }));
+  document.querySelector('[data-manual-start]').addEventListener('click', () => {
+    stopCamera();
+    revealReview('manual');
+  });
+  document.querySelector('[data-camera-start]').addEventListener('click', async () => {
+    scanStatus.textContent = 'Requesting camera permission…';
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      imageInput.setAttribute('capture', 'environment');
+      imageInput.click();
+      scanStatus.textContent = 'Choose your camera to photograph the receipt.';
+      return;
+    }
+    try {
+      cameraStream = await navigator.mediaDevices.getUserMedia({video: {facingMode: {ideal: 'environment'}}, audio: false});
+      cameraView.srcObject = cameraStream;
+      cameraPanel.hidden = false;
+      scanStatus.textContent = 'Frame the receipt clearly, then capture.';
+      await cameraView.play();
+    } catch (err) {
+      stopCamera();
+      scanStatus.textContent = 'Camera permission unavailable. Upload an image or enter the expense manually.';
+    }
+  });
+  document.querySelector('[data-camera-cancel]').addEventListener('click', stopCamera);
+  document.querySelector('[data-camera-shutter]').addEventListener('click', () => {
+    if (!cameraStream || !cameraView.videoWidth) {
+      scanStatus.textContent = 'Camera is not ready. Try again or upload an image.';
+      return;
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = cameraView.videoWidth;
+    canvas.height = cameraView.videoHeight;
+    canvas.getContext('2d').drawImage(cameraView, 0, 0);
+    canvas.toBlob(blob => {
+      if (!blob) { scanStatus.textContent = 'Capture failed. Please try again.'; return; }
+      const transfer = new DataTransfer();
+      transfer.items.add(new File([blob], 'receipt-camera.jpg', {type: 'image/jpeg'}));
+      imageInput.files = transfer.files;
+      stopCamera();
+      modeInput.value = 'camera';
+      form.requestSubmit(scanButton);
+    }, 'image/jpeg', 0.92);
+  });
+  window.addEventListener('pagehide', stopCamera);
+
   imageInput.addEventListener('change', function () {
     const file = this.files[0];
     if (file) {
       preview.src = URL.createObjectURL(file);
       preview.style.display = 'block';
+      modeInput.value = 'upload';
+      form.requestSubmit(scanButton);
     } else {
       preview.style.display = 'none';
     }
