@@ -150,3 +150,10 @@ def test_canon_black_office_environment_asset_resolves():
     assert asset.headers["Content-Type"].startswith("image/svg+xml")
     assert b'<svg xmlns="http://www.w3.org/2000/svg"' in asset.data
     assert b'canon-black-office-command.svg' in css.data
+
+
+def test_command_environment_is_layered_behind_controls_not_body_paint():
+    client = Client(application, Response)
+    css = client.get("/static/gbo.css")
+    assert b".command-environment { z-index: 0; pointer-events: none; }" in css.data
+    assert b".command-stage { position: relative; z-index: 1; }" in css.data
