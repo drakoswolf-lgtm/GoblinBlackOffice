@@ -18,7 +18,7 @@
     <h1>{{ project.name }}</h1>
     {% if project.description %}<p class="lead">{{ project.description }}</p>{% endif %}
     <div class="beta-project-actions">
-      <a class="button secondary" href="/">Save &amp; Return to Desk</a>
+      <a class="button secondary" href="/">Return to Desk</a>
       {% if project.status.value == 'active' %}
       <form method="post"><input type="hidden" name="action" value="project_status"><input type="hidden" name="status" value="completed"><button type="submit">Mark Field Work Complete</button></form>
       {% elif project.status.value != 'active' %}
@@ -50,7 +50,7 @@
         <p class="muted">{{ agreement.status.value }}{% if agreement.amount is not none %} · {{ agreement.currency }} {{ '%.2f'|format(agreement.amount) }}{% endif %}</p>
         <div class="actions">
           <a class="button secondary" href="/signor/agreements/{{ agreement.agreement_id }}/pdf" data-pdf-preview data-pdf-title="Agreement {{ agreement.agreement_id }}">Preview PDF</a>
-          <a class="button" href="/signor/?project_id={{ project.project_id }}">Draft another agreement</a>
+          <a class="button" href="/signor/?project_id={{ project.project_id }}">Draft another agreement</a><a class="button secondary" href="/settings/documents">Document Style &amp; Logo</a>
         </div>
       {% else %}
         <p>Define the scope before planning or billing the job.</p>
