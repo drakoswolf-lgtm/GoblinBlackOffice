@@ -214,7 +214,7 @@ body.splash-active { overflow: hidden; }
 }
 .gbo-access-door {
   z-index: 7; opacity: 0;
-  background: url("/canon/startup/canon-access-door-closed.webp") center/cover no-repeat;
+  background: url("/canon/startup/canon-access-door-closed.svg") center/cover no-repeat;
 }
 .gbo-door-half, .gbo-door-seam { display: none; }
 .gbo-splash.is-breaching .gbo-charge { opacity: .08; }
@@ -2124,7 +2124,7 @@ body.splash-active { overflow: hidden; }
   background-size:contain;
 }
 .gbo-splash.is-door .gbo-access-door {
-  background-image:url("/canon/startup/canon-access-door-closed.webp");
+  background-image:url("/canon/startup/canon-access-door-closed.svg");
 }
 .gbo-splash.is-opening .gbo-access-door {
   background-image:url("/canon/startup/canon-access-door-opening.webp");
