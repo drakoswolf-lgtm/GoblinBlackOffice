@@ -221,7 +221,7 @@ body.splash-active { overflow: hidden; }
 .gbo-splash.is-breaching .gbo-breach { animation: breach-flash .62s ease-out both; }
 .gbo-splash.is-door .gbo-access-door { opacity: 1; transition: opacity .2s ease; }
 .gbo-splash.is-opening .gbo-access-door {
-  background-image: url("/canon/startup/canon-access-door-opening.webp");
+  background-image: url("/canon/startup/canon-access-door-opening.svg");
   transform: scale(1.018); transition: transform .9s cubic-bezier(.2,.7,.2,1);
 }
 .gbo-whiteout { z-index: 12; background: #fff; opacity: 0; }
@@ -2127,7 +2127,7 @@ body.splash-active { overflow: hidden; }
   background-image:url("/canon/startup/canon-access-door-closed.svg");
 }
 .gbo-splash.is-opening .gbo-access-door {
-  background-image:url("/canon/startup/canon-access-door-opening.webp");
+  background-image:url("/canon/startup/canon-access-door-opening.svg");
 }
 
 @media (max-width:900px) {
