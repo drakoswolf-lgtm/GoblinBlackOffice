@@ -134,7 +134,7 @@ def test_receipt_scan_populates_review_fields_and_preserves_mode(monkeypatch):
 
     monkeypatch.setattr(
         ledger_web, "extract_text_from_image",
-        lambda payload: "HOME HARDWARE\\n2026-10-10\\nSUBTOTAL 20.00\\nGST 1.00\\nTOTAL 21.00",
+        lambda payload: "HOME HARDWARE\n2026-10-10\nSUBTOTAL 20.00\nGST 1.00\nTOTAL 21.00",
     )
     image = Image.new("RGB", (320, 400), "white")
     stream = BytesIO()
