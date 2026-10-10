@@ -89,6 +89,9 @@ class Business:
     accounting_platform: str | None = None
     typical_services: str | None = None
     status: RecordStatus = RecordStatus.ACTIVE
+    document_style: str = "modern"
+    document_accent: str = "teal"
+    document_logo_png_b64: str | None = None
 
 
 @dataclass(frozen=True)
