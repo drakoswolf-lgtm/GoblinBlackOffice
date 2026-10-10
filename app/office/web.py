@@ -23,6 +23,7 @@ from app.office.auth import (
     authenticate,
     complete_onboarding,
     configure_same_origin_protection,
+    configure_trusted_proxy_proto,
     current_business_id,
     current_user,
     register_user,
@@ -46,6 +47,7 @@ office_app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 office_app.config["SESSION_COOKIE_SECURE"] = _auth_required
 office_app.config["GBO_AUTH_REQUIRED"] = _auth_required
 office_app.config["GBO_INVITE_TOKEN"] = _invite_token
+configure_trusted_proxy_proto(office_app)
 configure_same_origin_protection(office_app)
 
 _canon_root = Path(__file__).resolve().parents[2] / "resources" / "canon"
