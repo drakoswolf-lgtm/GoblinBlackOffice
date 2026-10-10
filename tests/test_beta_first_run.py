@@ -4,12 +4,10 @@ from werkzeug.wrappers import Response
 from app.office.web import application, office_app
 
 
-def test_first_run_can_reach_office_and_open_a_job():
-    office_app.config.update(
-        TESTING=True,
-        GBO_AUTH_REQUIRED=False,
-        GBO_INVITE_TOKEN="",
-    )
+def test_first_run_can_reach_office_and_open_a_job(monkeypatch):
+    monkeypatch.setitem(office_app.config, "TESTING", True)
+    monkeypatch.setitem(office_app.config, "GBO_AUTH_REQUIRED", True)
+    monkeypatch.setitem(office_app.config, "GBO_INVITE_TOKEN", "")
     client = Client(application, Response)
 
     register = client.post(
