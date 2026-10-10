@@ -2197,3 +2197,7 @@ body.splash-active { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .command-scanline, .command-orbit { animation: none !important; }
 }
+
+/* Keep the environment above the opaque body paint and below every control. */
+.command-environment { z-index: 0; pointer-events: none; }
+.command-stage { position: relative; z-index: 1; }
