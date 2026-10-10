@@ -89,8 +89,32 @@ try {
       };
     });
 
-    if (!visual.background.includes("canon-black-office-command.svg")) {
-      throw Error(spec.name + ": Canon environment was not applied");
+    const backgroundName = "canon-black-office-" + spec.name + ".webp";
+    if (!visual.background.includes(backgroundName)) {
+      throw Error(spec.name + ": Approved physical office plate was not applied");
+    }
+    const backgroundResponse = await page.request.get(
+      base + "/canon/environments/" + backgroundName,
+    );
+    if (!backgroundResponse.ok() ||
+        !backgroundResponse.headers()["content-type"]?.includes("image/webp")) {
+      throw Error(spec.name + ": Approved physical office plate failed to load");
+    }
+    const decode = await page.evaluate(async (url) => {
+      const art = new Image();
+      art.src = url;
+      await art.decode();
+      return { width: art.naturalWidth, height: art.naturalHeight };
+    }, "/canon/environments/" + backgroundName);
+    if ((spec.name === "mobile") !== (decode.height > decode.width)) {
+      throw Error(spec.name + ": Background orientation is incorrect");
+    }
+    if (spec.name === "mobile") {
+      const commander = await page.locator(".command-aeterna").boundingBox();
+      const workspace = await page.locator(".command-workspace").boundingBox();
+      if (!commander || !workspace || commander.y >= workspace.y) {
+        throw Error("On mobile, Æterna must appear above the project directory");
+      }
     }
     if (visual.environmentZ !== "0" || visual.stageZ !== "1") {
       throw Error(spec.name + ": Incorrect command surface stacking");
