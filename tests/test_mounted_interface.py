@@ -166,7 +166,6 @@ def test_command_visual_assets_decode_and_svg_is_well_formed():
 
     client = Client(application, Response)
     paths = (
-        "/canon/startup/canon-access-door-closed.webp",
         "/canon/startup/canon-access-door-opening.webp",
         "/canon/characters/canon-aeterna-headshot.webp",
         "/canon/brand/canon-app-badge.webp",
@@ -186,6 +185,7 @@ def test_command_visual_assets_decode_and_svg_is_well_formed():
 
     for route in (
         "/canon/startup/canon-startup-charge.svg",
+        "/canon/startup/canon-access-door-closed.svg",
         "/canon/environments/canon-black-office-command.svg",
     ):
         asset = client.get(route)
