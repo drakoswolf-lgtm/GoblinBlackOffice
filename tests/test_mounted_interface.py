@@ -116,3 +116,79 @@ def test_startup_sequence_is_session_scoped_with_explicit_replay():
     assert b"sessionStorage" in runtime.data
     assert b"params.get('splash') === '1'" in runtime.data
     assert b"params.get('updating') === '1'" in runtime.data
+
+
+def test_office_desk_uses_holographic_command_surface_not_legacy_dashboard():
+    client = Client(application, Response)
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert b'class="command-body"' in response.data
+    assert b'class="command-workspace"' in response.data
+    assert b"Command Desk" in response.data
+    assert b"Open a new job" in response.data
+    assert b"Give the paperwork" not in response.data
+
+
+def test_startup_uses_mobile_safe_canon_presentation():
+    client = Client(application, Response)
+    splash = client.get("/")
+    css = client.get("/static/gbo.css")
+
+    assert b"gbo-boot-console" in splash.data
+    assert b"gbo-progress-meter" in splash.data
+    assert b'background-size:contain' in css.data
+    assert b'canon-access-door-opening.svg' in css.data
+
+
+def test_canon_black_office_environment_asset_resolves():
+    client = Client(application, Response)
+    asset = client.get("/canon/environments/canon-black-office-command.svg")
+    css = client.get("/static/gbo.css")
+
+    assert asset.status_code == 200
+    assert asset.headers["Content-Type"].startswith("image/svg+xml")
+    assert b'<svg xmlns="http://www.w3.org/2000/svg"' in asset.data
+    assert b'canon-black-office-command.svg' in css.data
+
+
+def test_command_environment_is_layered_behind_controls_not_body_paint():
+    client = Client(application, Response)
+    css = client.get("/static/gbo.css")
+    assert b".command-environment { z-index: 0; pointer-events: none; }" in css.data
+    assert b".command-stage { position: relative; z-index: 1; }" in css.data
+
+
+def test_command_visual_assets_decode_and_svg_is_well_formed():
+    from io import BytesIO
+    from xml.etree import ElementTree
+    from PIL import Image
+
+    client = Client(application, Response)
+    paths = (
+        "/canon/characters/canon-aeterna-headshot.webp",
+        "/canon/brand/canon-app-badge.webp",
+    )
+    errors = []
+    for route in paths:
+        try:
+            response = client.get(route)
+            assert response.status_code == 200, route
+            with Image.open(BytesIO(response.data)) as artwork:
+                assert artwork.format == "WEBP", route
+                assert artwork.width >= 128 and artwork.height >= 128, route
+                artwork.verify()
+        except Exception as exc:
+            errors.append(f"{route}: {type(exc).__name__}: {exc}")
+    assert not errors, "; ".join(errors)
+
+    for route in (
+        "/canon/startup/canon-startup-charge.svg",
+        "/canon/startup/canon-access-door-closed.svg",
+        "/canon/startup/canon-access-door-opening.svg",
+        "/canon/environments/canon-black-office-command.svg",
+    ):
+        asset = client.get(route)
+        assert asset.status_code == 200, route
+        root = ElementTree.fromstring(asset.data)
+        assert root.tag == "{http://www.w3.org/2000/svg}svg"

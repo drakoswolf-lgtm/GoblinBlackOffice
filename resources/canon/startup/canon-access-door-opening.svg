@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1600" viewBox="0 0 900 1600" role="img" aria-label="Black Office graphite access doors part to reveal brilliant white light">
+<defs>
+<linearGradient id="black" x2="0" y2="1"><stop stop-color="#243338"/><stop offset=".35" stop-color="#090f13"/><stop offset=".8" stop-color="#061014"/><stop offset="1" stop-color="#29363a"/></linearGradient>
+<linearGradient id="lp" x2="1" y2="0"><stop stop-color="#0b1417"/><stop offset=".5" stop-color="#253034"/><stop offset=".9" stop-color="#030709"/><stop offset="1" stop-color="#35454a"/></linearGradient>
+<linearGradient id="rp" x2="0" y2="0"><stop stop-color="#36464b"/><stop offset=".1" stop-color="#030709"/><stop offset=".5" stop-color="#253034"/><stop offset="1" stop-color="#0b1417"/></linearGradient>
+<linearGradient id="light" x2="1" y2="0"><stop stop-color="#4bada2" stop-opacity=".28"/><stop offset=".16" stop-color="#eefffa"/><stop offset=".5" stop-color="#fff"/><stop offset=".84" stop-color="#eefffa"/><stop offset="1" stop-color="#4bada2" stop-opacity=".28"/></linearGradient>
+<linearGradient id="glare" x2="1" y2="0"><stop stop-color="#e8fff6" stop-opacity="0"/><stop offset=".5" stop-color="#ffffff" stop-opacity=".9"/><stop offset="1" stop-color="#e8fff6" stop-opacity="0"/></linearGradient>
+<radialGradient id="vignette"><stop offset=".65" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".6"/></radialGradient>
+<filter id="bloom"><feGaussianBlur stdDeviation="37"/></filter>
+<filter id="soft"><feGaussianBlur stdDeviation="10"/></filter>
+<pattern id="grid" width="42" height="59" patternUnits="userSpaceOnUse"><path d="M0 0H42M0 0V59" fill="none" stroke="#9bb9b7" stroke-opacity=".045"/></pattern>
+</defs>
+<rect width="900" height="1600" fill="#03090a"/>
+<rect x="357" y="24" width="186" height="1552" fill="#eafff6" opacity=".83" filter="url(#bloom)"/>
+<path d="M395 75H505V1540H395Z" fill="url(#light)"/>
+<path d="M420 20H480V1580H420Z" fill="#fff" opacity=".64" filter="url(#soft)"/>
+<rect x="440" y="0" width="20" height="1600" fill="#fff"/>
+<path d="M20 18H370V1582H20Z" fill="url(#black)" stroke="#58696e" stroke-width="17"/>
+<path d="M530 18H880V1582H530Z" fill="url(#black)" stroke="#58696e" stroke-width="17"/>
+<path d="M74 106H364V1490H74Z" fill="url(#lp)" stroke="#4b6267" stroke-width="9"/>
+<path d="M536 106H826V1490H536Z" fill="url(#rp)" stroke="#4b6267" stroke-width="9"/>
+<rect x="80" y="110" width="284" height="1380" fill="url(#grid)"/>
+<rect x="536" y="110" width="284" height="1380" fill="url(#grid)"/>
+<path d="M100 210H345M800 210H555" stroke="#85918d" stroke-opacity=".18" stroke-width="6"/><path d="M100 374H345M800 374H555" stroke="#85918d" stroke-opacity=".18" stroke-width="6"/><path d="M100 538H345M800 538H555" stroke="#85918d" stroke-opacity=".18" stroke-width="6"/><path d="M100 702H345M800 702H555" stroke="#85918d" stroke-opacity=".18" stroke-width="6"/><path d="M100 866H345M800 866H555" stroke="#85918d" stroke-opacity=".18" stroke-width="6"/><path d="M100 1030H345M800 1030H555" stroke="#85918d" stroke-opacity=".18" stroke-width="6"/><path d="M100 1194H345M800 1194H555" stroke="#85918d" stroke-opacity=".18" stroke-width="6"/><path d="M100 1358H345M800 1358H555" stroke="#85918d" stroke-opacity=".18" stroke-width="6"/><circle cx="87" cy="189" r="6" fill="#718487" stroke="#0a151a" stroke-width="4"/><circle cx="813" cy="189" r="6" fill="#718487" stroke="#0a151a" stroke-width="4"/><circle cx="87" cy="313" r="6" fill="#718487" stroke="#0a151a" stroke-width="4"/><circle cx="813" cy="313" r="6" fill="#718487" stroke="#0a151a" stroke-width="4"/><circle cx="87" cy="437" r="6" fill="#718487" stroke="#0a151a" stroke-width="4"/><circle cx="813" cy="437" r="6" fill="#718487" stroke="#0a151a" stroke-width="4"/><circle cx="87" cy="561" r="6" fill="#718487" stroke="#0a151a" stroke-width="4"/><circle cx="813" cy="561" r="6" fill="#718487" stroke="#0a151a" stroke-width="4"/><circle cx="87" cy="685" r="6" fill="#718487" stroke="#0a151a" stroke-width="4"/><circle cx="813" cy="685" r="6" fill="#718487" stroke="#0a151a" stroke-width="4"/><circle cx="87" cy="809" r="6" fill="#718487" stroke="#0a151a" stroke-width="4"/><circle cx="813" cy="809" r="6" fill="#718487" stroke="#0a151a" stroke-width="4"/><circle cx="87" cy="933" r="6" fill="#718487" stroke="#0a151a" stroke-width="4"/><circle cx="813" cy="933" r="6" fill="#718487" stroke="#0a151a" stroke-width="4"/><circle cx="87" cy="1057" r="6" fill="#718487" stroke="#0a151a" stroke-width="4"/><circle cx="813" cy="1057" r="6" fill="#718487" stroke="#0a151a" stroke-width="4"/><circle cx="87" cy="1181" r="6" fill="#718487" stroke="#0a151a" stroke-width="4"/><circle cx="813" cy="1181" r="6" fill="#718487" stroke="#0a151a" stroke-width="4"/><circle cx="87" cy="1305" r="6" fill="#718487" stroke="#0a151a" stroke-width="4"/><circle cx="813" cy="1305" r="6" fill="#718487" stroke="#0a151a" stroke-width="4"/>
+<path d="M98 165H323L353 222M802 165H577L547 222" stroke="#667b7a" stroke-width="13" fill="none" opacity=".4"/>
+<path d="M94 1438H317L350 1373M806 1438H583L550 1373" stroke="#667b7a" stroke-width="13" fill="none" opacity=".4"/>
+<rect x="43" y="307" width="15" height="970" fill="#57f7bc" opacity=".63"/>
+<rect x="842" y="307" width="15" height="970" fill="#57f7bc" opacity=".63"/>
+<rect x="33" y="307" width="32" height="970" fill="#26efab" opacity=".23" filter="url(#soft)"/>
+<rect x="835" y="307" width="32" height="970" fill="#26efab" opacity=".23" filter="url(#soft)"/>
+<path d="M348 180V1420M552 180V1420" stroke="#61a799" stroke-opacity=".76" stroke-width="7"/>
+<path d="M340 170V1430M560 170V1430" stroke="#ffffff" stroke-opacity=".3" stroke-width="18" filter="url(#soft)"/>
+<path d="M167 682L350 618L350 752L257 746Z" fill="#506564" stroke="#0b1719" stroke-width="10"/>
+<path d="M733 682L550 618L550 752L643 746Z" fill="#506564" stroke="#0b1719" stroke-width="10"/>
+<path d="M167 682L287 714L350 752M733 682L613 714L550 752" stroke="#70dcad" stroke-opacity=".55" stroke-width="5" fill="none"/>
+<path d="M127 761L350 823M773 761L550 823" stroke="#5f7979" stroke-opacity=".24" stroke-width="12"/>
+<path d="M0 0H900V94H0ZM0 1506H900V1600H0Z" fill="url(#black)" stroke="#4b575c" stroke-width="8"/>
+<rect width="900" height="1600" fill="url(#vignette)"/>
+</svg>
