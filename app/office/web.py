@@ -103,7 +103,7 @@ def _parse_structured_materials(form):
     for number, (name, qty, unit, price) in enumerate(
         zip_longest(names, quantities, units, prices, fillvalue=""), start=1
     ):
-        if not any(str(part).strip() for part in (name, qty, unit, price)):
+        if not any(str(part).strip() for part in (name, qty, price)):
             continue
         try:
             requirements.append(MaterialRequirementInput(
