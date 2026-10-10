@@ -166,21 +166,29 @@ def test_command_visual_assets_decode_and_svg_is_well_formed():
 
     client = Client(application, Response)
     paths = (
-        "/canon/startup/canon-startup-charge.webp",
         "/canon/startup/canon-access-door-closed.webp",
         "/canon/startup/canon-access-door-opening.webp",
         "/canon/characters/canon-aeterna-headshot.webp",
         "/canon/brand/canon-app-badge.webp",
     )
+    errors = []
     for route in paths:
-        response = client.get(route)
-        assert response.status_code == 200, route
-        with Image.open(BytesIO(response.data)) as artwork:
-            assert artwork.format == "WEBP", route
-            assert artwork.width >= 128 and artwork.height >= 128, route
-            artwork.verify()
+        try:
+            response = client.get(route)
+            assert response.status_code == 200, route
+            with Image.open(BytesIO(response.data)) as artwork:
+                assert artwork.format == "WEBP", route
+                assert artwork.width >= 128 and artwork.height >= 128, route
+                artwork.verify()
+        except Exception as exc:
+            errors.append(f"{route}: {type(exc).__name__}: {exc}")
+    assert not errors, "; ".join(errors)
 
-    environment = client.get("/canon/environments/canon-black-office-command.svg")
-    assert environment.status_code == 200
-    root = ElementTree.fromstring(environment.data)
-    assert root.tag == "{http://www.w3.org/2000/svg}svg"
+    for route in (
+        "/canon/startup/canon-startup-charge.svg",
+        "/canon/environments/canon-black-office-command.svg",
+    ):
+        asset = client.get(route)
+        assert asset.status_code == 200, route
+        root = ElementTree.fromstring(asset.data)
+        assert root.tag == "{http://www.w3.org/2000/svg}svg"
