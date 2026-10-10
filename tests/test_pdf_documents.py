@@ -63,7 +63,10 @@ def test_signor_pdf_endpoint_is_tenant_scoped(monkeypatch):
     assert response.status_code == 200
     assert response.mimetype == "application/pdf"
     assert response.data.startswith(b"%PDF")
-    assert "attachment" in response.headers["Content-Disposition"]
+    assert "inline" in response.headers["Content-Disposition"]
+    download = web.app.test_client().get(response.request.path + "?download=1")
+    assert download.status_code == 200
+    assert "attachment" in download.headers["Content-Disposition"]
 
 
 def test_squarmish_pdf_endpoint_uses_persisted_invoice(monkeypatch):
@@ -81,4 +84,7 @@ def test_squarmish_pdf_endpoint_uses_persisted_invoice(monkeypatch):
     assert response.status_code == 200
     assert response.mimetype == "application/pdf"
     assert response.data.startswith(b"%PDF")
-    assert "attachment" in response.headers["Content-Disposition"]
+    assert "inline" in response.headers["Content-Disposition"]
+    download = web.app.test_client().get(response.request.path + "?download=1")
+    assert download.status_code == 200
+    assert "attachment" in download.headers["Content-Disposition"]
