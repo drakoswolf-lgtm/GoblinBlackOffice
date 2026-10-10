@@ -11,6 +11,7 @@ import uuid
 
 from flask import Flask, abort, redirect, request, session
 from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from app.core.models import Business, User
 from app.core.runtime import business_id as fallback_business_id, office_store
@@ -164,6 +165,19 @@ def _origin_tuple(value: str) -> tuple[str, str] | None:
     return parsed.scheme.lower(), parsed.netloc.lower()
 
 
+def configure_trusted_proxy_proto(app: Flask) -> None:
+    """Only trust the HTTPS scheme from a known reverse proxy.
+
+    DigitalOcean App Platform strips client-provided X-Forwarded-Proto and
+    replaces it at ingress. Do not enable this on a directly exposed server.
+    Host, client IP, port and prefix forwarding remain UNTRUSTED.
+    """
+    if os.environ.get("GBO_TRUST_PROXY_PROTO", "").strip().lower() in {"1", "true", "yes"}:
+        app.wsgi_app = ProxyFix(
+            app.wsgi_app, x_for=0, x_proto=1, x_host=0, x_port=0, x_prefix=0
+        )
+
+
 def configure_same_origin_protection(app: Flask) -> None:
     """Reject cross-site state-changing browser requests in production.
 
@@ -212,6 +226,7 @@ def configure_specialist_auth(app: Flask) -> None:
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
     app.config["SESSION_COOKIE_SECURE"] = app.config.get("GBO_AUTH_REQUIRED", False)
+    configure_trusted_proxy_proto(app)
     configure_same_origin_protection(app)
 
     @app.before_request
