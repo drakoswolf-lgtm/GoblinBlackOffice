@@ -2,6 +2,8 @@
 from __future__ import annotations
 import hmac
 import os
+import base64
+from io import BytesIO
 from dataclasses import replace
 from itertools import zip_longest
 from datetime import date
@@ -228,6 +230,59 @@ def record_desk():
             _, errors = create_project(business_id=bid, client_id=request.form.get("client_id", ""), name=request.form.get("name", ""), description=request.form.get("description", ""), pricing_model=request.form.get("pricing_model", "undetermined"))
         if not errors: return redirect(url_for("record_desk"))
     return render_template("office/records.html", errors=errors, clients=office_store.clients.list_for_business(bid), projects=office_store.projects.list_for_business(bid))
+
+@office_app.route("/settings/documents", methods=["GET", "POST"])
+def document_settings():
+    """Business-owned PDF styling and bounded private logo intake."""
+    bid = current_business_id()
+    business = office_store.businesses.get(bid, bid)
+    if business is None:
+        return ("Business record not found.", 404)
+    errors = []
+    if request.method == "POST":
+        style = request.form.get("document_style", "modern")
+        accent = request.form.get("document_accent", "teal")
+        if style not in {"modern", "classic", "minimal"}:
+            errors.append("Choose a valid document layout.")
+        if accent not in {"teal", "blue", "graphite", "burgundy"}:
+            errors.append("Choose a valid accent colour.")
+        logo = business.document_logo_png_b64
+        if request.form.get("remove_logo") == "1":
+            logo = None
+        upload = request.files.get("logo_image")
+        if upload is not None and upload.filename:
+            try:
+                from PIL import Image, ImageOps, UnidentifiedImageError
+                raw = upload.read(1024 * 1024 + 1)
+                if not raw or len(raw) > 1024 * 1024:
+                    raise ValueError("Logo must be a PNG or JPEG under 1 MB.")
+                with Image.open(BytesIO(raw)) as probe:
+                    if probe.format not in {"PNG", "JPEG"} or probe.width * probe.height > 20_000_000:
+                        raise ValueError("Logo must be a valid PNG or JPEG under 20 megapixels.")
+                with Image.open(BytesIO(raw)) as image:
+                    normalized = ImageOps.exif_transpose(image)
+                    normalized.thumbnail((640, 240))
+                    if normalized.mode not in {"RGB", "RGBA"}:
+                        normalized = normalized.convert("RGBA")
+                    output = BytesIO()
+                    normalized.save(output, format="PNG", optimize=True)
+                    data = output.getvalue()
+                    if len(data) > 350_000:
+                        raise ValueError("Logo is too detailed. Please upload a smaller image.")
+                    logo = base64.b64encode(data).decode("ascii")
+            except (ValueError, OSError, UnidentifiedImageError) as exc:
+                errors.append(str(exc))
+        if not errors:
+            office_store.businesses.save(replace(
+                business, document_style=style,
+                document_accent=accent, document_logo_png_b64=logo,
+            ))
+            return redirect(url_for("document_settings", saved="1"))
+    return render_template(
+        "office/document_settings.html", business=business,
+        errors=errors, saved=request.args.get("saved") == "1",
+    )
+
 
 @office_app.route("/jobs/new", methods=["GET", "POST"])
 def new_job():
