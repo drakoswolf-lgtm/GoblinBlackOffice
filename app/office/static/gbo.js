@@ -38,7 +38,7 @@
   }
 
   const minMs = 5000;
-  const start = performance.now();
+  let start = performance.now();
   let progress = 0;
   let lastBand = -1;
 
@@ -105,5 +105,67 @@
     requestAnimationFrame(tick);
   }
 
-  requestAnimationFrame(tick);
+  const film = splash.querySelector('[data-gbo-film]');
+  const filmAudio = splash.querySelector('[data-gbo-film-audio]');
+
+  if (!film) {
+    requestAnimationFrame(tick);
+    return;
+  }
+
+  let filmComplete = false;
+  let legacyStarted = false;
+  let filmGuard = null;
+
+  function fallbackToLegacy() {
+    if (legacyStarted || filmComplete) return;
+    legacyStarted = true;
+    window.clearTimeout(filmGuard);
+    film.pause();
+    splash.classList.remove('is-film');
+    if (filmAudio) filmAudio.hidden = true;
+    start = performance.now();
+    requestAnimationFrame(tick);
+  }
+
+  film.addEventListener('ended', () => {
+    if (legacyStarted || filmComplete) return;
+    filmComplete = true;
+    window.clearTimeout(filmGuard);
+    try {
+      window.sessionStorage.setItem(sessionKey, '1');
+    } catch (_) {
+      // A blocked sessionStorage must not trap the user in the splash.
+    }
+    splash.classList.add('is-film-ending');
+    window.setTimeout(() => {
+      splash.hidden = true;
+      splash.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('splash-active');
+      document.body.classList.add('gbo-entered');
+    }, 220);
+  }, { once: true });
+
+  film.addEventListener('error', fallbackToLegacy, { once: true });
+
+  if (filmAudio) {
+    filmAudio.hidden = false;
+    filmAudio.addEventListener('click', () => {
+      film.muted = !film.muted;
+      filmAudio.textContent = film.muted ? 'ENABLE SOUND' : 'MUTE SOUND';
+      filmAudio.setAttribute('aria-pressed', film.muted ? 'false' : 'true');
+      if (film.paused) film.play().catch(fallbackToLegacy);
+    });
+  }
+
+  splash.classList.add('is-film');
+  // Treat the movie as an authored introduction, never as real loading progress.
+  // With mute enabled, modern browsers generally permit autoplay.
+  const playback = film.play();
+  if (playback && typeof playback.catch === 'function') {
+    playback.catch(fallbackToLegacy);
+  }
+  filmGuard = window.setTimeout(() => {
+    if (!filmComplete && !legacyStarted && film.paused) fallbackToLegacy();
+  }, 2500);
 })();
