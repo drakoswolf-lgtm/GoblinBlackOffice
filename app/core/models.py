@@ -15,6 +15,7 @@ from enum import Enum
 
 class RecordStatus(str, Enum):
     ACTIVE = "active"
+    COMPLETED = "completed"
     ARCHIVED = "archived"
 
 
@@ -108,6 +109,7 @@ class Project:
     name: str
     description: str | None = None
     status: RecordStatus = RecordStatus.ACTIVE
+    pricing_model: str = "undetermined"
 
 
 @dataclass(frozen=True)
