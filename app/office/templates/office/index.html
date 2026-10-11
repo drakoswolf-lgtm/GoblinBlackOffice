@@ -42,6 +42,7 @@
         <div class="command-primary-actions">
           <a class="command-primary" href="/jobs/new">+ Open a new job</a>
           <a class="command-secondary" href="/records">CLIENTS &amp; PROJECTS</a>
+          <a class="command-secondary" href="/aeterna/command">ÆTERNA COMMAND</a>
         </div>
       </header>
 
@@ -106,9 +107,18 @@
         COMMAND ADVICE
       </button>
       <div class="command-aeterna-panel aeterna-panel">
-        <p>Start with the job. The Office will route the agreement, purchases, labour and billing from there.</p>
+        <div class="aeterna-desk-status">
+          <span>ACTIVE JOBS: <strong>{{ aeterna_brief.active_count }}</strong></span>
+          <span>OUTSTANDING INVOICES: <strong>{{ aeterna_brief.currency }} {{ '%.2f'|format(aeterna_brief.ledger.outstanding) }}</strong></span>
+          <span>DERIVED ACTIONS: <strong>{{ aeterna_brief.actions|length }}</strong></span>
+          {% if aeterna_brief.actions %}
+          <span>NEXT CHECK: <strong>{{ aeterna_brief.actions[0].title }}</strong></span>
+          {% else %}<span>NO ACTION FLAGS FOUND. CHECKING IS NOT CERTIFICATION.</span>{% endif %}
+        </div>
         <div class="command-aeterna-actions">
-          <a href="/jobs/new">Open a new job</a>
+          <a href="/aeterna/command">OPEN COMMAND INTELLIGENCE</a>
+          <a href="/aeterna/command?view=priorities">REVIEW PRIORITIES</a>
+          <a href="/jobs/new">OPEN NEW JOB</a>
           <a href="/records">OPEN RECORDS</a>
           <a href="/settings/documents">DOCUMENT BRANDING</a>
         </div>
