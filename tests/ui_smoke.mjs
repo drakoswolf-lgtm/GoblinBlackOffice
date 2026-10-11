@@ -300,6 +300,26 @@ try {
     if (reducedPortraitStyle !== "none") {
       throw Error(spec.name + ": Reduced-motion preference is not respected");
     }
+    if (spec.name === "mobile") {
+      const card = await page.locator(".aeterna-command-officer").evaluate(node => {
+        const box = el => {
+          const b = el.getBoundingClientRect();
+          return { x:b.x,y:b.y,right:b.right,bottom:b.bottom,width:b.width,height:b.height };
+        };
+        return {
+          heading:box(node.querySelector(".aeterna-officer-heading")),
+          portrait:box(node.querySelector(".command-aeterna-frame")),
+          intro:box(node.querySelector(".aeterna-officer-intro")),
+          boundary:box(node.querySelector(".aeterna-officer-boundary")),
+        };
+      });
+      const overlaps = (a,b) => a.x < b.right - 2 && a.right > b.x + 2 &&
+        a.y < b.bottom - 2 && a.bottom > b.y + 2;
+      if (card.heading.width < 115 || overlaps(card.heading,card.portrait) ||
+          overlaps(card.intro,card.portrait) || overlaps(card.boundary,card.intro)) {
+        throw Error("Mobile Aeterna card content overlaps or compresses: " + JSON.stringify(card));
+      }
+    }
     await page.screenshot({ path: "artifacts/ui/" + spec.name + "-aeterna-command.png", fullPage: true });
     await page.getByRole("link", { name: "GOBLIN CHECKS" }).click();
     if (!(await page.getByText("Office-wide checks summarize saved records").isVisible()) || !(await page.getByText("NOT AUTOMATED").isVisible())) {
@@ -364,6 +384,64 @@ try {
     if (!(await page.getByText("CURRICULUM VITÆ").first().isVisible())) {
       throw Error(spec.name + ": CV did not follow first-entry video");
     }
+    // Prevent the exact release defect captured on Android: absolute controls
+    // cover the Deployment cards, and the CV displays a synthetic room.
+    const cvBg = await page.locator(".black-office-environment").evaluate(
+      node => getComputedStyle(node).backgroundImage
+    );
+    const expectedRoom = spec.name === "mobile" ?
+      "canon-black-office-mobile.webp" : "canon-black-office-desktop.webp";
+    if (!cvBg.includes(expectedRoom)) {
+      throw Error(spec.name + ": Curriculum doesn't use approved room image: " + cvBg);
+    }
+    if (spec.name === "mobile") {
+      const firstState = await page.evaluate(() => ({
+        planeTransform:getComputedStyle(document.querySelector(".intel-table-plane")).transform,
+        controlsPosition:getComputedStyle(document.querySelector(".curriculum-controls")).position,
+        dialoguePosition:getComputedStyle(document.querySelector(".aeterna-dialogue")).position,
+        bgPosition:getComputedStyle(document.querySelector(".black-office-environment")).position
+      }));
+      if (firstState.planeTransform !== "none" || firstState.controlsPosition !== "static" ||
+          firstState.dialoguePosition !== "relative" || firstState.bgPosition !== "fixed") {
+        throw Error("CV geometry is not stable on mobile: " + JSON.stringify(firstState));
+      }
+    }
+    await page.screenshot({path:"artifacts/ui/"+spec.name+"-curriculum-first.png", fullPage:true});
+    for (let step=0;step<5;step++) {
+      if (step === 1) {
+        await page.locator('input[name="business_name"]').fill("Layout Test Company");
+        await page.locator('input[name="business_type"]').fill("Contracting");
+      }
+      await page.locator("[data-curriculum-next]").click();
+      await page.locator('[data-screen="'+(step+1)+'"]').waitFor({state:"visible", timeout:4000});
+    }
+    if (!await page.locator("[data-curriculum-deploy]").isVisible()) {
+      throw Error(spec.name + ": Curriculum deployment button isn't visible");
+    }
+    if (spec.name === "mobile") {
+      const metrics = await page.evaluate(() => {
+        const r = sel => {
+          const v = document.querySelector(sel).getBoundingClientRect();
+          return {y:v.y,bottom:v.bottom,height:v.height,x:v.x,right:v.right};
+        };
+        const cards = [...document.querySelectorAll(".deployment-card")].map(n => n.getBoundingClientRect());
+        const bottom = Math.max(...cards.map(n => n.bottom));
+        return {
+          lastCardBottom:bottom,
+          deploymentNote:r(".deployment-note"),
+          controls:r(".curriculum-controls"),
+          dialogue:r(".aeterna-dialogue"),
+          overflow:document.documentElement.scrollWidth - window.innerWidth,
+        };
+      });
+      if (metrics.controls.y < metrics.deploymentNote.bottom - 2 ||
+          metrics.dialogue.y < metrics.controls.bottom - 2 ||
+          metrics.overflow > 2) {
+        throw Error("CV deployment controls overlap content: "+JSON.stringify(metrics));
+      }
+    }
+    await page.screenshot({path:"artifacts/ui/"+spec.name+"-curriculum-deployment.png", fullPage:true});
+
     await page.goto(base + "/welcome", { waitUntil: "domcontentloaded" });
     if (!page.url().endsWith("/onboarding")) {
       throw Error(spec.name + ": First-entry can replay after completion");
