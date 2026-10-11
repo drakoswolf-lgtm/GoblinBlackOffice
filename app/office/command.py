@@ -53,6 +53,7 @@ class CommandBriefing:
     project: object | None
     projects: tuple[object, ...]
     project_brief: ProjectBrief | None
+    portfolio_checks: tuple[GoblinCheck, ...]
     ledger: LedgerSummary
     actual_hours: Decimal
     project_count: int
@@ -199,11 +200,36 @@ def build_command_briefing(store, business_id: str, *, project_id: str = "", vie
             (action for brief in project_briefs for action in brief.actions),
             key=lambda a: (a.priority, a.project_name.casefold(), a.title)
         ))
+    draft_count = sum(i.status == InvoiceStatus.DRAFT for i in all_invoices)
+    unresolved_materials = sum(
+        1 for brief in project_briefs if brief.material_remaining > 0
+    )
+    remaining_lines = sum(brief.material_remaining for brief in project_briefs)
+    total_agreements = len(records["agreements"])
+    total_shopping = len(records["shopping_items"])
+    total_labor_logs = len(records["work_logs"])
+    portfolio_checks = (
+        GoblinCheck("SigNor", "DRAFTS FOR REVIEW" if any(a.status.value == "draft" for a in records["agreements"]) else
+            ("AGREEMENTS RECORDED" if total_agreements else "NO AGREEMENTS"),
+            f"{total_agreements} agreement record(s) across this business. Client acceptance is a separate action.", "/signor/"),
+        GoblinCheck("Ledgergut", "EXPENSES RECORDED" if all_expenses else "NO EXPENSES",
+            f"{len(all_expenses)} expense record(s). Completeness of receipts is not verified.", "/ledgergut/"),
+        GoblinCheck("Packrat", "MATERIALS REMAIN" if remaining_lines else
+            ("MATERIALS RECORDED" if total_shopping else "NO MATERIAL LIST"),
+            f"{total_shopping} shopping item(s); {remaining_lines} with remaining quantities across {unresolved_materials} projects.", "/records"),
+        GoblinCheck("Patch", "LABOUR RECORDED" if total_labor_logs else "NO LABOUR LOGS",
+            f"{total_labor_logs} work log(s), {hours} user-entered hours. Work order tracking is not implemented.", "/records"),
+        GoblinCheck("Squarmish", "DRAFTS FOR REVIEW" if draft_count else
+            ("OUTSTANDING" if ledger.outstanding > 0 else "NO DRAFTS"),
+            f"{len(all_invoices)} invoice record(s), {draft_count} draft(s); {currency} {ledger.outstanding:.2f} outstanding on approved/issued invoices.", "/squarmish/"),
+        GoblinCheck("Grimscratch", "NOT AUTOMATED",
+            "Compliance/risk review is not instrumented. No clearance is implied.", "/workflows/grimscratch"),
+    )
     resolved_view, interpretation = resolve_view(view, question)
     return CommandBriefing(
         business_name=business.name, currency=currency, project=selected,
         projects=all_projects, project_brief=selected_brief,
-        ledger=ledger, actual_hours=hours,
+        portfolio_checks=portfolio_checks, ledger=ledger, actual_hours=hours,
         project_count=len(all_projects),
         active_count=sum(p.status == RecordStatus.ACTIVE for p in all_projects),
         completed_count=sum(p.status == RecordStatus.COMPLETED for p in all_projects),
