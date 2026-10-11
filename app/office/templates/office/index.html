@@ -81,7 +81,7 @@
         <div class="command-channels">
           {% for specialist in specialists %}
           <a class="command-channel business-specialist-link" href="{{ specialist.href }}" aria-label="{{ specialist.label }}: {{ specialist.note }}">
-            <img class="office-scope-portrait" src="/canon/characters/canon-{{ specialist.portrait }}-headshot.webp" alt="" loading="lazy">
+            <span class="office-scope-portrait face-{{ specialist.portrait }}" aria-hidden="true"></span>
             <span class="command-channel-index" aria-hidden="true">0{{ loop.index }}</span>
             <span class="command-channel-copy">
               <small>{{ specialist.role }}</small>
