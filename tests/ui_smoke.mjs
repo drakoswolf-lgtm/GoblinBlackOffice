@@ -211,6 +211,38 @@ try {
     if (betaOverflow > 2) throw Error(spec.name + ": Project UI horizontal overflow: " + betaOverflow);
     await page.screenshot({ path:"artifacts/ui/" + spec.name + "-project-business-first.png", fullPage:true });
 
+    // Ledgergut mobile hotfix: exercise the actual native file chooser,
+    // multipart POST and real Tesseract parsing rather than just button presence.
+    const slip = await context.newPage();
+    await slip.setContent(`<!doctype html><html><body style="margin:0;background:#faf9ee">
+      <div id="slip" style="width:840px;height:940px;padding:48px;box-sizing:border-box;background:#faf9ee;color:#141414;font:33px Arial,sans-serif;line-height:2">
+      HOME HARDWARE<br>123 MAIN STREET<br>DATE 2026-10-11<br>
+      CEDAR BOARD 24.00<br>SUBTOTAL 24.00<br>GST 1.20<br>PST 1.68<br>TOTAL 26.88</div>
+    </body></html>`);
+    const receiptPhoto = await slip.locator("#slip").screenshot({ type:"png" });
+    await slip.close();
+    const scanHome = await page.goto(base + "/ledgergut/", { waitUntil:"domcontentloaded" });
+    if (!scanHome?.ok()) throw Error(spec.name + ": Ledgergut entry unavailable");
+    const fileChoiceEvent = page.waitForEvent("filechooser", { timeout:12000 });
+    await page.locator("label.beta-upload-choice").click();
+    const fileChooser = await fileChoiceEvent;
+    await fileChooser.setFiles({ name:"receipt-test.png", mimeType:"image/png", buffer:receiptPhoto });
+    await page.waitForURL("**/ledgergut/receipts/scan", { timeout:60000 });
+    if (!await page.locator("[data-receipt-review]").first().isVisible()) {
+      throw Error(spec.name + ": OCR review did not appear after image selection");
+    }
+    if (!await page.locator("#vendor_name").inputValue() ||
+        (await page.locator("#total_amount").inputValue()) !== "26.88") {
+      throw Error(spec.name + ": OCR failed to recognize a legible receipt photo");
+    }
+    const retainedToken = await page.locator('input[name="pending_image_token"]').inputValue();
+    if (!retainedToken) throw Error(spec.name + ": Scanned image was not retained for human review");
+    const pendingPhoto = await page.request.get(base + "/ledgergut/receipts/pending/" + retainedToken);
+    if (!pendingPhoto.ok() || !pendingPhoto.headers()["content-type"]?.includes("image/png")) {
+      throw Error(spec.name + ": Review photo not retrievable after scan");
+    }
+    await page.screenshot({ path: "artifacts/ui/" + spec.name + "-ledgergut-ocr-upload.png", fullPage:true });
+
     // Beta Mk.III Pass A: verify the staged receipt UI, not just the desk artwork.
     const receiptResponse = await page.goto(base + "/ledgergut/", { waitUntil: "domcontentloaded" });
     if (!receiptResponse?.ok()) throw Error(spec.name + ": Ledgergut route failed");
