@@ -141,7 +141,7 @@ def _parse_optional_date(raw: str):
 @office_app.before_request
 def _office_auth_gate():
     if not office_app.config.get("GBO_AUTH_REQUIRED", False): return None
-    if request.endpoint in {"login", "register", "health", "static"}: return None
+    if request.endpoint in {"login", "register", "health", "static", "canon_asset"}: return None
     user = current_user()
     if user is None: return redirect(url_for("login", next=request.path))
     if not user.onboarding_complete:
