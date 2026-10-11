@@ -1,4 +1,51 @@
 (() => {
+  // Passive command portrait. No speech, animation triggers or business commands
+  // are inferred from this footage. The approved static portrait always remains.
+  const portraits = document.querySelectorAll('[data-aeterna-ambient]');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const dataSaver = navigator.connection && navigator.connection.saveData;
+  if (!reducedMotion && !dataSaver) {
+    for (const portrait of portraits) {
+      let failed = false;
+      let requested = false;
+      const frame = portrait.parentElement;
+      portrait.addEventListener('loadeddata', () => {
+        portrait.classList.add('is-ready');
+        frame.classList.add('has-ambient-video');
+      });
+      portrait.addEventListener('error', () => {
+        failed = true;
+        portrait.classList.remove('is-ready');
+        frame.classList.remove('has-ambient-video');
+      });
+      const activate = () => {
+        if (failed || document.hidden) return;
+        if (!requested) {
+          requested = true;
+          portrait.load();
+        }
+        portrait.play().catch(() => {
+          // Static canon portrait remains visible if autoplay is disallowed.
+        });
+      };
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) activate();
+            else portrait.pause();
+          }
+        }, { threshold: 0.08 });
+        observer.observe(portrait);
+      } else {
+        activate();
+      }
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) portrait.pause();
+        else if (portrait.getBoundingClientRect().height > 0) activate();
+      });
+    }
+  }
+
   const advice = document.querySelector('[data-aeterna-advice]');
   const toggle = document.querySelector('[data-aeterna-toggle]');
   if (advice && toggle) {
