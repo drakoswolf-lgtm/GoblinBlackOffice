@@ -2616,3 +2616,20 @@ body.splash-active { overflow: hidden; }
  .office-project-status{font-size:.59rem}
  .office-record-create .office-record-form{padding:13px}
 }
+
+
+/* One lightweight, canonical six-face strip. The images themselves are not links
+   or content; they sit behind accessible functional labels. */
+.office-scope-portrait{
+ display:block;
+ background-image:url('/canon/characters/canon-goblin-specialist-sprite.webp');
+ background-repeat:no-repeat;
+ background-size:600% 100%;
+ background-position:0 50%;
+}
+.face-ledgergut{background-position:0% 50%}
+.face-signor{background-position:20% 50%}
+.face-squarmish{background-position:40% 50%}
+.face-packrat{background-position:60% 50%}
+.face-patch{background-position:80% 50%}
+.face-grimsnatch{background-position:100% 50%}
