@@ -84,9 +84,15 @@
   function transitionTo(target) {
     if (busy || target === current) return;
     if (target > current && !validateCurrent()) return;
+    const direction = target > current ? 1 : -1;
+    // Mobile and touch UI must not animate the geometry under the user's
+    // finger. Keep the content and controls in one stable vertical flow.
+    if (window.matchMedia('(max-width: 900px)').matches) {
+      updateUI(target, direction);
+      return;
+    }
     busy = true;
     const old = screens[current];
-    const direction = target > current ? 1 : -1;
     stage?.classList.add('is-shifting');
     old.classList.add(direction > 0 ? 'is-leaving-left' : 'is-leaving-right');
     window.setTimeout(() => {
