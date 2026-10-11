@@ -587,6 +587,8 @@ def canon_asset(asset_path: str):
     # Send the approved image plates with an explicit, browser-safe type.
     if asset_path.lower().endswith(".webp"):
         return send_from_directory(_canon_root, asset_path, mimetype="image/webp")
+    if asset_path.lower().endswith(".mp4"):
+        return send_from_directory(_canon_root, asset_path, mimetype="video/mp4", conditional=True)
     return send_from_directory(_canon_root, asset_path)
 
 @office_app.route("/health")
