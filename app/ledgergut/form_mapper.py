@@ -74,6 +74,22 @@ def _parse_line_items(raw: str) -> tuple[tuple[ReceiptLineItem, ...], list[str]]
     return tuple(items), errors
 
 
+def _parse_structured_line_items(rows):
+    items, errors = [], []
+    for number, (name, quantity, price) in enumerate(rows, 1):
+        name, quantity, price = (str(v).strip() for v in (name, quantity, price))
+        if not any((name, quantity, price)):
+            continue
+        if not name:
+            errors.append(f"Purchased item row {number}: description is required.")
+            continue
+        try:
+            items.append(ReceiptLineItem(name=name, quantity=quantity, unit_price=price))
+        except ValueError as exc:
+            errors.append(f"Purchased item row {number}: {exc}")
+    return tuple(items), errors
+
+
 def build_models(
     form: dict[str, str],
 ) -> tuple[ReceiptRecord | None, list[str]]:
@@ -99,7 +115,10 @@ def build_models(
     if err:
         errors.append(err)
 
-    line_items, line_item_errors = _parse_line_items(form.get("line_items_text", ""))
+    if "_structured_line_rows" in form:
+        line_items, line_item_errors = _parse_structured_line_items(form["_structured_line_rows"])
+    else:
+        line_items, line_item_errors = _parse_line_items(form.get("line_items_text", ""))
     errors.extend(line_item_errors)
 
     if errors:

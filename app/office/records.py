@@ -20,7 +20,7 @@ def create_client(*, business_id: str, name: str, email: str = "", phone: str = 
     return client, ()
 
 
-def create_project(*, business_id: str, client_id: str, name: str, description: str = ""):
+def create_project(*, business_id: str, client_id: str, name: str, description: str = "", pricing_model: str = "undetermined"):
     clean = name.strip()
     client = office_store.clients.get(client_id, business_id)
     errors = []
@@ -28,6 +28,8 @@ def create_project(*, business_id: str, client_id: str, name: str, description: 
         errors.append("Project name is required.")
     if client is None:
         errors.append("Choose a client from this Office.")
+    if pricing_model not in {"undetermined", "hourly", "fixed", "time_and_materials"}:
+        errors.append("Choose a valid pricing basis.")
     if errors:
         return None, tuple(errors)
     project = Project(
@@ -36,6 +38,7 @@ def create_project(*, business_id: str, client_id: str, name: str, description: 
         client_id=client_id,
         name=clean,
         description=description.strip() or None,
+        pricing_model=pricing_model,
     )
     office_store.projects.save(project)
     return project, ()

@@ -63,7 +63,10 @@ def test_signor_pdf_endpoint_is_tenant_scoped(monkeypatch):
     assert response.status_code == 200
     assert response.mimetype == "application/pdf"
     assert response.data.startswith(b"%PDF")
-    assert "attachment" in response.headers["Content-Disposition"]
+    assert "inline" in response.headers["Content-Disposition"]
+    download = web.app.test_client().get(response.request.path + "?download=1")
+    assert download.status_code == 200
+    assert "attachment" in download.headers["Content-Disposition"]
 
 
 def test_squarmish_pdf_endpoint_uses_persisted_invoice(monkeypatch):
@@ -81,4 +84,45 @@ def test_squarmish_pdf_endpoint_uses_persisted_invoice(monkeypatch):
     assert response.status_code == 200
     assert response.mimetype == "application/pdf"
     assert response.data.startswith(b"%PDF")
-    assert "attachment" in response.headers["Content-Disposition"]
+    assert "inline" in response.headers["Content-Disposition"]
+    download = web.app.test_client().get(response.request.path + "?download=1")
+    assert download.status_code == 200
+    assert "attachment" in download.headers["Content-Disposition"]
+
+
+def test_document_branding_with_uploaded_logo_renders_pdf():
+    from dataclasses import replace
+    from base64 import b64encode
+    from io import BytesIO
+    from PIL import Image
+
+    business, client, project, agreement, invoice = _records()
+    img = Image.new("RGB", (120, 42), (22, 87, 92))
+    stream = BytesIO()
+    img.save(stream, format="PNG")
+    business = replace(
+        business, document_style="classic", document_accent="burgundy",
+        document_logo_png_b64=b64encode(stream.getvalue()).decode("ascii"),
+        payment_terms="Net 15",
+    )
+    assert build_agreement_pdf(business=business, agreement=agreement, project=project, client=client).startswith(b"%PDF")
+    assert build_invoice_pdf(business=business, invoice=invoice, project=project, client=client).startswith(b"%PDF")
+
+
+def test_document_branding_screen_saves_business_settings():
+    from app.core.runtime import business_id, office_store
+    from app.office.web import office_app
+
+    business = office_store.businesses.get(business_id, business_id)
+    assert business is not None
+    client = office_app.test_client()
+    page = client.get("/settings/documents")
+    assert page.status_code == 200
+    assert b"Business logo" in page.data
+    update = client.post("/settings/documents", data={
+        "document_style": "minimal", "document_accent": "graphite",
+    })
+    assert update.status_code == 302
+    stored = office_store.businesses.get(business_id, business_id)
+    assert stored.document_style == "minimal"
+    assert stored.document_accent == "graphite"

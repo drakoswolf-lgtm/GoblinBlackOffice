@@ -144,6 +144,31 @@ try {
       fullPage: true,
     });
 
+
+    // Beta Mk.III Pass A: verify the staged receipt UI, not just the desk artwork.
+    const receiptResponse = await page.goto(base + "/ledgergut/", { waitUntil: "domcontentloaded" });
+    if (!receiptResponse?.ok()) throw Error(spec.name + ": Ledgergut route failed");
+    if (!(await page.locator("[data-receipt-choices]").isVisible())) {
+      throw Error(spec.name + ": Receipt intake choices must be visible before scanning");
+    }
+    if (await page.locator("[data-receipt-review]").first().isVisible()) {
+      throw Error(spec.name + ": Receipt review fields appeared before intake choice");
+    }
+    await page.locator("[data-manual-start]").click();
+    if (!(await page.locator("[data-receipt-review]").first().isVisible())) {
+      throw Error(spec.name + ": Manual entry did not expose review fields");
+    }
+    const receiptRows = page.locator(".beta-line-row.receipt-line");
+    await page.locator("[data-add-row]").click();
+    if ((await receiptRows.count()) !== 2) {
+      throw Error(spec.name + ": Add Item did not append a structured receipt row");
+    }
+    await page.screenshot({ path: "artifacts/ui/" + spec.name + "-ledgergut-entry.png", fullPage: true });
+    const brandResponse = await page.goto(base + "/settings/documents", { waitUntil: "domcontentloaded" });
+    if (!brandResponse?.ok() || !(await page.locator("#document_style").isVisible())) {
+      throw Error(spec.name + ": Document branding settings did not load");
+    }
+
     if (errors.length) throw Error(spec.name + ": Browser errors: " + errors.join("; "));
     console.log("PASS " + spec.name + " visual smoke", visual);
     await context.close();

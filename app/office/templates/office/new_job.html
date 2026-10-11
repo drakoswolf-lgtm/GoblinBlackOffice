@@ -45,6 +45,13 @@
     <label for="description">Initial brief</label>
     <textarea id="description" name="description" placeholder="What were you hired to do?">{{ form_data.get('description','') }}</textarea>
 
+    <label for="pricing_model">Pricing basis</label>
+    <select id="pricing_model" name="pricing_model">
+      <option value="undetermined" {% if form_data.get('pricing_model','undetermined') == 'undetermined' %}selected{% endif %}>Not negotiated yet</option>
+      <option value="hourly" {% if form_data.get('pricing_model','') == 'hourly' %}selected{% endif %}>Hourly</option>
+      <option value="time_and_materials" {% if form_data.get('pricing_model','') == 'time_and_materials' %}selected{% endif %}>Time &amp; materials</option>
+      <option value="fixed" {% if form_data.get('pricing_model','') == 'fixed' %}selected{% endif %}>Fixed price</option>
+    </select>
     <div class="button-row"><button class="signal" type="submit">Open job</button></div>
   </form>
 </main>

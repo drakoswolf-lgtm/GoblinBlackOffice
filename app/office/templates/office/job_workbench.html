@@ -14,9 +14,20 @@
   </header>
 
   <section class="hero compact">
-    <p class="eyebrow">Active project{% if client %} · {{ client.name }}{% endif %}</p>
+    <p class="eyebrow">{{ project.status.value|upper }} PROJECT · {{ project.pricing_model.replace("_", " ")|title }}{% if client %} · {{ client.name }}{% endif %}</p>
     <h1>{{ project.name }}</h1>
     {% if project.description %}<p class="lead">{{ project.description }}</p>{% endif %}
+    <div class="beta-project-actions">
+      <a class="button secondary" href="/">Return to Desk</a>
+      {% if project.status.value == 'active' %}
+      <form method="post"><input type="hidden" name="action" value="project_status"><input type="hidden" name="status" value="completed"><button type="submit">Mark Field Work Complete</button></form>
+      {% elif project.status.value != 'active' %}
+      <form method="post"><input type="hidden" name="action" value="project_status"><input type="hidden" name="status" value="active"><button type="submit">Reopen Project</button></form>
+      {% endif %}
+      {% if project.status.value != 'archived' %}
+      <form method="post" onsubmit="return confirm('Archive this project? Its invoices and receipts will remain available in Records.');"><input type="hidden" name="action" value="project_status"><input type="hidden" name="status" value="archived"><button class="secondary" type="submit">Archive Project</button></form>
+      {% endif %}
+    </div>
   </section>
 
   {% if message %}<div class="alert success"><strong>{{ message }}</strong></div>{% endif %}
@@ -29,7 +40,7 @@
     <div class="stat"><strong>{{ currency }} {{ '%.2f'|format(ledger.outstanding) }}</strong><span>Outstanding issued invoices</span></div>
   </section>
 
-  <section class="grid grid-2" style="margin-top:18px">
+  <section class="grid grid-3" style="margin-top:18px">
     <article class="card">
       <p class="card-kicker">01 · SigNor</p>
       <h2>Agreement</h2>
@@ -38,8 +49,8 @@
         <p><strong>{{ agreement.title }}</strong></p>
         <p class="muted">{{ agreement.status.value }}{% if agreement.amount is not none %} · {{ agreement.currency }} {{ '%.2f'|format(agreement.amount) }}{% endif %}</p>
         <div class="actions">
-          <a class="button secondary" href="/signor/agreements/{{ agreement.agreement_id }}/pdf">PDF</a>
-          <a class="button" href="/signor/?project_id={{ project.project_id }}">Draft another agreement</a>
+          <a class="button secondary" href="/signor/agreements/{{ agreement.agreement_id }}/pdf" data-pdf-preview data-pdf-title="Agreement {{ agreement.agreement_id }}">Preview PDF</a>
+          <a class="button" href="/signor/?project_id={{ project.project_id }}">Draft another agreement</a><a class="button secondary" href="/settings/documents">Document Style &amp; Logo</a>
         </div>
       {% else %}
         <p>Define the scope before planning or billing the job.</p>
@@ -48,10 +59,17 @@
     </article>
 
     <article class="card">
-      <p class="card-kicker">02 · Packrat</p>
-      <h2>Materials &amp; receipts</h2>
-      <p>{{ shopping_items|length }} shopping-list items · {{ expenses|length }} project expenses.</p>
-      <a class="button" href="/ledgergut/?project_id={{ project.project_id }}">Feed Ledgergut a receipt</a>
+      <p class="card-kicker">02 · Ledgergut</p>
+      <h2>Receipts &amp; Expenses</h2>
+      <p>{{ expenses|length }} recorded project expenses.</p>
+      <a class="button signal" href="/ledgergut/?project_id={{ project.project_id }}">Scan Receipt / Enter Expense</a>
+    </article>
+
+    <article class="card">
+      <p class="card-kicker">03 · Packrat</p>
+      <h2>Materials &amp; Shopping</h2>
+      <p>{{ shopping_items|length }} shopping-list items to track.</p>
+      <a class="button secondary" href="#packrat-shopping">Open Shopping List</a>
     </article>
   </section>
 
@@ -64,12 +82,34 @@
         <label for="plan-agreement">Agreement</label>
         <select id="plan-agreement" name="agreement_id">{% for a in agreements %}<option value="{{ a.agreement_id }}">{{ a.title }}</option>{% endfor %}</select>
       </div>
-      <div><label for="labour_hours">Estimated labour hours</label><input id="labour_hours" name="labour_hours" inputmode="decimal"></div>
-      <div><label for="labour_rate">Labour rate</label><input id="labour_rate" name="labour_rate" inputmode="decimal"></div>
+      <div><label for="labour_hours">Estimated labour hours (optional)</label><input id="labour_hours" name="labour_hours" inputmode="decimal" value="{{ form_data.get('labour_hours','') }}"></div>
+      <div><label for="labour_rate">Labour rate (per hour)</label><input id="labour_rate" name="labour_rate" inputmode="decimal" value="{{ form_data.get('labour_rate','') }}"></div>
     </div>
-    <label for="materials_text">Materials</label>
-    <textarea id="materials_text" name="materials_text" placeholder="1x6 cedar fence board | 145 | ea | 7.49&#10;4x4 cedar post | 10 | ea | 34.95"></textarea>
-    <p class="muted" style="font-size:.82rem">Beta format: description | quantity | unit | estimated unit cost. Leave blank for labour-only work. These are explicit human-reviewed requirements, not AI takeoff claims.</p>
+    <div data-repeatable-rows>
+      <p class="card-kicker">Material requirements</p>
+      <div class="beta-line-rows" data-row-list>
+        {% for row in material_rows %}
+        <div class="beta-line-row" data-entry-row>
+          <label>Item <input name="material_description" value="{{ row[0] }}" placeholder="Cedar board"></label>
+          <label>Quantity <input name="material_quantity" type="number" step="any" min="0" value="{{ row[1] }}" inputmode="decimal"></label>
+          <label>Unit <input name="material_unit" value="{{ row[2] or 'ea' }}" placeholder="ea"></label>
+          <label>Unit price <input name="material_price" type="number" step="0.01" min="0" value="{{ row[3] }}" inputmode="decimal"></label>
+          <button type="button" class="secondary" data-remove-row aria-label="Remove material row">✕</button>
+        </div>
+        {% endfor %}
+      </div>
+      <template data-row-template>
+        <div class="beta-line-row" data-entry-row>
+          <label>Item <input name="material_description" placeholder="Material description"></label>
+          <label>Quantity <input name="material_quantity" type="number" step="any" min="0" inputmode="decimal"></label>
+          <label>Unit <input name="material_unit" value="ea"></label>
+          <label>Unit price <input name="material_price" type="number" step="0.01" min="0" inputmode="decimal"></label>
+          <button type="button" class="secondary" data-remove-row aria-label="Remove material row">✕</button>
+        </div>
+      </template>
+      <button type="button" class="secondary" data-add-row>Add Material</button>
+      <p class="muted" style="font-size:.82rem">Leave the row blank for labour-only work. Costs remain estimates until actual receipts are confirmed.</p>
+    </div>
     <div class="grid grid-2">
       <div><label for="other_cost">Other estimated cost</label><input id="other_cost" name="other_cost" inputmode="decimal" value="0"></div>
       <div><label for="assumptions">Estimate assumptions</label><input id="assumptions" name="assumptions" placeholder="Normal access, no demolition…"></div>
@@ -79,7 +119,7 @@
   </form>
   {% endif %}
 
-  <section class="card" style="margin-top:18px">
+  <section class="card" id="packrat-shopping" style="margin-top:18px">
     <p class="card-kicker">Live shopping list</p>
     <h2>Packrat</h2>
     {% if shopping_items %}
@@ -154,7 +194,7 @@
           <tr>
             <td>{{ inv.invoice_id }}</td><td>{{ inv.status.value }}</td><td class="money">{{ inv.currency }} {{ '%.2f'|format(inv.total) }}</td>
             <td>
-              <a href="/squarmish/invoices/{{ inv.invoice_id }}/pdf">PDF</a>
+              <a href="/squarmish/invoices/{{ inv.invoice_id }}/pdf" data-pdf-preview data-pdf-title="Invoice {{ inv.invoice_id }}">Preview PDF</a>
               {% if inv.status.value == 'draft' %}
               <form method="post" action="/squarmish/invoices/{{ inv.invoice_id }}/confirm" style="display:inline;margin-left:8px"><button class="secondary" type="submit" style="width:auto;min-height:34px;padding:6px 9px">Approve</button></form>
               {% endif %}
@@ -187,5 +227,11 @@
 
   <footer class="footer">One job. One record. Several suspiciously efficient goblins.</footer>
 </main>
+<dialog class="pdf-modal" data-pdf-dialog aria-label="PDF document preview">
+  <header><strong data-pdf-title>Document preview</strong><button type="button" class="secondary" data-pdf-close>Close ✕</button></header>
+  <iframe data-pdf-frame title="Generated project document" loading="lazy"></iframe>
+  <footer><a class="button secondary" data-pdf-download href="#">Download PDF</a><a data-pdf-external target="_blank" rel="noopener" href="#">Open in new tab</a><p data-pdf-status role="status" aria-live="polite"></p></footer>
+</dialog>
+<script src="/static/beta-forms.js" defer></script>
 </body>
 </html>

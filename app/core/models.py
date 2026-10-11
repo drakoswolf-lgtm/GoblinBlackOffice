@@ -15,6 +15,7 @@ from enum import Enum
 
 class RecordStatus(str, Enum):
     ACTIVE = "active"
+    COMPLETED = "completed"
     ARCHIVED = "archived"
 
 
@@ -88,6 +89,9 @@ class Business:
     accounting_platform: str | None = None
     typical_services: str | None = None
     status: RecordStatus = RecordStatus.ACTIVE
+    document_style: str = "modern"
+    document_accent: str = "teal"
+    document_logo_png_b64: str | None = None
 
 
 @dataclass(frozen=True)
@@ -108,6 +112,7 @@ class Project:
     name: str
     description: str | None = None
     status: RecordStatus = RecordStatus.ACTIVE
+    pricing_model: str = "undetermined"
 
 
 @dataclass(frozen=True)

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Document Branding · Goblin Black Office</title>
+  <link rel="stylesheet" href="/static/gbo.css">
+</head>
+<body>
+<main class="shell">
+  <header class="topbar">
+    <a class="brand" href="/"><span class="brand-mark">GBO</span><span>Document Design</span></a>
+    <nav class="topnav"><a href="/">Office Desk</a><a href="/records">Records</a></nav>
+  </header>
+  <section class="hero compact">
+    <p class="eyebrow">Business Identity // SigNor + Squarmish</p>
+    <h1>Make it yours.</h1>
+    <p class="lead">Your approved business details flow automatically into every agreement and invoice. Set your preferred document design and logo here.</p>
+  </section>
+  {% if saved %}<div class="alert success" role="status">Document branding saved. New PDF previews use these settings.</div>{% endif %}
+  {% if errors %}<div class="errors"><strong>Please review</strong><ul>{% for error in errors %}<li>{{ error }}</li>{% endfor %}</ul></div>{% endif %}
+  <form class="form-card" method="post" enctype="multipart/form-data" style="margin-top:16px">
+    <p class="card-kicker">Document identity</p>
+    <p><strong>{{ business.name }}</strong><span class="muted"> · {{ business.reporting_currency }}</span></p>
+    <div class="grid grid-2">
+      <div>
+        <label for="document_style">Layout</label>
+        <select id="document_style" name="document_style">
+          <option value="modern" {% if business.document_style == "modern" %}selected{% endif %}>Modern professional</option>
+          <option value="classic" {% if business.document_style == "classic" %}selected{% endif %}>Classic letterhead</option>
+          <option value="minimal" {% if business.document_style == "minimal" %}selected{% endif %}>Minimal monochrome</option>
+        </select>
+      </div>
+      <div>
+        <label for="document_accent">Accent colour</label>
+        <select id="document_accent" name="document_accent">
+          <option value="teal" {% if business.document_accent == "teal" %}selected{% endif %}>Deep teal</option>
+          <option value="blue" {% if business.document_accent == "blue" %}selected{% endif %}>Cobalt blue</option>
+          <option value="graphite" {% if business.document_accent == "graphite" %}selected{% endif %}>Graphite</option>
+          <option value="burgundy" {% if business.document_accent == "burgundy" %}selected{% endif %}>Burgundy</option>
+        </select>
+      </div>
+    </div>
+    <label for="logo_image">Business logo (PNG or JPG, max 1 MB)</label>
+    <input type="file" id="logo_image" name="logo_image" accept="image/png,image/jpeg">
+    {% if business.document_logo_png_b64 %}
+    <div class="card" style="margin-top:10px">
+      <p class="card-kicker">Current logo</p>
+      <img alt="Current document logo" src="data:image/png;base64,{{ business.document_logo_png_b64 }}" style="max-width:260px;max-height:120px;object-fit:contain">
+      <label class="check"><input type="checkbox" name="remove_logo" value="1"><span>Remove current logo</span></label>
+    </div>
+    {% endif %}
+    <p class="muted">Logo uploads are resized for PDF letterheads and stored in your private business record. Personal information is never added to a document unless it is in your business profile.</p>
+    <div class="button-row"><button type="submit" class="signal">Save Document Branding</button><a href="/" class="button secondary">Return to Desk</a></div>
+  </form>
+</main>
+</body>
+</html>

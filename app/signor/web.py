@@ -28,14 +28,22 @@ def index():
     active_business_id = _business_id()
     projects = _store.projects.list_for_business(active_business_id)
     clients = {c.client_id: c for c in _store.clients.list_for_business(active_business_id)}
-    form_data: dict[str, str] = {}
+    business = _store.businesses.get(active_business_id, active_business_id)
+    form_data: dict[str, str] = {
+        "currency": business.reporting_currency if business else "CAD",
+        "payment_terms": business.payment_terms or "" if business else "",
+    }
     errors: tuple[str, ...] = ()
     agreement = None
 
     if request.method == "GET":
         requested_project_id = request.args.get("project_id", "").strip()
-        if requested_project_id and _store.projects.get(requested_project_id, active_business_id) is not None:
-            form_data["project_id"] = requested_project_id
+        if requested_project_id:
+            project = _store.projects.get(requested_project_id, active_business_id)
+            if project is not None:
+                form_data["project_id"] = requested_project_id
+                form_data["title"] = project.name + " agreement"
+                form_data["scope"] = project.description or ""
 
     if request.method == "POST":
         form_data = request.form.to_dict()
@@ -65,6 +73,7 @@ def index():
         agreement=agreement,
         projects=projects,
         clients=clients,
+        business=business,
     )
 
 
@@ -78,7 +87,7 @@ def agreement_pdf(agreement_id: str):
     project = _store.projects.get(agreement.project_id, active_business_id)
     client = _store.clients.get(project.client_id, active_business_id) if project is not None and project.client_id else None
     pdf = build_agreement_pdf(business=business, agreement=agreement, project=project, client=client)
-    return send_file(BytesIO(pdf), mimetype="application/pdf", as_attachment=True, download_name=f"{agreement.agreement_id}.pdf")
+    return send_file(BytesIO(pdf), mimetype="application/pdf", as_attachment=request.args.get("download") == "1", download_name=f"{agreement.agreement_id}.pdf")
 
 
 @app.route("/agreements/<agreement_id>/confirm", methods=["POST"])

@@ -87,8 +87,9 @@ def draft_job_plan(
                 errors.append("Labour rate cannot be negative.")
         except ValueError as exc:
             errors.append(str(exc))
-    if (parsed_hours is None) != (parsed_rate is None):
-        errors.append("Estimated labour requires both hours and rate, or neither.")
+    if parsed_hours is not None and parsed_rate is None:
+        errors.append("Estimated labour hours require a labour rate.")
+    # Hourly jobs may have an agreed rate without a known number of hours.
 
     try:
         parsed_other = _decimal(other_cost, "other_cost")

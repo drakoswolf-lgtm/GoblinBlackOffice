@@ -28,7 +28,7 @@
         <label for="project">Project</label>
         <select id="project" name="project_id"><option value="">Choose project</option>{% for p in projects %}<option value="{{ p.project_id }}" {% if form_data.get('project_id') == p.project_id %}selected{% endif %}>{{ p.name }}{% if p.client_id and clients.get(p.client_id) %} · {{ clients.get(p.client_id).name }}{% endif %}</option>{% endfor %}</select>
       </div>
-      <div><label for="amount">Price</label><input id="amount" name="amount" inputmode="decimal" value="{{ form_data.get('amount','') }}" placeholder="2500.00"></div>
+      <div><label for="amount">Fixed agreement amount (optional)</label><input id="amount" name="amount" inputmode="decimal" value="{{ form_data.get('amount','') }}" placeholder="2500.00"></div>
       <div><label for="currency">Currency</label><input id="currency" name="currency" value="{{ form_data.get('currency','CAD') }}"></div>
     </div>
 

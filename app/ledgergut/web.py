@@ -6,6 +6,7 @@ import os
 import uuid
 from dataclasses import replace
 from datetime import date, datetime, timedelta, timezone
+from itertools import zip_longest
 from pathlib import Path
 
 from flask import Flask, Response, redirect, render_template, request, url_for
@@ -99,6 +100,21 @@ def _consume_pending_image(token: str) -> tuple[bytes, str] | None:
     return bytes.fromhex(payload["image_data"]), payload["ext"]
 
 
+def _submitted_receipt_form():
+    data = request.form.to_dict()
+    if "line_description" in request.form:
+        data["_structured_line_rows"] = list(zip_longest(
+            request.form.getlist("line_description"),
+            request.form.getlist("line_quantity"),
+            request.form.getlist("line_unit_price"), fillvalue=""
+        ))
+    return data
+
+
+def _display_line_rows(data):
+    return data.get("_structured_line_rows") or [("", "", "")]
+
+
 def _render_index(
     *,
     form_data: dict[str, str] | None = None,
@@ -126,6 +142,7 @@ def _render_index(
         projects=projects,
         clients=clients,
         form_data=page_form_data,
+        line_rows=_display_line_rows(page_form_data),
         findings=findings or [],
         input_errors=input_errors or [],
         saved=saved,
@@ -204,7 +221,7 @@ def index():
 
 @app.route("/receipts/scan", methods=["POST"])
 def scan_receipt():
-    form_data = request.form.to_dict()
+    form_data = _submitted_receipt_form()
     pending_image, image_error = _read_pending_image(required=True)
     if image_error is not None:
         return _render_index(form_data=form_data, scan_error=image_error)
@@ -227,7 +244,7 @@ def scan_receipt():
 
 @app.route("/receipts/new", methods=["POST"])
 def new_receipt():
-    form_data = request.form.to_dict()
+    form_data = _submitted_receipt_form()
 
     pending_image, image_error = _read_pending_image(required=False)
     if pending_image is None:
