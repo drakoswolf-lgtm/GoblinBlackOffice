@@ -139,7 +139,9 @@ def seed():
     })
     assert agreement_res.status_code == 200, (agreement_res.status_code,agreement_res.data[:250])
     agreement = office_store.agreements.list_for_business(bid)[0]
-    assert_redirect(post(c,f"/signor/agreements/{agreement.agreement_id}/confirm"), job_url)
+    approved_agreement=post(c,f"/signor/agreements/{agreement.agreement_id}/confirm")
+    assert approved_agreement.status_code == 302
+    assert approved_agreement.headers["Location"].startswith(job_url+"?message=")
     assert office_store.agreements.get(agreement.agreement_id,bid).status == AgreementStatus.PROPOSED
     assert get(c, f"/signor/agreements/{agreement.agreement_id}/pdf").mimetype == "application/pdf"
 
@@ -183,7 +185,7 @@ def seed():
                           "amount":"20"}).status_code == 302
     assert office_store.invoices.get(invoice.invoice_id,bid).status == InvoiceStatus.PARTIALLY_PAID
     report=get(c,f"/aeterna/command?project_id={project.project_id}&view=totals")
-    assert report.status_code == 200 and b"FINANCIAL" in report.data
+    assert report.status_code == 200 and b"PROJECT TOTALS" in report.data
     assert b"NOT AUTOMATED" in get(c,f"/aeterna/command?project_id={project.project_id}&view=checks").data
     assert post(c,"/logout").status_code == 302
     assert_redirect(get(c,job_url),"/login?next="+job_url)
