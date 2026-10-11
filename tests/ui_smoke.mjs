@@ -237,7 +237,7 @@ try {
     } else if (process.env.GBO_REQUIRE_FIRST_ENTRY_ASSETS === "1") {
       throw Error(spec.name + ": Release build missing first-entry master " + expectedIntroName);
     }
-    if (!(await page.getByRole("button", { name: /REPLAY WITH SOUND/i }).isVisible())) {
+    if (!(await page.locator("[data-intro-sound]").isVisible())) {
       throw Error(spec.name + ": Film sound replay control is missing");
     }
     const introHorizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
