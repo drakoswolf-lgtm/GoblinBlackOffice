@@ -19,6 +19,7 @@ from app.core.job_lifecycle import (
     record_project_work,
 )
 from app.core.ledger import summarize_project_ledger
+from app.office.command import build_command_briefing
 from app.core.models import RecordStatus
 from app.core.runtime import office_store
 from app.ledgergut.web import app as ledgergut_app
@@ -230,6 +231,22 @@ def record_desk():
             _, errors = create_project(business_id=bid, client_id=request.form.get("client_id", ""), name=request.form.get("name", ""), description=request.form.get("description", ""), pricing_model=request.form.get("pricing_model", "undetermined"))
         if not errors: return redirect(url_for("record_desk"))
     return render_template("office/records.html", errors=errors, clients=office_store.clients.list_for_business(bid), projects=office_store.projects.list_for_business(bid))
+
+@office_app.route("/aeterna/command", methods=["GET"])
+def aeterna_command():
+    """A read-only, business-scoped command and specialist review."""
+    bid = current_business_id()
+    try:
+        briefing = build_command_briefing(
+            office_store, bid,
+            project_id=request.args.get("project_id", "").strip(),
+            view=request.args.get("view", "overview"),
+            question=request.args.get("question", ""),
+        )
+    except LookupError:
+        return ("Project not found.", 404)
+    return render_template("office/aeterna_command.html", briefing=briefing)
+
 
 @office_app.route("/settings/documents", methods=["GET", "POST"])
 def document_settings():
@@ -496,6 +513,7 @@ def job_workbench(project_id: str):
         actual_hours=actual_hours,
         expense_total=expense_total,
         currency=currency,
+        aeterna_brief=build_command_briefing(office_store, bid, project_id=project_id),
         material_rows=_form_material_rows(request.form) if request.method == "POST" else [("", "", "ea", "")],
         form_data=request.form if request.method == "POST" else {},
         errors=tuple(errors),
@@ -530,6 +548,7 @@ def index():
         clients=clients,
         user=current_user(),
         sticky_lines=_sticky_payload(),
+        aeterna_brief=build_command_briefing(office_store, bid),
     )
 
 @office_app.route("/canon/<path:asset_path>")
