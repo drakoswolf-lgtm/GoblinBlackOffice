@@ -73,3 +73,40 @@ jobs:
       - name: Clean up beta container
         if: always()
         run: docker rm -f gbo-visual || true
+
+
+  release-gate:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: gbo_release
+          POSTGRES_PASSWORD: isolated_release_password
+          POSTGRES_DB: gbo_release
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U gbo_release -d gbo_release"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      GBO_ENV: production
+      GBO_AUTH_REQUIRED: "1"
+      GBO_SECRET: "isolated-ci-release-secret-not-for-live-use"
+      GBO_INVITE_TOKEN: "ci-approval-invite-only"
+      DATABASE_URL: postgresql://gbo_release:isolated_release_password@127.0.0.1:5432/gbo_release
+      WEB_CONCURRENCY: "1"
+      GBO_TRUST_PROXY_PROTO: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install project
+        run: python -m pip install --upgrade pip && pip install -e ".[dev]"
+      - name: Production-mode new-account golden path
+        run: python tests/pass_d_release_gate.py seed
+      - name: Persisted data and cross-tenant isolation in a fresh process
+        run: python tests/pass_d_release_gate.py verify
