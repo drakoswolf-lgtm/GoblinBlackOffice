@@ -112,7 +112,7 @@
         <div class="aeterna-action-list">
           {% for action in briefing.actions[:12] %}
           <a href="{{ action.href }}">
-            <span class="aeterna-action-rank">{{ loop.index|string|rjust(2,'0') }}</span>
+            <span class="aeterna-action-rank">{{ '%02d'|format(loop.index) }}</span>
             <span><small>{{ action.category }} // {{ action.project_name }}</small><strong>{{ action.title }}</strong><em>{{ action.detail }}</em></span>
             <span aria-hidden="true">›</span>
           </a>
