@@ -169,6 +169,30 @@ try {
       throw Error(spec.name + ": Document branding settings did not load");
     }
 
+
+    // Æterna Pass B: project-scoped command intelligence must render in both layouts.
+    const commandResponse = await page.goto(base + "/aeterna/command", { waitUntil: "domcontentloaded" });
+    if (!commandResponse?.ok() || !(await page.getByRole("heading", { name: "Command Intelligence" }).isVisible())) {
+      throw Error(spec.name + ": Æterna command console failed to render");
+    }
+    if (!(await page.locator("#aeterna-project").isVisible())) {
+      throw Error(spec.name + ": Project selector unavailable");
+    }
+    await page.locator("#aeterna-question").fill("What is outstanding?");
+    await page.getByRole("button", { name: "RUN BRIEFING" }).click();
+    if (!(await page.getByText("FINANCIAL RECORDS").isVisible())) {
+      throw Error(spec.name + ": Æterna did not route financial questions");
+    }
+    const commandOverflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    if (commandOverflow > 2) {
+      throw Error(spec.name + ": Æterna command horizontal overflow: " + commandOverflow);
+    }
+    await page.screenshot({ path: "artifacts/ui/" + spec.name + "-aeterna-command.png", fullPage: true });
+    await page.getByRole("link", { name: "GOBLIN CHECKS" }).click();
+    if (!(await page.getByText("Select an individual project").isVisible())) {
+      throw Error(spec.name + ": Specialist check empty state missing");
+    }
+
     if (errors.length) throw Error(spec.name + ": Browser errors: " + errors.join("; "));
     console.log("PASS " + spec.name + " visual smoke", visual);
     await context.close();
