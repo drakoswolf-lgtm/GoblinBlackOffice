@@ -2407,3 +2407,26 @@ body.splash-active { overflow: hidden; }
  .aeterna-command-officer .command-aeterna-frame{height:112px}
  .aeterna-command-tabs a{flex:1;min-width:40%}
 }
+
+
+/* PASS C // First-entry cinematic; lives before Curriculum VitÆ, never in the desk */
+.gbo-intro-body { margin:0; min-height:100vh; background:#02070d; color:#bce9ff; }
+.gbo-first-entry { min-height:100vh; min-height:100dvh; position:relative; isolation:isolate; display:flex; flex-direction:column; justify-content:center; overflow:hidden; background:#02070d; }
+.gbo-first-entry-stage {position:absolute; inset:0; display:flex; align-items:center; justify-content:center; overflow:hidden}
+.gbo-first-entry video { width:100%; height:100%; max-height:100dvh; object-fit:contain; background:#02070d; }
+.gbo-first-entry-vignette {pointer-events:none;position:absolute;inset:0; background:linear-gradient(0deg,rgba(2,7,13,.68) 0%,rgba(2,7,13,0) 20%,rgba(2,7,13,0) 80%,rgba(2,7,13,.24) 100%);}
+.gbo-first-entry-status {position:absolute;left:20px;top:18px;z-index:2;color:#94cbe4;text-shadow:0 1px 5px #010508;font-size:.65rem;font-weight:650;letter-spacing:.14em;line-height:1.5}
+.gbo-first-entry-toolbar {position:absolute;z-index:3;bottom:22px;left:18px;right:18px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.gbo-first-entry-toolbar button {font-weight:700;letter-spacing:.08em;font-size:.67rem;min-height:44px;padding:11px 16px;cursor:pointer;backdrop-filter:blur(9px);}
+.gbo-first-entry-toolbar [data-intro-sound] {background:rgba(5,31,49,.73);border:1px solid rgba(94,194,240,.53);color:#c7edff}
+.gbo-first-entry-toolbar [data-intro-sound]:disabled {opacity:.45;cursor:not-allowed;}
+.gbo-first-entry-toolbar form {margin:0}
+.gbo-first-entry-continue {background:rgba(9,67,104,.84);border:1px solid #5ac9ff;color:#fff}
+.gbo-first-entry-toolbar button:focus-visible {outline:2px solid #fff;outline-offset:3px}
+.gbo-first-entry.is-unavailable video {opacity:.25;}
+@media (max-width:700px) {
+ .gbo-first-entry-status {top:20px;left:12px;right:12px;font-size:.58rem}
+ .gbo-first-entry-toolbar {bottom:calc(14px + env(safe-area-inset-bottom, 0px));left:12px;right:12px;display:grid;grid-template-columns:1fr}
+ .gbo-first-entry-toolbar form {width:100%}
+ .gbo-first-entry-toolbar button {width:100%}
+}
