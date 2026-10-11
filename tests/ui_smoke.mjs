@@ -145,6 +145,72 @@ try {
     });
 
 
+    // Beta business-first pass: the portraits are subdued behind functional labels.
+    const channels = page.locator(".command-channel.business-specialist-link");
+    if (await channels.count() !== 6) throw Error(spec.name + ": Missing six business specialist channels");
+    for (const label of ["Receipt Log", "Agreements", "Invoices & Payments", "Materials", "Work Log", "Risk Review"]) {
+      if (!await channels.getByText(label, { exact: true }).isVisible()) {
+        throw Error(spec.name + ": Missing business section " + label);
+      }
+    }
+    const spriteSource = "/canon/characters/canon-goblin-specialist-sprite.webp";
+    const spriteResponse = await page.request.get(base + spriteSource);
+    if (!spriteResponse.ok() || !spriteResponse.headers()["content-type"]?.includes("image/webp")) {
+      throw Error(spec.name + ": Canon six-goblin portrait sprite missing");
+    }
+    const spriteDimensions = await page.evaluate(async url => {
+      const img = new Image(); img.src = url; await img.decode();
+      return { width: img.naturalWidth, height: img.naturalHeight };
+    }, spriteSource);
+    if (spriteDimensions.width < 300 || spriteDimensions.height < 75) {
+      throw Error(spec.name + ": Portrait sprite failed to decode");
+    }
+    const firstPortrait = await channels.first().locator(".office-scope-portrait").evaluate(node => {
+      const s = getComputedStyle(node);
+      return { source:s.backgroundImage, opacity:Number(s.opacity), z:s.zIndex };
+    });
+    if (!firstPortrait.source.includes("canon-goblin-specialist-sprite.webp") ||
+        firstPortrait.opacity > .5) {
+      throw Error(spec.name + ": Portrait must be an unobtrusive background image");
+    }
+
+    const records = await page.goto(base + "/records", { waitUntil: "domcontentloaded" });
+    if (!records?.ok() || !await page.getByRole("heading", { name:"Clients & Projects" }).isVisible()) {
+      throw Error(spec.name + ": Client and project records did not render");
+    }
+    await page.locator("#add-client summary").click();
+    await page.locator("#client-name").fill("UX Test " + spec.name);
+    await page.locator("#add-client button[type=submit]").click();
+    await page.waitForURL("**/records");
+    const clientLink = page.locator('.office-client-row[href*="client_id="]').filter({ hasText:"UX Test " + spec.name }).first();
+    if (!await clientLink.isVisible()) throw Error(spec.name + ": Client not listed after creation");
+    await clientLink.click();
+    if (!await page.getByText("CLIENT CONTACT").isVisible()) {
+      throw Error(spec.name + ": Client details not shown after selection");
+    }
+    await page.screenshot({ path:"artifacts/ui/" + spec.name + "-clients.png", fullPage:true });
+    await page.locator("#add-project summary").click();
+    await page.locator("#project-name").fill("Business-first test job " + spec.name);
+    await page.locator("#record-pricing").selectOption("hourly");
+    await page.locator("#add-project button[type=submit]").click();
+    await page.waitForURL("**/records");
+    const jobRow = page.locator(".office-project-row").filter({ hasText:"Business-first test job " + spec.name }).first();
+    if (!await jobRow.isVisible()) throw Error(spec.name + ": New project missing from business records");
+    await jobRow.click();
+    await page.waitForURL("**/jobs/*");
+    if (await page.locator(".office-scope-panel").count() !== 6) {
+      throw Error(spec.name + ": Project workbench missing six functional panels");
+    }
+    if (!await page.getByRole("link", { name:/Draft agreement/ }).first().isVisible()) {
+      throw Error(spec.name + ": Agreement workflow link lost");
+    }
+    for (const area of ["project-agreements", "packrat-shopping", "project-work", "project-invoices"]) {
+      if (await page.locator("#" + area).count() !== 1) throw Error(spec.name + ": Project section missing: " + area);
+    }
+    const betaOverflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    if (betaOverflow > 2) throw Error(spec.name + ": Project UI horizontal overflow: " + betaOverflow);
+    await page.screenshot({ path:"artifacts/ui/" + spec.name + "-project-business-first.png", fullPage:true });
+
     // Beta Mk.III Pass A: verify the staged receipt UI, not just the desk artwork.
     const receiptResponse = await page.goto(base + "/ledgergut/", { waitUntil: "domcontentloaded" });
     if (!receiptResponse?.ok()) throw Error(spec.name + ": Ledgergut route failed");
