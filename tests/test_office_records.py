@@ -23,4 +23,6 @@ def test_record_desk_is_available():
     office_app.config.update(TESTING=True, GBO_AUTH_REQUIRED=False)
     response = office_app.test_client().get("/records")
     assert response.status_code == 200
-    assert b"Clients & Projects" in response.data
+    assert b"Clients &amp; Projects" in response.data
+    assert b"office-client-row" in response.data
+    assert b"office-project-list" in response.data or b"office-empty-record" in response.data
