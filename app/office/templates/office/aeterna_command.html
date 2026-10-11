@@ -139,7 +139,16 @@
           {% endfor %}
         </div>
         {% else %}
-        <p class="aeterna-command-empty">Select an individual project to run meaningful specialist checks. Portfolio totals remain available above.</p>
+        <p class="aeterna-command-disclaimer">Office-wide checks summarize saved records across all projects. Select a project for detailed handoffs and individual action links.</p>
+        <div class="aeterna-check-grid">
+          {% for check in briefing.portfolio_checks %}
+          <article>
+            <div><strong>{{ check.name|upper }}</strong><small>{{ check.state }}</small></div>
+            <p>{{ check.summary }}</p>
+            <a href="{{ check.href }}">OPEN SPECIALIST ›</a>
+          </article>
+          {% endfor %}
+        </div>
         {% endif %}
       </section>
       {% endif %}
