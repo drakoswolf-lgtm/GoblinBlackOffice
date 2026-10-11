@@ -36,3 +36,9 @@ The command desk uses two **pixel-identical, lossless WebP encodings** of the ap
 - `environments/canon-black-office-mobile.webp` — 941 × 1672 portrait, SHA-256 `81c5dee12db7a09366dd661dfce573dc3873f9ed6a3f7e8364359becf41a645b`.
 
 Render with CSS `background-size: cover` inside the fixed Office environment layer. Select the portrait plate at widths up to 700px. Do not crop or synthesize new artwork into these assets. The older `canon-black-office-command.svg` remains a fallback only. No additional animations are part of this change.
+
+## Goblin specialist panels (beta)
+
+- `characters/canon-goblin-specialist-sprite.webp` — one optimized, six-face WebP strip for the subordinate, shaded specialist-background portraits, sourced from the previously generated full-character renders (not from fabricated avatars). The order is **Ledgergut, SigNor, Squarmish, Packrat, Patch, Grimsnatch**. The canon sheet is still the identity/uniform reference; this small background asset is deliberately not a high-resolution dossier.
+- CSS maps these faces with `face-ledgergut`, `face-signor`, `face-squarmish`, `face-packrat`, `face-patch`, and `face-grimsnatch`. The characters are supporting atmospherics rather than labels or actions. Names and ranks sit in subdued bylines under the business function.
+- The source full-body render files are preserved in the ChatGPT conversation; this beta change does not promote a new full-body portrait family or personnel screen.
