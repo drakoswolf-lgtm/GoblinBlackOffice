@@ -209,6 +209,34 @@ try {
     if (!actualIntroSrc.endsWith(expectedIntroName)) {
       throw Error(spec.name + ": Wrong first-entry master selected: " + actualIntroSrc);
     }
+    // Once the binary masters arrive, CI verifies their actual decoding,
+    // not merely a correct-looking URL. Drafts without assets stay identifiable.
+    const mediaResponse = await page.request.get(base + "/canon/introductions/" + expectedIntroName);
+    if (mediaResponse.ok()) {
+      if (!mediaResponse.headers()["content-type"]?.includes("video/mp4")) {
+        throw Error(spec.name + ": Introduction is not served as MP4");
+      }
+      await page.waitForFunction(() => {
+        const film = document.querySelector("[data-first-entry-video]");
+        return film && film.readyState >= 2 && film.videoWidth > 0 && film.videoHeight > 0;
+      }, null, { timeout: 12000 });
+      const dimensions = await welcomeVideo.evaluate(film => ({
+        width: film.videoWidth,
+        height: film.videoHeight,
+        duration: film.duration,
+      }));
+      const correct = spec.name === "mobile"
+        ? dimensions.width === 720 && dimensions.height === 1280 &&
+          dimensions.duration >= 5.5 && dimensions.duration < 7
+        : dimensions.width === 1280 && dimensions.height === 720 &&
+          dimensions.duration >= 3.5 && dimensions.duration < 5;
+      if (!correct) {
+        throw Error(spec.name + ": Intro master wrong geometry or runtime: " +
+          JSON.stringify(dimensions));
+      }
+    } else if (process.env.GBO_REQUIRE_FIRST_ENTRY_ASSETS === "1") {
+      throw Error(spec.name + ": Release build missing first-entry master " + expectedIntroName);
+    }
     if (!(await page.getByRole("button", { name: /REPLAY WITH SOUND/i }).isVisible())) {
       throw Error(spec.name + ": Film sound replay control is missing");
     }
