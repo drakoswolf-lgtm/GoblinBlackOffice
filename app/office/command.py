@@ -78,7 +78,7 @@ def resolve_view(view: str, question: str) -> tuple[str, str]:
     if not q:
         return (view if view in VIEWS else "overview"), ""
     lowered = q.casefold()
-    if any(word in lowered for word in ("money", "total", "balance", "invoice", "payment", "expense", "spent", "cost", "hour", "revenue", "paid")):
+    if any(word in lowered for word in ("money", "total", "balance", "outstanding", "owing", "unpaid", "invoice", "payment", "expense", "spent", "cost", "hour", "revenue", "paid")):
         return "totals", "FINANCIAL RECORDS"
     if any(word in lowered for word in ("priority", "priorities", "next", "urgent", "block", "action", "todo", "to do")):
         return "priorities", "ACTION QUEUE"
