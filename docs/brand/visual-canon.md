@@ -467,3 +467,17 @@ Before approving a future visual, ask:
 10. Is the latest approved insignia geometry actually present on the uniform/equipment?
 
 If any answer is no, the visual is not on-model.
+
+## 16. Business-first beta screen hierarchy
+
+On the Command Desk, project workbench, and client/project records screens, real business content has visual priority. Goblins are helpers represented as shaded, recognisable characters **behind** service labels, not as foreground profile cards or dossier UI.
+
+- Main labels are business functions: **Receipt Log, Agreements, Invoices & Payments, Materials, Work Log, Risk Review**.
+- Specialists' rank and character names are compact secondary bylines, never the main headings. Ranks currently read **2Lt. Ledgergut, Ltc. SigNor, Ssg. Squarmish, Pfc. Packrat, Cpl. Patch, 1Lt. Grimsnatch**.
+- Portraits are large in area but dark, desaturated and translucent, covered by a readable text/gradient layer; interaction belongs to the whole functional panel.
+- Project name, linked client, status, actual ledger metrics, work logs and existing actions take precedence over the specialist grid.
+- Client records list real clients and scoped projects, not invented activities, statuses, financial figures, or unrelated decorative photography.
+- Do not manufacture functionality for specialist rough-ins; link existing real workflows and label their boundaries honestly.
+- Æterna retains her separate cobalt command treatment, with no goblin green command takeover.
+
+These rules supersede the character-centric dossier mockups. Future beta UI should use responsive HTML/CSS and genuine domain records, not a baked screenshot as a page.
