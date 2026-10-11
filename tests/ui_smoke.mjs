@@ -418,26 +418,28 @@ try {
     if (!await page.locator("[data-curriculum-deploy]").isVisible()) {
       throw Error(spec.name + ": Curriculum deployment button isn't visible");
     }
-    if (spec.name === "mobile") {
+    {
       const metrics = await page.evaluate(() => {
         const r = sel => {
           const v = document.querySelector(sel).getBoundingClientRect();
           return {y:v.y,bottom:v.bottom,height:v.height,x:v.x,right:v.right};
         };
         const cards = [...document.querySelectorAll(".deployment-card")].map(n => n.getBoundingClientRect());
-        const bottom = Math.max(...cards.map(n => n.bottom));
+        const button = document.querySelector("[data-curriculum-deploy]");
         return {
-          lastCardBottom:bottom,
+          lastCardBottom:Math.max(...cards.map(n => n.bottom)),
           deploymentNote:r(".deployment-note"),
           controls:r(".curriculum-controls"),
           dialogue:r(".aeterna-dialogue"),
+          buttonFits:button.scrollWidth <= button.clientWidth + 2,
           overflow:document.documentElement.scrollWidth - window.innerWidth,
         };
       });
       if (metrics.controls.y < metrics.deploymentNote.bottom - 2 ||
+          metrics.deploymentNote.y < metrics.lastCardBottom - 2 ||
           metrics.dialogue.y < metrics.controls.bottom - 2 ||
-          metrics.overflow > 2) {
-        throw Error("CV deployment controls overlap content: "+JSON.stringify(metrics));
+          !metrics.buttonFits || metrics.overflow > 2) {
+        throw Error(spec.name + ": CV deployment content or action overlaps: "+JSON.stringify(metrics));
       }
     }
     await page.screenshot({path:"artifacts/ui/"+spec.name+"-curriculum-deployment.png", fullPage:true});
