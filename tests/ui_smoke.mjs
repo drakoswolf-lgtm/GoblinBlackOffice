@@ -187,6 +187,21 @@ try {
     if (commandOverflow > 2) {
       throw Error(spec.name + ": Æterna command horizontal overflow: " + commandOverflow);
     }
+    const ambientOnCommand = page.locator("[data-aeterna-ambient]");
+    if ((await ambientOnCommand.count()) !== 1) {
+      throw Error(spec.name + ": Ambient portrait not mounted on command screen");
+    }
+    if (!await ambientOnCommand.evaluate(v => v.muted && v.loop && v.playsInline)) {
+      throw Error(spec.name + ": Ambient portrait must be silent, looping and inline");
+    }
+    if (!await page.locator(".aeterna-command-officer img[alt='Cmdr. Æterna Skyeward']").isVisible()) {
+      throw Error(spec.name + ": Canon still image missing as portrait fallback");
+    }
+    // Smoke tests request reduced-motion; the portrait must stay static.
+    const reducedPortraitStyle = await ambientOnCommand.evaluate(v => getComputedStyle(v).display);
+    if (reducedPortraitStyle !== "none") {
+      throw Error(spec.name + ": Reduced-motion preference is not respected");
+    }
     await page.screenshot({ path: "artifacts/ui/" + spec.name + "-aeterna-command.png", fullPage: true });
     await page.getByRole("link", { name: "GOBLIN CHECKS" }).click();
     if (!(await page.getByText("Office-wide checks summarize saved records").isVisible()) || !(await page.getByText("NOT AUTOMATED").isVisible())) {
@@ -245,6 +260,9 @@ try {
     await page.screenshot({ path: "artifacts/ui/" + spec.name + "-first-entry.png" });
     await page.getByRole("button", { name: /CONTINUE TO CURRICULUM VITÆ/i }).click();
     await page.waitForURL("**/onboarding");
+    if ((await page.locator(".aeterna-holo-frame [data-aeterna-ambient]").count()) !== 1) {
+      throw Error(spec.name + ": CV briefing is missing Aeterna ambient portrait");
+    }
     if (!(await page.getByText("CURRICULUM VITÆ").first().isVisible())) {
       throw Error(spec.name + ": CV did not follow first-entry video");
     }
