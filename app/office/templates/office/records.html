@@ -1,70 +1,27 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Clients &amp; Projects · Goblin Black Office</title>
-  <link rel="stylesheet" href="/static/gbo.css">
-</head>
-<body>
-<main class="shell">
-  <header class="topbar">
-    <a class="brand" href="/"><span class="brand-mark">GBO</span><span>Goblin Black Office</span></a>
-    <nav class="topnav"><a href="/">Office Desk</a><a href="/aeterna/command">ÆTERNA</a></nav>
-  </header>
-
-  <section class="hero compact">
-    <p class="eyebrow">Office records</p>
-    <h1>Clients & Projects</h1>
-    <p class="lead">Give every agreement, expense, and invoice a proper home before the specialists start moving paper around.</p>
-  </section>
-
-  {% if errors %}<div class="errors">{% for e in errors %}<div>{{ e }}</div>{% endfor %}</div>{% endif %}
-
-  <section class="grid grid-2">
-    <article class="form-card" style="margin-top:0">
-      <p class="eyebrow">Client file</p>
-      <h2>Add a client</h2>
-      <form method="post">
-        <input type="hidden" name="kind" value="client">
-        <label for="client-name">Client name</label>
-        <input id="client-name" name="name" placeholder="Alexander Hotel" required>
-        <label for="client-email">Email</label>
-        <input id="client-email" name="email" type="email" placeholder="Optional">
-        <label for="client-phone">Phone</label>
-        <input id="client-phone" name="phone" placeholder="Optional">
-        <div class="button-row"><button type="submit">Create client</button></div>
-      </form>
-      <hr class="divider">
-      <div class="card-kicker">Current clients</div>
-      {% if clients %}<div class="list" style="margin-top:12px">{% for c in clients %}<div class="list-row"><div><strong>{{ c.name }}</strong><small>{{ c.client_id }}</small></div></div>{% endfor %}</div>{% else %}<p class="muted">No clients yet.</p>{% endif %}
-    </article>
-
-    <article class="form-card" style="margin-top:0">
-      <p class="eyebrow">Project file</p>
-      <h2>Add a project</h2>
-      <form method="post">
-        <input type="hidden" name="kind" value="project">
-        <label for="project-client">Client</label>
-        <select id="project-client" name="client_id" required><option value="">Choose client</option>{% for c in clients %}<option value="{{ c.client_id }}">{{ c.name }}</option>{% endfor %}</select>
-        <label for="project-name">Project name</label>
-        <input id="project-name" name="name" placeholder="Reception desk refit" required>
-        <label for="project-description">Description</label>
-        <textarea id="project-description" class="short" name="description" placeholder="What is this job? Keep it short."></textarea>
-        <label for="record-pricing">Pricing basis</label>
-        <select id="record-pricing" name="pricing_model">
-          <option value="undetermined">Not negotiated yet</option>
-          <option value="hourly">Hourly</option>
-          <option value="time_and_materials">Time &amp; materials</option>
-          <option value="fixed">Fixed price</option>
-        </select>
-        <div class="button-row"><button type="submit">Create project</button></div>
-      </form>
-      <hr class="divider">
-      <div class="card-kicker">Current projects</div>
-      {% if projects %}<div class="list" style="margin-top:12px">{% for p in projects %}<div class="list-row"><div><strong>{{ p.name }}</strong><small>{{ p.project_id }} · {{ p.status.value }} · {{ p.pricing_model.replace("_", " ") }}</small></div><a class="button secondary" href="/jobs/{{ p.project_id }}">Open job</a></div>{% endfor %}</div>{% else %}<p class="muted">No projects yet.</p>{% endif %}
-    </article>
-  </section>
-</main>
-</body>
-</html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Clients &amp; Projects · Goblin Black Office</title><link rel="stylesheet" href="/static/gbo.css"></head>
+<body class="office-record-body">
+<main class="shell office-detail-shell">
+<header class="topbar office-detail-topbar"><a class="brand office-brand" href="/"><img src="/canon/brand/canon-app-badge.webp" alt=""><span>GOBLIN BLACK OFFICE<small>CLIENTS &amp; PROJECTS</small></span></a><nav class="topnav"><a href="/">Command Desk</a><a href="/aeterna/command">Æterna</a></nav></header>
+<section class="office-detail-hero"><p class="eyebrow">BUSINESS RECORDS // SHARED PROJECT INTELLIGENCE</p><h1>Clients &amp; Projects</h1><p class="lead">The people behind the projects. Select a client to see their projects and existing contact details.</p><div class="office-hero-actions"><a class="button signal" href="#add-client">+ New client</a><a class="button secondary" href="#add-project">+ New project</a></div></section>
+{% if errors %}<div class="errors" role="alert">{% for e in errors %}<div>{{ e }}</div>{% endfor %}</div>{% endif %}
+<div class="office-record-columns">
+<section class="office-record-module" aria-label="Client records"><header class="office-section-head"><div><p class="eyebrow">RELATIONSHIPS // {{ clients|length }} RECORDED</p><h2>Clients</h2></div><a href="#add-client">ADD CLIENT +</a></header>
+<nav class="office-client-list" aria-label="Select client">
+<a class="office-client-row {% if not selected_client %}is-selected{% endif %}" href="/records" {% if not selected_client %}aria-current="page"{% endif %}><span class="office-client-monogram" aria-hidden="true">◎</span><span class="office-client-copy"><strong>All clients</strong><small>Browse the full project list</small></span><span class="office-client-count">{{ projects|length }}</span><span aria-hidden="true">›</span></a>
+{% for c in clients %}
+<a class="office-client-row {% if selected_client and selected_client.client_id == c.client_id %}is-selected{% endif %}" href="/records?client_id={{ c.client_id|urlencode }}" {% if selected_client and selected_client.client_id == c.client_id %}aria-current="page"{% endif %}><span class="office-client-monogram" aria-hidden="true">{{ c.name[:1]|upper }}</span><span class="office-client-copy"><strong>{{ c.name }}</strong><small>{{ c.client_id }}</small></span><span class="office-client-count">{{ project_counts.get(c.client_id,0) }}</span><span aria-hidden="true">›</span></a>
+{% endfor %}
+</nav>
+{% if selected_client %}<div class="office-client-focus"><p class="eyebrow">CLIENT CONTACT</p><h3>{{ selected_client.name }}</h3><p class="office-record-id">{{ selected_client.client_id }}</p>{% if selected_client.email %}<p><span>Email</span><a href="mailto:{{ selected_client.email }}">{{ selected_client.email }}</a></p>{% endif %}{% if selected_client.phone %}<p><span>Phone</span><a href="tel:{{ selected_client.phone }}">{{ selected_client.phone }}</a></p>{% endif %}<a class="office-inline-action" href="#add-project">CREATE PROJECT FOR CLIENT ›</a></div>{% endif %}
+</section>
+<section class="office-record-module" aria-label="Project records"><header class="office-section-head"><div><p class="eyebrow">PROJECT SPINE // {{ selected_projects|length }} RECORDED</p><h2>{% if selected_client %}{{ selected_client.name }}'s projects{% else %}All projects{% endif %}</h2></div><a href="#add-project">ADD PROJECT +</a></header>
+{% if selected_projects %}<div class="office-project-list">{% for p in selected_projects %}
+<a class="office-project-row" href="/jobs/{{ p.project_id }}"><span class="office-project-signal {% if p.status.value == 'archived' %}is-archived{% endif %}" aria-hidden="true"></span><span class="office-project-copy"><strong>{{ p.name }}</strong><small>{{ p.project_id }}{% if not selected_client %}{% for c in clients %}{% if c.client_id == p.client_id %} · {{ c.name }}{% endif %}{% endfor %}{% endif %}</small></span><span class="office-project-status">{{ p.status.value|upper }}<small>{{ p.pricing_model|replace('_',' ') }}</small></span><span aria-hidden="true">›</span></a>
+{% endfor %}</div>{% else %}<p class="office-empty-record">No project records for this selection. Create a project to connect agreements, receipts and labour.</p>{% endif %}
+</section></div>
+<section class="office-record-forms" aria-label="Create business records">
+<details class="office-record-create" id="add-client" {% if errors %}open{% endif %}><summary><span><small>01 // CLIENT RECORD</small><strong>Add a client</strong></span><span aria-hidden="true">+</span></summary><form class="office-record-form" method="post" action="/records"><input type="hidden" name="kind" value="client"><label for="client-name">Client name</label><input id="client-name" name="name" required placeholder="Business or contact name"><label for="client-email">Email</label><input id="client-email" type="email" name="email" placeholder="Optional"><label for="client-phone">Phone</label><input id="client-phone" name="phone" placeholder="Optional"><div class="button-row"><button type="submit">Create client</button></div></form></details>
+<details class="office-record-create" id="add-project" {% if errors %}open{% endif %}><summary><span><small>02 // PROJECT RECORD</small><strong>Add a project</strong></span><span aria-hidden="true">+</span></summary><form class="office-record-form" method="post" action="/records"><input type="hidden" name="kind" value="project"><label for="project-client">Client</label><select id="project-client" name="client_id" required><option value="">Choose client</option>{% for c in clients %}<option value="{{ c.client_id }}" {% if selected_client and c.client_id == selected_client.client_id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select><label for="project-name">Project name</label><input id="project-name" name="name" required placeholder="Reception desk refit"><label for="project-description">Description</label><textarea id="project-description" class="short" name="description" placeholder="What is this job?"></textarea><label for="record-pricing">Pricing basis</label><select id="record-pricing" name="pricing_model"><option value="undetermined">Not negotiated yet</option><option value="hourly">Hourly</option><option value="time_and_materials">Time &amp; materials</option><option value="fixed">Fixed price</option></select><div class="button-row"><button type="submit">Create project</button></div></form></details>
+</section><footer class="footer">PEOPLE · PAPERWORK · PROGRESS</footer>
+</main></body></html>
