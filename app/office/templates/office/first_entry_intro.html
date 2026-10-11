@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>First Contact · Goblin Black Office</title>
+  <link rel="stylesheet" href="/static/gbo.css">
+</head>
+<body class="gbo-intro-body">
+  <main class="gbo-first-entry" data-first-entry aria-label="Æterna first introduction">
+    <div class="gbo-first-entry-stage">
+      <video data-first-entry-video
+             autoplay muted playsinline preload="auto" disablepictureinpicture
+             aria-label="Cmdr. Æterna Skyeward appears in the Black Office for the first time">
+      </video>
+      <div class="gbo-first-entry-vignette" aria-hidden="true"></div>
+      <div class="gbo-first-entry-status" aria-live="polite" data-intro-status>ESTABLISHING COMMAND LINK</div>
+    </div>
+    <div class="gbo-first-entry-toolbar">
+      <button type="button" data-intro-sound aria-label="Replay the introduction with sound">REPLAY WITH SOUND</button>
+      <form method="post" action="{{ url_for('first_entry_intro') }}" data-intro-continue>
+        <button type="submit" class="gbo-first-entry-continue">CONTINUE TO CURRICULUM VITÆ <span aria-hidden="true">›</span></button>
+      </form>
+    </div>
+  </main>
+  <script src="/static/first-entry-intro.js" defer></script>
+</body>
+</html>
