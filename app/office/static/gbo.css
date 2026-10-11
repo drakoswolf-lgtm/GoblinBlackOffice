@@ -2905,3 +2905,38 @@ body.splash-active { overflow: hidden; }
     transition:none !important;
   }
 }
+
+
+/* Desktop CV: the holographic footer was still absolutely positioned over the
+   Deployment note. Let panels size to their real content above the navigation. */
+@media(min-width:901px) {
+  .curriculum-grid {min-height:0}
+  .curriculum-workspace {min-height:0;padding-bottom:30px}
+  .intel-table-plane {min-height:0;padding-bottom:24px}
+  .curriculum-screen {min-height:0}
+  .curriculum-controls {
+    position:relative;
+    inset:auto;
+    left:auto;right:auto;top:auto;bottom:auto;
+    margin:23px 0 0;
+    width:100%;
+    grid-template-columns:112px minmax(75px,1fr) minmax(185px,205px);
+  }
+  .curriculum-controls .curriculum-back,
+  .curriculum-controls .curriculum-next,
+  .curriculum-controls .curriculum-deploy {
+    min-width:0;
+    width:100%;
+    white-space:normal;
+    line-height:1.24;
+    padding:11px 10px;
+  }
+  .curriculum-progress{min-width:0}
+  .aeterna-dialogue {
+    position:relative;
+    inset:auto;
+    left:auto;right:auto;top:auto;bottom:auto;
+    margin:18px 12px 0;
+    width:auto;
+  }
+}
