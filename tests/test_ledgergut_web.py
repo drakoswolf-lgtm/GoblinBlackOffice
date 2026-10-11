@@ -547,3 +547,60 @@ def test_storage_error_on_save_deletes_written_image(app_client):
     # The image directory must be empty — the image was rolled back on StorageError.
     image_files = list(store._image_dir.iterdir())
     assert image_files == [], f"Unexpected orphaned files: {image_files}"
+
+
+def test_failed_ocr_keeps_image_for_manual_review_and_tenant_private_preview(app_client, monkeypatch):
+    """A bad OCR pass is not permission to throw away the user's receipt."""
+    import io
+    from PIL import Image
+    import app.ledgergut.web as web_module
+    from app.ledgergut.ocr import OcrError
+
+    client, store = app_client
+    image = Image.new("RGB", (50, 50), "white")
+    buffer = io.BytesIO()
+    image.save(buffer, format="PNG")
+    image_data = buffer.getvalue()
+    monkeypatch.setattr(
+        web_module, "extract_text_from_image",
+        lambda _: (_ for _ in ()).throw(OcrError("Too blurry to recognize.")),
+    )
+    before = set(web_module.app.config.get("LEDGERGUT_PENDING_IMAGES", {}))
+    scan = client.post(
+        "/receipts/scan",
+        data={"receipt_image": (io.BytesIO(image_data), "photograph.png")},
+        content_type="multipart/form-data",
+    )
+    assert scan.status_code == 200
+    assert b"Too blurry to recognize." in scan.data
+    assert b"preserved for manual entry" in scan.data
+    pending = set(web_module.app.config["LEDGERGUT_PENDING_IMAGES"]) - before
+    assert len(pending) == 1
+    token = next(iter(pending))
+    image_url = f"/receipts/pending/{token}"
+    preview = client.get(image_url)
+    assert preview.status_code == 200
+    assert preview.mimetype == "image/png"
+    assert preview.data == image_data
+
+    original_business_id = web_module._active_business_id
+    monkeypatch.setattr(web_module, "_active_business_id", lambda: "foreign-business")
+    assert client.get(image_url).status_code == 404
+    monkeypatch.setattr(web_module, "_active_business_id", original_business_id)
+
+    invalid = client.post(
+        "/receipts/new",
+        data={**_valid_form(total_amount="0.00"),
+              "entry_mode": "manual", "pending_image_token": token},
+    )
+    assert invalid.status_code == 200
+    assert token in web_module.app.config["LEDGERGUT_PENDING_IMAGES"]
+
+    saved = client.post(
+        "/receipts/new",
+        data={**_valid_form(), "entry_mode": "manual",
+              "pending_image_token": token},
+    )
+    assert saved.status_code == 302
+    assert len(store.list_receipts()) == 1
+    assert token not in web_module.app.config["LEDGERGUT_PENDING_IMAGES"]

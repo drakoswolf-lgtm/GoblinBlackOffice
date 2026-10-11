@@ -23,14 +23,14 @@ def test_extract_text_from_image_returns_mocked_ocr_text(monkeypatch) -> None:
     monkeypatch.setattr(
         pytesseract,
         "image_to_string",
-        lambda image: "HOME HARDWARE\nTOTAL 28.00\n",
+        lambda image, **kwargs: "HOME HARDWARE\nTOTAL 28.00\n",
     )
 
     assert extract_text_from_image(_png_bytes()) == "HOME HARDWARE\nTOTAL 28.00"
 
 
 def test_extract_text_from_image_surfaces_user_facing_failure(monkeypatch) -> None:
-    def _raise_not_found(_image):
+    def _raise_not_found(_image, **kwargs):
         raise pytesseract.TesseractNotFoundError()
 
     monkeypatch.setattr(pytesseract, "image_to_string", _raise_not_found)
@@ -100,3 +100,37 @@ def test_parse_receipt_text_ignores_phone_numbers_and_card_numbers() -> None:
     assert suggestions.vendor_name == "Coffee Spot"
     assert suggestions.total_amount == Decimal("12.60")
     assert suggestions.receipt_number is None
+
+
+def test_real_tesseract_scans_receipt_photo_instead_of_gibberish() -> None:
+    """Actual OCR, not a monkeypatch: recognize totals from a realistic phone size."""
+    import shutil
+    from PIL import ImageDraw, ImageFont
+    if shutil.which("tesseract") is None:
+        pytest.skip("Tesseract not installed")
+    image = Image.new("RGB", (1050, 1450), "#f2f1e9")
+    canvas = ImageDraw.Draw(image)
+    font = ImageFont.truetype("DejaVuSans.ttf", 35)
+    rows = [
+        "HOME HARDWARE", "123 MAIN STREET", "DATE 2026-10-11",
+        "CEDAR BOARD     24.00", "SUBTOTAL 24.00",
+        "GST 1.20", "PST 1.68", "TOTAL 26.88",
+    ]
+    for i, row in enumerate(rows):
+        canvas.text((60, 95 + i * 108), row, fill="#282828", font=font)
+    buffer = io.BytesIO()
+    image.save(buffer, format="JPEG", quality=87)
+    extracted = extract_text_from_image(buffer.getvalue())
+    parsed = parse_receipt_text(extracted)
+    assert parsed.vendor_name == "HOME HARDWARE", extracted
+    assert parsed.total_amount == Decimal("26.88"), extracted
+    assert parsed.subtotal == Decimal("24.00"), extracted
+    assert parsed.tax_amount == Decimal("2.88"), extracted
+
+
+def test_unreadable_photograph_is_not_presented_as_a_valid_receipt(monkeypatch) -> None:
+    monkeypatch.setattr(
+        pytesseract, "image_to_string", lambda image, **kwargs: "x 0 s i ??"
+    )
+    with pytest.raises(OcrError, match="enough readable receipt information"):
+        extract_text_from_image(_png_bytes())

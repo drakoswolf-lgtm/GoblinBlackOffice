@@ -25,7 +25,7 @@ from app.ledgergut.storage import ReceiptStore, StorageError
 from app.ledgergut.validation import validate_receipt
 
 _HERE = Path(__file__).parent
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 PENDING_IMAGE_TTL = timedelta(minutes=30)
 
@@ -87,17 +87,39 @@ def _store_pending_image(image_data: bytes, ext: str) -> str:
     _pending_images()[token] = {
         "image_data": image_data.hex(),
         "ext": ext,
+        "business_id": _active_business_id(),
         "expires_at": expires_at.isoformat(),
     }
     return token
 
 
-def _consume_pending_image(token: str) -> tuple[bytes, str] | None:
+def _peek_pending_image(token: str) -> tuple[bytes, str] | None:
+    """Never reveal or consume another Office's staged receipt images."""
     _prune_pending_images()
-    payload = _pending_images().pop(token, None)
-    if payload is None:
+    payload = _pending_images().get(token)
+    if payload is None or payload.get("business_id") != _active_business_id():
         return None
     return bytes.fromhex(payload["image_data"]), payload["ext"]
+
+
+def _consume_pending_image(token: str) -> tuple[bytes, str] | None:
+    image = _peek_pending_image(token)
+    if image is not None:
+        _pending_images().pop(token, None)
+    return image
+
+
+@app.get("/receipts/pending/<token>")
+def pending_receipt_image(token: str):
+    image = _peek_pending_image(token)
+    if image is None:
+        return Response("Receipt preview unavailable.", status=404, mimetype="text/plain")
+    data, ext = image
+    content_type = "image/png" if ext == "png" else "image/webp" if ext == "webp" else "image/jpeg"
+    return Response(data, mimetype=content_type, headers={
+        "Cache-Control": "private, no-store",
+        "X-Content-Type-Options": "nosniff",
+    })
 
 
 def _submitted_receipt_form():
@@ -158,18 +180,18 @@ def _read_pending_image(*, required: bool) -> tuple[tuple[bytes, str] | None, st
     image_file = request.files.get("receipt_image")
     if image_file is None or not image_file.filename:
         if required:
-            return None, "Upload a PNG or JPG receipt image under 10 MB to scan."
+            return None, "Upload a JPG, PNG or WebP receipt image under 10 MB to scan."
         return None, None
 
     ext = image_file.filename.rsplit(".", 1)[-1].lower() if "." in image_file.filename else ""
     if ext not in ALLOWED_EXTENSIONS:
-        return None, "Unsupported receipt image. Upload a PNG or JPG file under 10 MB."
+        return None, "Unsupported receipt image. Upload a JPG, PNG or WebP file under 10 MB."
 
     image_data = image_file.read()
     if not image_data:
-        return None, "Receipt image was empty. Upload a PNG or JPG file under 10 MB."
+        return None, "Receipt image was empty. Upload a JPG, PNG or WebP file under 10 MB."
     if len(image_data) > MAX_UPLOAD_BYTES:
-        return None, "Receipt image is too large. Upload a PNG or JPG file under 10 MB."
+        return None, "Receipt image is too large. Upload a JPG, PNG or WebP file under 10 MB."
     return (image_data, ext), None
 
 
@@ -232,7 +254,14 @@ def scan_receipt():
         raw_text = extract_text_from_image(image_data)
         suggestions = parse_receipt_text(raw_text)
     except OcrError as exc:
-        return _render_index(form_data=form_data, scan_error=str(exc))
+        # Failed OCR does not make the photographed receipt disappear. Keep it
+        # available for honest manual review and attach it on successful save.
+        form_data["entry_mode"] = "manual"
+        form_data["pending_image_token"] = _store_pending_image(image_data, ext)
+        return _render_index(
+            form_data=form_data,
+            scan_error=str(exc) + " Your uploaded image is preserved for manual entry.",
+        )
 
     updated_form_data = _apply_suggestions(form_data, suggestions)
     updated_form_data["pending_image_token"] = _store_pending_image(image_data, ext)
@@ -247,13 +276,12 @@ def new_receipt():
     form_data = _submitted_receipt_form()
 
     pending_image, image_error = _read_pending_image(required=False)
-    if pending_image is None:
-        pending_image_token = form_data.get("pending_image_token", "").strip()
-        if pending_image_token:
-            pending_image = _consume_pending_image(pending_image_token)
-            if pending_image is None:
-                input_error = "Scanned receipt image expired. Re-upload the image before saving."
-                image_error = input_error if image_error is None else image_error
+    pending_image_token = form_data.get("pending_image_token", "").strip()
+    if pending_image is None and pending_image_token:
+        pending_image = _peek_pending_image(pending_image_token)
+        if pending_image is None:
+            input_error = "Scanned receipt image expired. Re-upload the image before saving."
+            image_error = input_error if image_error is None else image_error
     record, input_errors = build_models(form_data)
     if image_error:
         input_errors.append(image_error)
@@ -276,7 +304,7 @@ def new_receipt():
             if pending_image is not None:
                 image_data, ext = pending_image
                 image_filename = f"{uuid.uuid4().hex}.{ext}"
-                content_type = "image/png" if ext == "png" else "image/jpeg"
+                content_type = "image/png" if ext == "png" else "image/webp" if ext == "webp" else "image/jpeg"
                 try:
                     image_key = image_store.put(
                         business_id=active_business_id,
@@ -309,6 +337,8 @@ def new_receipt():
                             project_id=None,
                         )
                         _office_store.expenses.save(expense)
+                    if pending_image_token:
+                        _consume_pending_image(pending_image_token)
                     if selected_project_id and request.script_root.rstrip("/") == "/ledgergut":
                         return redirect(
                             f"/jobs/{selected_project_id}?message=receipt-saved"
