@@ -19,6 +19,7 @@
     {% if project.description %}<p class="lead">{{ project.description }}</p>{% endif %}
     <div class="beta-project-actions">
       <a class="button secondary" href="/">Return to Desk</a>
+      <a class="button secondary" href="/aeterna/command?project_id={{ project.project_id }}">ASK ÆTERNA</a>
       {% if project.status.value == 'active' %}
       <form method="post"><input type="hidden" name="action" value="project_status"><input type="hidden" name="status" value="completed"><button type="submit">Mark Field Work Complete</button></form>
       {% elif project.status.value != 'active' %}
@@ -32,6 +33,17 @@
 
   {% if message %}<div class="alert success"><strong>{{ message }}</strong></div>{% endif %}
   {% if errors %}<div class="errors"><strong>Needs attention</strong><ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
+
+  <section class="aeterna-project-brief" aria-label="Æterna project advisory">
+    <p class="card-kicker">ÆTERNA // PROJECT ADVISORY</p>
+    <p><strong>{{ aeterna_brief.actions|length }} derived action(s)</strong> · {{ aeterna_brief.currency }} {{ '%.2f'|format(aeterna_brief.ledger.outstanding) }} outstanding · {{ aeterna_brief.actual_hours }} h recorded</p>
+    {% if aeterna_brief.actions %}
+    <p>FIRST CHECK: {{ aeterna_brief.actions[0].title }}. {{ aeterna_brief.actions[0].detail }}</p>
+    {% else %}
+    <p>No action prompts inferred from current records. This is not a project-completion certificate.</p>
+    {% endif %}
+    <a href="/aeterna/command?project_id={{ project.project_id }}&amp;view=checks">RUN GOBLIN CHECKS ›</a>
+  </section>
 
   <section class="stat-strip stat-4" aria-label="Project summary">
     <div class="stat"><strong>{% if latest_estimate %}{{ currency }} {{ '%.2f'|format(latest_estimate.total_estimate) }}{% else %}Not planned{% endif %}</strong><span>Latest estimate</span></div>
