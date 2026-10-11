@@ -394,6 +394,16 @@ try {
     if (!cvBg.includes(expectedRoom)) {
       throw Error(spec.name + ": Curriculum doesn't use approved room image: " + cvBg);
     }
+    if (spec.name === "desktop") {
+      const readout = await page.evaluate(() => {
+        const right = document.querySelector(".curriculum-statusbar .status-readout").getBoundingClientRect().right;
+        const portraitLeft = document.querySelector(".aeterna-briefing").getBoundingClientRect().left;
+        return {right, portraitLeft};
+      });
+      if (readout.right > readout.portraitLeft - 5) {
+        throw Error("Desktop CV status readout obscured by Æterna: " + JSON.stringify(readout));
+      }
+    }
     if (spec.name === "mobile") {
       const firstState = await page.evaluate(() => ({
         planeTransform:getComputedStyle(document.querySelector(".intel-table-plane")).transform,
