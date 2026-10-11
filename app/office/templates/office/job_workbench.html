@@ -71,7 +71,7 @@
       ] %}
       {% for portrait, heading, subtitle, byline, link, count, unit in panels %}
       <a class="office-scope-panel" href="{{ link }}">
-        <img class="office-scope-portrait" src="/canon/characters/canon-{{ portrait }}-headshot.webp" alt="" loading="lazy">
+        <span class="office-scope-portrait face-{{ portrait }}" aria-hidden="true"></span>
         <span class="office-scope-content">
           <small>{{ subtitle }}</small>
           <strong>{{ heading }}</strong>
