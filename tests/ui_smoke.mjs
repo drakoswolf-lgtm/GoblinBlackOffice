@@ -193,6 +193,38 @@ try {
       throw Error(spec.name + ": Office-wide specialist checks missing");
     }
 
+
+    // Pass C: the first-registration film is an introduction only.
+    // Media existence/decode becomes a release gate when masters are committed.
+    await page.goto(base + "/register", { waitUntil: "domcontentloaded" });
+    await page.locator("#display-name").fill("Intro Test " + spec.name);
+    await page.locator("#email").fill("cinema-" + spec.name + "@example.test");
+    await page.locator("#password").fill("a-passphrase-longer-than-ten");
+    await page.getByRole("button", { name: "Create account" }).click();
+    await page.waitForURL("**/welcome");
+    const welcomeVideo = page.locator("[data-first-entry-video]");
+    if (!(await welcomeVideo.isVisible())) throw Error(spec.name + ": Welcome film missing");
+    const expectedIntroName = "aeterna-first-entry-" + spec.name + ".mp4";
+    const actualIntroSrc = await welcomeVideo.evaluate(video => video.currentSrc || video.src);
+    if (!actualIntroSrc.endsWith(expectedIntroName)) {
+      throw Error(spec.name + ": Wrong first-entry master selected: " + actualIntroSrc);
+    }
+    if (!(await page.getByRole("button", { name: /REPLAY WITH SOUND/i }).isVisible())) {
+      throw Error(spec.name + ": Film sound replay control is missing");
+    }
+    const introHorizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    if (introHorizontalOverflow > 2) throw Error(spec.name + ": Intro causes horizontal overflow");
+    await page.screenshot({ path: "artifacts/ui/" + spec.name + "-first-entry.png" });
+    await page.getByRole("button", { name: /CONTINUE TO CURRICULUM VITÆ/i }).click();
+    await page.waitForURL("**/onboarding");
+    if (!(await page.getByText("CURRICULUM VITÆ").first().isVisible())) {
+      throw Error(spec.name + ": CV did not follow first-entry video");
+    }
+    await page.goto(base + "/welcome", { waitUntil: "domcontentloaded" });
+    if (!page.url().endsWith("/onboarding")) {
+      throw Error(spec.name + ": First-entry can replay after completion");
+    }
+
     if (errors.length) throw Error(spec.name + ": Browser errors: " + errors.join("; "));
     console.log("PASS " + spec.name + " visual smoke", visual);
     await context.close();
