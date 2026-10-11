@@ -2940,3 +2940,9 @@ body.splash-active { overflow: hidden; }
     width:auto;
   }
 }
+
+/* Leave a real clearance lane for Æterna's desktop portrait. */
+@media(min-width:901px){
+  .curriculum-statusbar{right:30%}
+  .curriculum-statusbar .status-readout{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+}
