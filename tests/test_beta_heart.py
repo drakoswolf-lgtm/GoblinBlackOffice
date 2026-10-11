@@ -145,10 +145,12 @@ def test_authenticated_client_to_invoice_to_payment_browser_contract(monkeypatch
         "/register", data={**registration, "invite_code": "test-private-beta"}
     )
     assert created.status_code == 302
-    assert created.headers["Location"].endswith("/onboarding")
-    assert browser.get("/jobs/new").headers["Location"].endswith("/onboarding")
+    assert created.headers["Location"].endswith("/welcome")
+    assert browser.get("/jobs/new").headers["Location"].endswith("/welcome")
     assert browser.get("/signor/").headers["Location"].endswith("/onboarding")
 
+    assert browser.get("/welcome").status_code == 200
+    assert browser.post("/welcome").headers["Location"].endswith("/onboarding")
     intro = browser.get("/onboarding")
     assert intro.status_code == 200
     done = browser.post(
@@ -256,6 +258,8 @@ def test_authenticated_client_to_invoice_to_payment_browser_contract(monkeypatch
         },
     )
     assert other.status_code == 302
+    assert other.headers["Location"].endswith("/welcome")
+    assert browser.post("/welcome").headers["Location"].endswith("/onboarding")
     assert browser.post(
         "/onboarding", data={"business_name": "Other Black Office", "currency": "CAD"}
     ).status_code == 302

@@ -19,7 +19,9 @@ def test_first_run_can_reach_office_and_open_a_job(monkeypatch):
         },
     )
     assert register.status_code == 302
-    assert register.headers["Location"].endswith("/onboarding")
+    assert register.headers["Location"].endswith("/welcome")
+    assert client.get("/welcome").status_code == 200
+    assert client.post("/welcome").headers["Location"].endswith("/onboarding")
 
     onboarding = client.get("/onboarding")
     assert onboarding.status_code == 200

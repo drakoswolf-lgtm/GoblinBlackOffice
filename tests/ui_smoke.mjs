@@ -187,10 +187,88 @@ try {
     if (commandOverflow > 2) {
       throw Error(spec.name + ": Æterna command horizontal overflow: " + commandOverflow);
     }
+    const ambientOnCommand = page.locator("[data-aeterna-ambient]");
+    if ((await ambientOnCommand.count()) !== 1) {
+      throw Error(spec.name + ": Ambient portrait not mounted on command screen");
+    }
+    if (!await ambientOnCommand.evaluate(v => v.muted && v.loop && v.playsInline)) {
+      throw Error(spec.name + ": Ambient portrait must be silent, looping and inline");
+    }
+    if (!await page.locator(".aeterna-command-officer img[alt='Cmdr. Æterna Skyeward']").isVisible()) {
+      throw Error(spec.name + ": Canon still image missing as portrait fallback");
+    }
+    // Smoke tests request reduced-motion; the portrait must stay static.
+    const reducedPortraitStyle = await ambientOnCommand.evaluate(v => getComputedStyle(v).display);
+    if (reducedPortraitStyle !== "none") {
+      throw Error(spec.name + ": Reduced-motion preference is not respected");
+    }
     await page.screenshot({ path: "artifacts/ui/" + spec.name + "-aeterna-command.png", fullPage: true });
     await page.getByRole("link", { name: "GOBLIN CHECKS" }).click();
     if (!(await page.getByText("Office-wide checks summarize saved records").isVisible()) || !(await page.getByText("NOT AUTOMATED").isVisible())) {
       throw Error(spec.name + ": Office-wide specialist checks missing");
+    }
+
+
+    // Pass C: the first-registration film is an introduction only.
+    // Media existence/decode becomes a release gate when masters are committed.
+    await page.goto(base + "/register", { waitUntil: "domcontentloaded" });
+    await page.locator("#display-name").fill("Intro Test " + spec.name);
+    await page.locator("#email").fill("cinema-" + spec.name + "@example.test");
+    await page.locator("#password").fill("a-passphrase-longer-than-ten");
+    await page.getByRole("button", { name: "Create account" }).click();
+    await page.waitForURL("**/welcome");
+    const welcomeVideo = page.locator("[data-first-entry-video]");
+    if (!(await welcomeVideo.isVisible())) throw Error(spec.name + ": Welcome film missing");
+    const expectedIntroName = "aeterna-first-entry-" + spec.name + ".mp4";
+    const actualIntroSrc = await welcomeVideo.evaluate(video => video.currentSrc || video.src);
+    if (!actualIntroSrc.endsWith(expectedIntroName)) {
+      throw Error(spec.name + ": Wrong first-entry master selected: " + actualIntroSrc);
+    }
+    // Once the binary masters arrive, CI verifies their actual decoding,
+    // not merely a correct-looking URL. Drafts without assets stay identifiable.
+    const mediaResponse = await page.request.get(base + "/canon/introductions/" + expectedIntroName);
+    if (mediaResponse.ok()) {
+      if (!mediaResponse.headers()["content-type"]?.includes("video/mp4")) {
+        throw Error(spec.name + ": Introduction is not served as MP4");
+      }
+      await page.waitForFunction(() => {
+        const film = document.querySelector("[data-first-entry-video]");
+        return film && film.readyState >= 2 && film.videoWidth > 0 && film.videoHeight > 0;
+      }, null, { timeout: 12000 });
+      const dimensions = await welcomeVideo.evaluate(film => ({
+        width: film.videoWidth,
+        height: film.videoHeight,
+        duration: film.duration,
+      }));
+      const correct = spec.name === "mobile"
+        ? dimensions.width === 720 && dimensions.height === 1280 &&
+          dimensions.duration >= 5.5 && dimensions.duration < 7
+        : dimensions.width === 1280 && dimensions.height === 720 &&
+          dimensions.duration >= 3.5 && dimensions.duration < 5;
+      if (!correct) {
+        throw Error(spec.name + ": Intro master wrong geometry or runtime: " +
+          JSON.stringify(dimensions));
+      }
+    } else if (process.env.GBO_REQUIRE_FIRST_ENTRY_ASSETS === "1") {
+      throw Error(spec.name + ": Release build missing first-entry master " + expectedIntroName);
+    }
+    if (!(await page.locator("[data-intro-sound]").isVisible())) {
+      throw Error(spec.name + ": Film sound replay control is missing");
+    }
+    const introHorizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    if (introHorizontalOverflow > 2) throw Error(spec.name + ": Intro causes horizontal overflow");
+    await page.screenshot({ path: "artifacts/ui/" + spec.name + "-first-entry.png" });
+    await page.getByRole("button", { name: /CONTINUE TO CURRICULUM VITÆ/i }).click();
+    await page.waitForURL("**/onboarding");
+    if ((await page.locator(".aeterna-holo-frame [data-aeterna-ambient]").count()) !== 1) {
+      throw Error(spec.name + ": CV briefing is missing Aeterna ambient portrait");
+    }
+    if (!(await page.getByText("CURRICULUM VITÆ").first().isVisible())) {
+      throw Error(spec.name + ": CV did not follow first-entry video");
+    }
+    await page.goto(base + "/welcome", { waitUntil: "domcontentloaded" });
+    if (!page.url().endsWith("/onboarding")) {
+      throw Error(spec.name + ": First-entry can replay after completion");
     }
 
     if (errors.length) throw Error(spec.name + ": Browser errors: " + errors.join("; "));

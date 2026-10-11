@@ -144,7 +144,14 @@ def _office_auth_gate():
     if request.endpoint in {"login", "register", "health", "static"}: return None
     user = current_user()
     if user is None: return redirect(url_for("login", next=request.path))
-    if not user.onboarding_complete and request.endpoint not in {"onboarding", "logout"}: return redirect(url_for("onboarding"))
+    if not user.onboarding_complete:
+        # An account freshly created in this session sees the character intro
+        # before Curriculum VitÆ. Ordinary logins go straight to onboarding.
+        intro_due = session.get("gbo_intro_pending") == user.user_id
+        if intro_due and request.endpoint == "onboarding":
+            return redirect(url_for("first_entry_intro"))
+        if request.endpoint not in {"onboarding", "logout", "first_entry_intro"}:
+            return redirect(url_for("first_entry_intro" if intro_due else "onboarding"))
     return None
 
 @office_app.route("/login", methods=["GET", "POST"])
@@ -171,8 +178,31 @@ def register():
             user, errors = register_user(email=request.form.get("email", ""), password=request.form.get("password", ""), display_name=request.form.get("display_name", ""))
             if user is not None:
                 sign_in(user)
-                return redirect(url_for("onboarding"))
+                # Only a successful brand-new registration arms this introduction.
+                # sign_in() clears any previous session, so future logins bypass it.
+                session["gbo_intro_pending"] = user.user_id
+                return redirect(url_for("first_entry_intro"))
     return render_template("office/register.html", errors=errors, invite_required=invite_required)
+
+@office_app.route("/welcome", methods=["GET", "POST"])
+def first_entry_intro():
+    """A one-time character cinematic between signup and Curriculum VitÆ.
+
+    This route performs no business actions and never changes business records.
+    A normal login bypasses it, even if onboarding remains incomplete.
+    """
+    user = current_user()
+    if user is None:
+        return redirect(url_for("login"))
+    if user.onboarding_complete:
+        return redirect(url_for("index"))
+    if session.get("gbo_intro_pending") != user.user_id:
+        return redirect(url_for("onboarding"))
+    if request.method == "POST":
+        session.pop("gbo_intro_pending", None)
+        return redirect(url_for("onboarding"))
+    return render_template("office/first_entry_intro.html")
+
 
 @office_app.route("/onboarding", methods=["GET", "POST"])
 def onboarding():
@@ -557,6 +587,8 @@ def canon_asset(asset_path: str):
     # Send the approved image plates with an explicit, browser-safe type.
     if asset_path.lower().endswith(".webp"):
         return send_from_directory(_canon_root, asset_path, mimetype="image/webp")
+    if asset_path.lower().endswith(".mp4"):
+        return send_from_directory(_canon_root, asset_path, mimetype="video/mp4", conditional=True)
     return send_from_directory(_canon_root, asset_path)
 
 @office_app.route("/health")
