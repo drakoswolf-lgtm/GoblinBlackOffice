@@ -67,4 +67,4 @@ def test_private_beta_registration_requires_matching_invite(monkeypatch):
         },
     )
     assert accepted.status_code == 302
-    assert accepted.headers["Location"].endswith("/onboarding")
+    assert accepted.headers["Location"].endswith("/welcome")
