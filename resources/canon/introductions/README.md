@@ -30,3 +30,31 @@ Masters have been furnished in the chat attachment `GBO_Pass_C_First_Entry_Asset
 ### Release acceptance
 
 Do not merge or deploy as finished until both masters are present, serve as `video/mp4`, and decode on desktop/mobile Chromium. Verify signed-in user flow and audio controls on Android/Samsung and desktop browsers.
+
+## Pass C companion: ambient Æterna portrait
+
+The separate user-supplied `Add_animation_to_portrait_20261010212551.mp4`
+is an animated **portrait**, not another onboarding entrance.
+
+For command desk, Æterna command intelligence and Curriculum VitÆ, an edited
+silent/ping-pong portrait loop and a static poster have been prepared in the
+conversation attachment `GBO_Pass_C_Animated_Aeterna_Portrait.zip`.
+
+Extract and upload the **two binary files** to `resources/canon/characters/`:
+
+- `aeterna-ambient-portrait.mp4` (H.264, 360×640, 20 fps, 10 s, no audio;
+  SHA-256 `b88e1dbe83e5ebdfa12dc238c1638d98c37b49d5f27a05d8a64d829287ad0f57`).
+- `aeterna-ambient-poster.webp` (360×640; SHA-256
+  `4e655c1c96c3ae2ba286f6da61bbb65eab486f2639ddc15db0b3b97beedab204`).
+
+The original image is not replaced. The DOM always retains the approved
+`canon-aeterna-headshot.webp`; if the portrait MP4 is missing, unsupported,
+or blocked by browser policies, the still remains visible.
+
+The loop is muted, loads only when visible, and is disabled for reduced-motion
+or data-saver preferences. It plays no spoken business prompts. The scene is
+deliberately framed as a command portrait, not transparent compositing over the desk.
+
+**Do not merge as complete until the MP4 and poster have been uploaded** and
+the browser playback checked on desktop/mobile. The files are a human upload
+step because the available GitHub connector cannot write binary repository assets.
