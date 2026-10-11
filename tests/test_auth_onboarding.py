@@ -25,7 +25,17 @@ def test_account_onboarding_and_specialist_access(monkeypatch):
         data={"display_name": "Test Operator", "email": "operator@example.test", "password": "correct-horse-battery"},
     )
     assert registered.status_code == 302
-    assert registered.headers["Location"].endswith("/onboarding")
+    assert registered.headers["Location"].endswith("/welcome")
+    welcome = client.get("/welcome")
+    assert welcome.status_code == 200
+    assert b"first-entry-intro.js" in welcome.data
+    blocked = client.get("/onboarding")
+    assert blocked.headers["Location"].endswith("/welcome")
+    intro_complete = client.post("/welcome")
+    assert intro_complete.status_code == 302
+    assert intro_complete.headers["Location"].endswith("/onboarding")
+    assert client.get("/onboarding").status_code == 200
+    assert client.get("/welcome").headers["Location"].endswith("/onboarding")
 
     onboarded = client.post(
         "/onboarding",
