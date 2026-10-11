@@ -24,7 +24,7 @@
     .upload-zone{padding:18px;border:1px dashed var(--line-strong);border-radius:12px;background:#0c1012}
     .saved-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:36px 0 12px}
     .beta-upload-choice{position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px;min-height:110px;padding:12px;white-space:normal;text-align:center}
-    .beta-upload-choice input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:100px}
+    .receipt-file-source{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0;opacity:0}\n    .receipt-file-source:focus-visible + .beta-intake .beta-upload-choice{outline:2px solid #8cffe1;outline-offset:3px}
     .beta-upload-choice:focus-within{outline:2px solid #8cffe1;outline-offset:3px}
     .beta-replace-choice{cursor:pointer;margin-top:8px;min-height:44px}
     .beta-scan-status{margin-top:10px}
@@ -66,14 +66,15 @@
   {% set review_open = ocr_raw_text or form_data.get('entry_mode') == 'manual' or input_errors or findings %}
   <form class="receipt-layout" method="post" action="{{ url_for('new_receipt') }}" enctype="multipart/form-data" id="receipt-form">
     <input type="hidden" name="entry_mode" id="entry_mode" value="{{ form_data.get('entry_mode','') }}">
-    <!-- The picker is a real, finger-sized input on top of its label. Mobile browsers
-         need a native user-activated file input, not JS clicking display:none. -->
+    <!-- A single, visually-hidden (but native and accessible) file input serves both
+         labels. It remains mounted when the intake panel is hidden after scanning. -->
+    <input type="file" id="receipt_image" name="receipt_image" class="receipt-file-source" accept="image/jpeg,image/png,image/webp">
     <section class="card beta-intake" data-receipt-choices {% if review_open %}hidden{% endif %} style="grid-column:1/-1">
       <p class="card-kicker">Ledgergut // Receipt intake</p>
       <h2>Choose an entry method</h2>
       <div class="beta-entry-choices">
         <button type="button" data-camera-start><span class="choice-icon" aria-hidden="true">📷</span>Scan with Camera</button>
-        <label class="button beta-upload-choice"><span class="choice-icon" aria-hidden="true">⬆</span>Upload Image<input type="file" id="receipt_image" name="receipt_image" accept="image/jpeg,image/png,image/webp" aria-label="Upload receipt image"></label>
+        <label class="button beta-upload-choice" for="receipt_image"><span class="choice-icon" aria-hidden="true">⬆</span>Upload Image</label>
         <button type="button" data-manual-start><span class="choice-icon" aria-hidden="true">✎</span>Enter Manually</button>
       </div>
       <div class="beta-camera" data-camera-panel hidden>
