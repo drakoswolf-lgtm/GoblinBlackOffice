@@ -83,6 +83,9 @@ def test_financial_summary_excludes_drafts_foreign_currencies_and_tenants():
     assert any(action.title == "Review outstanding balance" for action in report.actions)
     portfolio = build_command_briefing(store, "BIZ-A")
     assert portfolio.ledger.invoiced == Decimal("500")
+    assert len(portfolio.portfolio_checks) == 6
+    assert "99999" not in str(portfolio.portfolio_checks)
+    assert next(c for c in portfolio.portfolio_checks if c.name == "Squarmish").state == "DRAFTS FOR REVIEW"
     assert "Private rival" not in str(portfolio.projects)
 
 
