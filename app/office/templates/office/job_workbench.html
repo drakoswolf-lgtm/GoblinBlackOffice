@@ -6,16 +6,22 @@
   <title>{{ project.name }} · Job Workbench</title>
   <link rel="stylesheet" href="/static/gbo.css">
 </head>
-<body>
-<main class="shell">
-  <header class="topbar">
-    <a class="brand" href="/"><span class="brand-mark">GBO</span><span>Job Workbench</span></a>
+<body class="office-record-body">
+<main class="shell office-detail-shell">
+  <header class="topbar office-detail-topbar">
+    <a class="brand office-brand" href="/"><img src="/canon/brand/canon-app-badge.webp" alt=""><span>GOBLIN BLACK OFFICE<small>PROJECT WORKBENCH</small></span></a>
     <nav class="topnav"><a href="/">Office Desk</a><a href="/records">Records</a></nav>
   </header>
 
-  <section class="hero compact">
-    <p class="eyebrow">{{ project.status.value|upper }} PROJECT · {{ project.pricing_model.replace("_", " ")|title }}{% if client %} · {{ client.name }}{% endif %}</p>
+  <section class="office-detail-hero office-job-header">
+    <p class="eyebrow">PROJECT // {{ project.project_id }}</p>
     <h1>{{ project.name }}</h1>
+    <div class="office-job-properties">
+      <span class="office-project-signal" aria-hidden="true"></span>
+      <strong>{{ project.status.value|replace('_',' ')|upper }}</strong>
+      <span>{{ project.pricing_model.replace("_", " ")|title }} pricing</span>
+      {% if client %}<a href="/records?client_id={{ client.client_id|urlencode }}">CLIENT // {{ client.name }} ›</a>{% endif %}
+    </div>
     {% if project.description %}<p class="lead">{{ project.description }}</p>{% endif %}
     <div class="beta-project-actions">
       <a class="button secondary" href="/">Return to Desk</a>
@@ -45,48 +51,57 @@
     <a href="/aeterna/command?project_id={{ project.project_id }}&amp;view=checks">RUN GOBLIN CHECKS ›</a>
   </section>
 
-  <section class="stat-strip stat-4" aria-label="Project summary">
+  <section class="stat-strip stat-4 office-ledger-metrics" aria-label="Project summary">
     <div class="stat"><strong>{% if latest_estimate %}{{ currency }} {{ '%.2f'|format(latest_estimate.total_estimate) }}{% else %}Not planned{% endif %}</strong><span>Latest estimate</span></div>
     <div class="stat"><strong>{{ actual_hours }} h</strong><span>Actual labour logged</span></div>
     <div class="stat"><strong>{{ currency }} {{ '%.2f'|format(expense_total) }}</strong><span>Recorded project expenses</span></div>
     <div class="stat"><strong>{{ currency }} {{ '%.2f'|format(ledger.outstanding) }}</strong><span>Outstanding issued invoices</span></div>
   </section>
 
-  <section class="grid grid-3" style="margin-top:18px">
-    <article class="card">
-      <p class="card-kicker">01 · SigNor</p>
-      <h2>Agreement</h2>
-      {% if agreements %}
-        {% set agreement=agreements[-1] %}
-        <p><strong>{{ agreement.title }}</strong></p>
-        <p class="muted">{{ agreement.status.value }}{% if agreement.amount is not none %} · {{ agreement.currency }} {{ '%.2f'|format(agreement.amount) }}{% endif %}</p>
-        <div class="actions">
-          <a class="button secondary" href="/signor/agreements/{{ agreement.agreement_id }}/pdf" data-pdf-preview data-pdf-title="Agreement {{ agreement.agreement_id }}">Preview PDF</a>
-          <a class="button" href="/signor/?project_id={{ project.project_id }}">Draft another agreement</a><a class="button secondary" href="/settings/documents">Document Style &amp; Logo</a>
-        </div>
-      {% else %}
-        <p>Define the scope before planning or billing the job.</p>
-        <a class="button signal" href="/signor/?project_id={{ project.project_id }}">Draft agreement</a>
-      {% endif %}
-    </article>
+  <section class="office-specialist-module" aria-labelledby="project-sections-heading">
+    <header class="office-section-head"><div><p class="eyebrow">SPECIALIST CHANNELS // PROJECT RECORDS</p><h2 id="project-sections-heading">Manage this project</h2></div><small>Business first · specialists behind the work</small></header>
+    <div class="office-specialist-grid">
+      {% set panels = [
+        ('ledgergut', 'Receipt Log', 'Receipts & expenses', '2Lt. Ledgergut', '/ledgergut/?project_id=' ~ project.project_id, expenses|length, 'expense records'),
+        ('signor', 'Agreements', 'Scope & terms', 'Ltc. SigNor', '/signor/?project_id=' ~ project.project_id, agreements|length, 'agreements'),
+        ('squarmish', 'Invoices & Payments', 'Billing & receivables', 'Ssg. Squarmish', '#project-invoices', invoices|length, 'invoices'),
+        ('packrat', 'Materials', 'Shopping & requirements', 'Pfc. Packrat', '#packrat-shopping', shopping_items|length, 'list items'),
+        ('patch', 'Work Log', 'Labour & operations', 'Cpl. Patch', '#project-work', work_logs|length, 'work entries'),
+        ('grimsnatch', 'Risk Review', 'Record-based checks', '1Lt. Grimsnatch', '/aeterna/command?project_id=' ~ project.project_id ~ '&view=checks', none, 'review checks')
+      ] %}
+      {% for portrait, heading, subtitle, byline, link, count, unit in panels %}
+      <a class="office-scope-panel" href="{{ link }}">
+        <span class="office-scope-portrait face-{{ portrait }}" aria-hidden="true"></span>
+        <span class="office-scope-content">
+          <small>{{ subtitle }}</small>
+          <strong>{{ heading }}</strong>
+          <span class="office-scope-summary">{% if count is not none %}{{ count }} {{ unit }}{% else %}{{ unit|capitalize }}{% endif %}</span>
+          <span class="office-scope-byline">{{ byline }}</span>
+        </span>
+        <span class="office-scope-chevron" aria-hidden="true">›</span>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
 
-    <article class="card">
-      <p class="card-kicker">02 · Ledgergut</p>
-      <h2>Receipts &amp; Expenses</h2>
-      <p>{{ expenses|length }} recorded project expenses.</p>
-      <a class="button signal" href="/ledgergut/?project_id={{ project.project_id }}">Scan Receipt / Enter Expense</a>
-    </article>
-
-    <article class="card">
-      <p class="card-kicker">03 · Packrat</p>
-      <h2>Materials &amp; Shopping</h2>
-      <p>{{ shopping_items|length }} shopping-list items to track.</p>
-      <a class="button secondary" href="#packrat-shopping">Open Shopping List</a>
-    </article>
+  <section class="office-business-section" id="project-agreements">
+    <header class="office-section-head"><div><p class="eyebrow">SCOPE & TERMS</p><h2>Agreements</h2></div><a href="/signor/?project_id={{ project.project_id }}">OPEN AGREEMENTS ›</a></header>
+    {% if agreements %}
+      {% set agreement = agreements[-1] %}
+      <p><strong>{{ agreement.title }}</strong> · {{ agreement.status.value|upper }}{% if agreement.amount is not none %} · {{ agreement.currency }} {{ '%.2f'|format(agreement.amount) }}{% endif %}</p>
+      <div class="actions">
+        <a class="button secondary" href="/signor/agreements/{{ agreement.agreement_id }}/pdf" data-pdf-preview data-pdf-title="Agreement {{ agreement.agreement_id }}">Preview PDF</a>
+        <a class="button secondary" href="/signor/?project_id={{ project.project_id }}">Draft another agreement</a>
+        <a class="button secondary" href="/settings/documents">Document Style &amp; Logo</a>
+      </div>
+    {% else %}
+      <p>Define the scope before planning or billing this project.</p>
+      <a class="button signal" href="/signor/?project_id={{ project.project_id }}">Draft agreement</a>
+    {% endif %}
   </section>
 
   {% if agreements %}
-  <form class="form-card" method="post">
+  <form class="form-card office-business-form" id="project-estimate" method="post">
     <input type="hidden" name="action" value="plan">
     <p class="card-kicker">Estimate + material plan</p>
     <div class="grid grid-3">
@@ -133,7 +148,7 @@
 
   <section class="card" id="packrat-shopping" style="margin-top:18px">
     <p class="card-kicker">Live shopping list</p>
-    <h2>Packrat</h2>
+    <h2>Materials &amp; Shopping</h2>
     {% if shopping_items %}
     <div class="table-wrap">
       <table>
@@ -154,8 +169,8 @@
     {% else %}<p class="muted">No material plan yet.</p>{% endif %}
   </section>
 
-  <section class="grid grid-2" style="margin-top:18px">
-    <form class="form-card" method="post" style="margin-top:0">
+  <section class="grid grid-2" id="project-work" style="margin-top:18px">
+    <form class="form-card office-business-form" method="post" style="margin-top:0">
       <input type="hidden" name="action" value="work">
       <p class="card-kicker">03 · Patch</p>
       <h2>Record actual labour</h2>
@@ -195,7 +210,7 @@
   </form>
   {% endif %}
 
-  <section class="card" style="margin-top:18px">
+  <section class="card office-business-section" id="project-invoices" style="margin-top:18px">
     <p class="card-kicker">Invoices &amp; payment</p>
     {% if invoices %}
     <div class="table-wrap">

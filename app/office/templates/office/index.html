@@ -80,14 +80,17 @@
         </header>
         <div class="command-channels">
           {% for specialist in specialists %}
-          <a class="command-channel" href="{{ specialist.href }}">
-            <span class="command-channel-index">0{{ loop.index }}</span>
+          <a class="command-channel business-specialist-link" href="{{ specialist.href }}" aria-label="{{ specialist.label }}: {{ specialist.note }}">
+            <span class="office-scope-portrait face-{{ specialist.portrait }}" aria-hidden="true"></span>
+            <span class="command-channel-index" aria-hidden="true">0{{ loop.index }}</span>
             <span class="command-channel-copy">
               <small>{{ specialist.role }}</small>
-              <strong>{{ specialist.name }}</strong>
+              <strong>{{ specialist.label }}</strong>
               <em>{{ specialist.note }}</em>
+              <span class="office-scope-byline">{{ specialist.rank }} {{ specialist.name }}</span>
             </span>
             <span class="command-channel-state">{{ specialist.status }}</span>
+            <span class="office-scope-chevron" aria-hidden="true">›</span>
           </a>
           {% endfor %}
         </div>

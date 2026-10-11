@@ -15,10 +15,12 @@ def test_office_desk_surfaces_wave2_workflow_rough_ins():
     office_app.config.update(TESTING=True, GBO_AUTH_REQUIRED=False)
     response = office_app.test_client().get("/")
     assert response.status_code == 200
-    assert b"Packrat McDuffel" in response.data
-    assert b"Patch" in response.data
-    assert b"Grimscratch" in response.data
+    assert b"Materials" in response.data
+    assert b"Work Log" in response.data
+    assert b"Risk Review" in response.data
     assert b"/workflows/packrat" in response.data
+    assert b"/workflows/patch" in response.data
+    assert b"/workflows/grimscratch" in response.data
 
 
 def test_wave2_workflow_pages_render_and_unknown_grunt_404s():

@@ -260,7 +260,25 @@ def record_desk():
         elif request.form.get("kind") == "project":
             _, errors = create_project(business_id=bid, client_id=request.form.get("client_id", ""), name=request.form.get("name", ""), description=request.form.get("description", ""), pricing_model=request.form.get("pricing_model", "undetermined"))
         if not errors: return redirect(url_for("record_desk"))
-    return render_template("office/records.html", errors=errors, clients=office_store.clients.list_for_business(bid), projects=office_store.projects.list_for_business(bid))
+    clients = office_store.clients.list_for_business(bid)
+    projects = office_store.projects.list_for_business(bid)
+    clients_by_id = {client.client_id: client for client in clients}
+    selected_client_id = request.args.get("client_id", "")
+    selected_client = clients_by_id.get(selected_client_id) if selected_client_id else None
+    # A foreign or obsolete client ID never exposes another tenant's records.
+    selected_projects = [
+        project for project in projects
+        if selected_client is None or project.client_id == selected_client.client_id
+    ]
+    project_counts = {
+        client.client_id: sum(1 for project in projects if project.client_id == client.client_id)
+        for client in clients
+    }
+    return render_template(
+        "office/records.html", errors=errors, clients=clients, projects=projects,
+        selected_client=selected_client, selected_projects=selected_projects,
+        project_counts=project_counts,
+    )
 
 @office_app.route("/aeterna/command", methods=["GET"])
 def aeterna_command():
@@ -564,12 +582,12 @@ def index():
     projects = [p for p in office_store.projects.list_for_business(bid) if p.status != RecordStatus.ARCHIVED]
     clients = {client.client_id: client for client in office_store.clients.list_for_business(bid)}
     specialists = [
-        {"name":"Ledgergut","role":"Receipts & expenses","status":"live","href":"/ledgergut/","note":"Feed me the receipt. Keep your fingers."},
-        {"name":"SigNor","role":"Agreements & scope","status":"live","href":"/signor/","note":"Words matter. Especially the ones someone forgot to define."},
-        {"name":"Squarmish","role":"Invoices & receivables","status":"live","href":"/squarmish/","note":"Completed work is lovely. Paid work is lovelier."},
-        {"name":"Packrat McDuffel","role":"Logistics & materials","status":"rough-in","href":"/workflows/packrat","note":"Right thing, right place, ideally before someone needs it."},
-        {"name":"Patch","role":"Operations & work orders","status":"rough-in","href":"/workflows/patch","note":"Loose ends become work orders. Work orders become finished work."},
-        {"name":"Grimscratch","role":"Risk & compliance","status":"rough-in","href":"/workflows/grimscratch","note":"Find the expensive assumption before it becomes an expensive fact."},
+        {"name":"Ledgergut","rank":"2Lt.","label":"Receipt Log","role":"Receipts & expenses","status":"live","href":"/ledgergut/","portrait":"ledgergut","note":"Capture, review and reconcile expenses."},
+        {"name":"SigNor","rank":"Ltc.","label":"Agreements","role":"Scope & terms","status":"live","href":"/signor/","portrait":"signor","note":"Draft terms and keep scope defined."},
+        {"name":"Squarmish","rank":"Ssg.","label":"Invoices & Payments","role":"Receivables","status":"live","href":"/squarmish/","portrait":"squarmish","note":"Draft invoices and track receivables."},
+        {"name":"Packrat","rank":"Pfc.","label":"Materials","role":"Planning & stock","status":"rough-in","href":"/workflows/packrat","portrait":"packrat","note":"Plan requirements and reconcile supplies."},
+        {"name":"Patch","rank":"Cpl.","label":"Work Log","role":"Operations & labour","status":"rough-in","href":"/workflows/patch","portrait":"patch","note":"Record completed work and field time."},
+        {"name":"Grimsnatch","rank":"1Lt.","label":"Risk Review","role":"Risk & compliance","status":"rough-in","href":"/workflows/grimscratch","portrait":"grimsnatch","note":"Review risks and unresolved checks."},
     ]
     return render_template(
         "office/index.html",

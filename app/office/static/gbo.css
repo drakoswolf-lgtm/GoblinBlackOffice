@@ -2455,3 +2455,181 @@ body.splash-active { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .aeterna-ambient-video { display:none !important; }
 }
+
+
+/* BETA // Business first. The portraits are shaded textures behind the work.
+   No CSS is relied upon for business facts, routing or counts. */
+.office-record-body {
+  background-color:#050c0e;
+  background-image:linear-gradient(180deg,rgba(3,11,14,.86),rgba(3,11,14,.95) 65%),url('/canon/environments/canon-black-office-desktop.webp');
+  background-position:center top;
+  background-size:cover;
+  background-attachment:fixed;
+}
+.office-detail-shell {width:min(1190px,calc(100% - 28px));padding-bottom:65px}
+.office-detail-topbar{min-height:60px;margin-bottom:18px;padding:8px 4px 14px;border-bottom-color:rgba(90,213,166,.23)}
+.office-brand{font-size:.85rem;letter-spacing:.15em;line-height:1.5}
+.office-brand img{width:46px;height:46px;object-fit:contain}
+.office-brand span{display:grid}
+.office-brand small{font-size:.58rem;letter-spacing:.2em;color:#6bbfa3;font-weight:500}
+.office-detail-hero{
+ position:relative;overflow:hidden;padding:26px clamp(17px,4vw,36px);margin-bottom:17px;
+ border:1px solid rgba(86,176,139,.27);border-radius:12px;
+ background:linear-gradient(100deg,rgba(5,27,28,.92),rgba(5,18,24,.77) 67%),radial-gradient(ellipse at right center,rgba(29,107,90,.18),transparent 72%);
+ box-shadow:inset 0 1px 0 rgba(119,244,199,.09),0 16px 38px rgba(0,0,0,.2);
+}
+.office-detail-hero:before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:2px;background:#47cba3;box-shadow:0 0 12px #37b894}
+.office-detail-hero h1{font-size:clamp(1.9rem,5vw,3.2rem);letter-spacing:-.025em;line-height:1.08}
+.office-detail-hero .lead{max-width:760px;margin:12px 0 0;font-size:.94rem;line-height:1.55;color:#b6c9cb}
+.office-hero-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:20px}
+.office-hero-actions .button{font-size:.77rem}
+.office-job-properties{display:flex;flex-wrap:wrap;align-items:center;gap:8px 17px;margin-top:13px;color:#c6d2d1;font-size:.76rem}
+.office-job-properties a{color:#8ae7c8}
+.office-job-properties .office-project-signal{width:8px;height:8px;flex:none}
+.office-ledger-metrics{margin:14px 0 20px;gap:1px;border-color:rgba(75,178,140,.18);background:rgba(75,178,140,.18)}
+.office-ledger-metrics .stat{padding:17px;background:rgba(3,23,26,.9)}
+.office-ledger-metrics .stat strong{color:#eefdf9;font-size:clamp(.95rem,2.1vw,1.32rem);font-variant-numeric:tabular-nums}
+.office-ledger-metrics .stat span{color:#8db2aa;font-size:.69rem;text-transform:uppercase;letter-spacing:.075em}
+.office-specialist-module,.office-business-section,.office-record-module{
+ border:1px solid rgba(82,183,148,.22);border-radius:12px;overflow:hidden;
+ background:linear-gradient(145deg,rgba(5,24,28,.89),rgba(4,16,22,.91));box-shadow:inset 0 1px 0 rgba(106,226,191,.045);
+}
+.office-specialist-module{margin:18px 0}
+.office-section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;padding:17px 20px;border-bottom:1px solid rgba(79,185,155,.18)}
+.office-section-head .eyebrow{margin:0 0 4px;font-size:.63rem;color:#77bda9}
+.office-section-head h2{margin:0;font-size:clamp(1.05rem,2.2vw,1.48rem);letter-spacing:.025em}
+.office-section-head>a,.office-section-head>small{color:#79bea7;font-size:.65rem;letter-spacing:.07em;text-decoration:none}
+.office-section-head>a:hover{color:#d0ffe8;text-decoration:underline}
+.office-specialist-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:rgba(70,175,141,.13)}
+.office-scope-panel,.command-channel.business-specialist-link{
+ position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;
+ min-height:135px;padding:16px 28px 15px 14px;
+ color:#effaf7;text-decoration:none;background:rgba(3,20,23,.94);transition:background .18s,border-color .18s;
+}
+.office-scope-panel:before,.command-channel.business-specialist-link:before{
+ content:"";position:absolute;z-index:0;inset:0;
+ background:linear-gradient(90deg,rgba(7,47,44,.1),rgba(3,22,27,.7) 58%,rgba(3,20,23,.93) 92%);
+ pointer-events:none;
+}
+.office-scope-panel:hover,.office-scope-panel:focus-visible,.command-channel.business-specialist-link:hover,.command-channel.business-specialist-link:focus-visible{
+ background:rgba(9,49,43,.94);color:white;outline-offset:-3px;outline:1px solid rgba(103,239,188,.67);
+}
+.office-scope-portrait{
+ position:absolute;z-index:0;inset:-12% auto -14% 0;
+ width:min(55%,250px);height:126%;
+ object-fit:cover;object-position:center 11%;opacity:.33;pointer-events:none;
+ filter:grayscale(.45) saturate(.65) contrast(1.17) brightness(.72);
+ -webkit-mask-image:linear-gradient(90deg,black 0%,rgba(0,0,0,.94) 42%,transparent 100%);
+ mask-image:linear-gradient(90deg,black 0%,rgba(0,0,0,.94) 42%,transparent 100%);
+}
+.office-scope-content{position:relative;z-index:1;display:grid;align-content:center;gap:3px;min-width:0;margin-left:clamp(95px,15vw,152px)}
+.office-scope-content>small,.command-channel.business-specialist-link .command-channel-copy>small{
+ color:#8fb5aa;text-transform:uppercase;letter-spacing:.11em;font-size:.6rem;font-weight:600;
+}
+.office-scope-content>strong,.command-channel.business-specialist-link .command-channel-copy>strong{
+ color:#f0fff9;font-size:clamp(1rem,1.75vw,1.25rem);letter-spacing:.01em;line-height:1.14;font-weight:760;
+}
+.office-scope-summary{color:#b5cbc3;font-size:.76rem}
+.office-scope-byline{color:#6f9e93;font-size:.65rem;letter-spacing:.045em;margin-top:3px}
+.office-scope-chevron{position:absolute;z-index:3;right:12px;top:50%;transform:translateY(-50%);font-size:1.5rem;color:#8bdcbb}
+.command-channel.business-specialist-link{
+ min-height:143px;display:grid;grid-template-columns:1fr;margin:0;padding:14px 18px 14px 17px;border-color:rgba(65,190,147,.11);
+}
+.command-channel.business-specialist-link .office-scope-portrait{width:55%;height:135%;top:-19%;bottom:auto;left:0;opacity:.32}
+.command-channel.business-specialist-link .command-channel-index{position:absolute;top:11px;left:11px;z-index:2;color:#77aa9d;font-size:.62rem}
+.command-channel.business-specialist-link .command-channel-copy{position:relative;z-index:2;display:grid;gap:3px;align-content:center;margin-left:clamp(97px,13vw,145px);padding-right:10px;min-width:0}
+.command-channel.business-specialist-link .command-channel-copy em{font-size:.74rem;color:#b4c4c1;margin-top:3px}
+.command-channel.business-specialist-link .command-channel-state{z-index:3;right:12px;top:9px;font-size:.52rem}
+.command-channel.business-specialist-link .office-scope-byline{font-size:.61rem}
+.command-channel.business-specialist-link .office-scope-chevron{font-size:1.4rem}
+.office-business-section{padding:0 18px 18px;margin-top:15px}
+.office-business-section>.office-section-head{margin:0 -18px 17px}
+.office-business-section>p{color:#bdd1c9;font-size:.85rem}
+.office-business-section .actions{display:flex;gap:8px;flex-wrap:wrap}
+.office-business-section .actions a{font-size:.78rem}
+.office-business-form{background:linear-gradient(165deg,rgba(7,28,29,.94),rgba(8,17,22,.95));border-color:rgba(87,182,146,.25)}
+.office-project-brief,.aeterna-project-brief{border-color:rgba(80,159,213,.27);background:linear-gradient(100deg,rgba(8,33,53,.87),rgba(3,22,31,.88))}
+.office-record-columns{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:16px}
+.office-record-module{min-width:0}
+.office-client-list,.office-project-list{display:grid;gap:1px;background:rgba(73,160,137,.15)}
+.office-client-row,.office-project-row{display:grid;align-items:center;text-decoration:none;color:#e3f4f0;background:rgba(3,20,24,.94);min-height:76px;padding:13px 13px;gap:10px}
+.office-client-row{grid-template-columns:42px minmax(0,1fr) auto 9px}
+.office-client-row:hover,.office-client-row.is-selected,.office-project-row:hover{background:rgba(14,63,53,.66);color:white}
+.office-client-row.is-selected{box-shadow:inset 3px 0 #40cf99}
+.office-client-monogram{display:grid;place-items:center;width:39px;height:39px;font-size:1.1rem;font-weight:700;color:#a2edd3;background:rgba(21,99,75,.28);border:1px solid rgba(102,225,163,.25);border-radius:7px}
+.office-client-copy,.office-project-copy{display:grid;gap:4px;min-width:0}
+.office-client-copy strong,.office-project-copy strong{font-size:.93rem;overflow-wrap:anywhere}
+.office-client-copy small,.office-project-copy small,.office-project-status small{font-size:.65rem;color:#86aca4;overflow-wrap:anywhere}
+.office-client-count{color:#83c5ac;font-size:.67rem}
+.office-project-row{grid-template-columns:9px minmax(0,1fr) auto 10px;min-height:82px}
+.office-project-signal{width:8px;height:8px;border-radius:100%;background:#39d99a;box-shadow:0 0 9px rgba(57,217,154,.35)}
+.office-project-signal.is-archived{background:#7b9992;box-shadow:none}
+.office-project-status{display:grid;text-align:right;gap:5px;color:#8fe3ba;font-size:.67rem;letter-spacing:.065em}
+.office-project-status small{font-weight:400;letter-spacing:0}
+.office-client-focus{padding:18px;border-top:1px solid rgba(73,160,137,.25)}
+.office-client-focus h3{margin:0;font-size:1.15rem}
+.office-record-id{font-size:.67rem;color:#79ada2}
+.office-client-focus p:not(.eyebrow){display:flex;flex-wrap:wrap;gap:10px;font-size:.78rem}
+.office-client-focus p span{min-width:45px;color:#7daaa1}
+.office-client-focus a{color:#a9f8db;overflow-wrap:anywhere}
+.office-client-focus .office-inline-action{display:block;font-size:.7rem;letter-spacing:.05em;margin-top:12px;text-decoration:none}
+.office-empty-record{margin:0;padding:25px;color:#9db7b0}
+.office-record-forms{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:17px;align-items:start}
+.office-record-create{border:1px solid rgba(73,160,137,.25);border-radius:10px;background:rgba(5,23,28,.94);min-width:0}
+.office-record-create summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:17px 20px;cursor:pointer;list-style:none;color:#e1f7eb}
+.office-record-create summary::-webkit-details-marker{display:none}
+.office-record-create summary span:first-child{display:grid;gap:6px}
+.office-record-create summary small{font-size:.63rem;letter-spacing:.13em;color:#80b6a5}
+.office-record-create summary strong{font-size:1.1rem}
+.office-record-create[open] summary{border-bottom:1px solid rgba(80,187,147,.19)}
+.office-record-create .office-record-form{padding:18px 20px 20px}
+.office-record-create .office-record-form label{display:block}
+.office-record-create:focus-within{border-color:rgba(97,218,171,.6)}
+.office-record-create:target{border-color:#4cd69f;box-shadow:0 0 19px rgba(67,219,154,.1)}
+.office-record-create:target:not([open]) summary{background:rgba(29,99,75,.32)}
+@media(max-width:880px){
+ .office-specialist-grid,.office-record-columns{grid-template-columns:1fr}
+ .office-record-forms{grid-template-columns:1fr}
+ .office-specialist-module .office-scope-panel{min-height:125px}
+}
+@media(max-width:620px){
+ .office-record-body{background-image:linear-gradient(180deg,rgba(3,11,14,.9),rgba(3,11,14,.96)),url('/canon/environments/canon-black-office-mobile.webp')}
+ .office-detail-shell{width:calc(100% - 18px);padding-top:10px}
+ .office-brand{font-size:.69rem}
+ .office-brand img{width:35px;height:35px}
+ .office-detail-topbar{gap:8px;flex-wrap:wrap}
+ .office-detail-topbar .topnav{font-size:.69rem}
+ .office-detail-hero{padding:20px 17px}
+ .office-ledger-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .office-ledger-metrics .stat{min-width:0;padding:12px}
+ .office-specialist-grid{grid-template-columns:1fr}
+ .office-section-head{padding:14px;align-items:start}
+ .office-section-head>small{display:none}
+ .office-scope-panel{min-height:118px;padding:14px 22px 14px 11px}
+ .office-scope-portrait{width:54%;opacity:.3}
+ .office-scope-content{margin-left:clamp(100px,27vw,138px)}
+ .office-scope-content>strong{font-size:1.05rem}
+ .command-channel.business-specialist-link .command-channel-copy{margin-left:clamp(110px,31vw,150px)}
+ .office-project-row{grid-template-columns:8px minmax(0,1fr) auto 9px;gap:8px}
+ .office-client-row{grid-template-columns:38px minmax(0,1fr) auto 8px;gap:8px}
+ .office-client-count{font-size:.63rem}
+ .office-project-status{font-size:.59rem}
+ .office-record-create .office-record-form{padding:13px}
+}
+
+
+/* One lightweight, canonical six-face strip. The images themselves are not links
+   or content; they sit behind accessible functional labels. */
+.office-scope-portrait{
+ display:block;
+ background-image:url('/canon/characters/canon-goblin-specialist-sprite.webp');
+ background-repeat:no-repeat;
+ background-size:600% 100%;
+ background-position:0 50%;
+}
+.face-ledgergut{background-position:0% 50%}
+.face-signor{background-position:20% 50%}
+.face-squarmish{background-position:40% 50%}
+.face-packrat{background-position:60% 50%}
+.face-patch{background-position:80% 50%}
+.face-grimsnatch{background-position:100% 50%}
