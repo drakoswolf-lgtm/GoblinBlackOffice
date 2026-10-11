@@ -99,3 +99,28 @@ def test_registration_rejects_weak_password(monkeypatch):
     )
     assert response.status_code == 200
     assert b"at least 10 characters" in response.data
+
+
+def test_return_login_bypasses_first_entry(monkeypatch):
+    monkeypatch.setitem(office_app.config, "GBO_AUTH_REQUIRED", True)
+    browser = office_app.test_client()
+    email = "film-returning-login@example.test"
+    created = browser.post("/register", data={
+        "display_name": "Operator",
+        "email": email,
+        "password": "this-is-a-safe-test-password",
+    })
+    assert created.headers["Location"].endswith("/welcome")
+    assert browser.post("/logout").status_code == 302
+    again = browser.post("/login", data={
+        "email": email,
+        "password": "this-is-a-safe-test-password",
+    })
+    assert again.headers["Location"].endswith("/onboarding")
+    assert browser.get("/welcome").headers["Location"].endswith("/onboarding")
+
+
+def test_anonymous_cannot_see_first_contact(monkeypatch):
+    monkeypatch.setitem(office_app.config, "GBO_AUTH_REQUIRED", True)
+    browser = office_app.test_client()
+    assert "/login" in browser.get("/welcome").headers["Location"]
