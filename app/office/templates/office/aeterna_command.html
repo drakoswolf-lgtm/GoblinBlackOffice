@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Æterna · Command Intelligence · Goblin Black Office</title>
+  <link rel="stylesheet" href="/static/gbo.css">
+</head>
+<body class="command-body">
+<div class="command-environment" aria-hidden="true">
+  <div class="command-backwall"></div>
+  <div class="command-console"></div>
+  <div class="command-haze"></div>
+  <img class="command-insignia" src="/canon/brand/canon-app-badge.webp" alt="">
+</div>
+<main class="command-stage aeterna-command-stage">
+  <header class="command-bar">
+    <a class="command-brand" href="/">
+      <img src="/canon/brand/canon-app-badge.webp" alt="">
+      <span><strong>GOBLIN BLACK OFFICE</strong><small>ÆTERNA // COMMAND INTELLIGENCE</small></span>
+    </a>
+    <nav class="command-nav"><a href="/">OFFICE DESK</a><a href="/records">RECORDS</a></nav>
+  </header>
+
+  <section class="aeterna-command-grid">
+    <aside class="aeterna-command-officer" aria-label="Cmdr. Æterna Skyeward">
+      <div class="command-aeterna-frame">
+        <div class="command-aeterna-glow" aria-hidden="true"></div>
+        <img src="/canon/characters/canon-aeterna-headshot.webp" alt="Cmdr. Æterna Skyeward">
+      </div>
+      <p class="command-kicker">CMDR. ÆTERNA SKYEWARD</p>
+      <h2>COMMAND ACCESS</h2>
+      <p>Choose the scope. I will report what the Office knows, what it does not know, and what needs your decision.</p>
+      <p class="aeterna-command-disclaimer">READ ONLY // No invoices issued, agreements approved, materials purchased, or projects changed from this console.</p>
+    </aside>
+
+    <section class="aeterna-command-content">
+      <p class="command-kicker">BLACK OFFICE // VERIFIED RECORDS</p>
+      <h1>Command Intelligence</h1>
+      <p class="aeterna-command-lede">{% if briefing.project %}PROJECT // {{ briefing.project.name }}{% else %}OFFICE // {{ briefing.business_name }}{% endif %}</p>
+
+      <form class="aeterna-query-form" method="get" action="{{ url_for('aeterna_command') }}">
+        <label for="aeterna-project">SCOPE</label>
+        <select id="aeterna-project" name="project_id">
+          <option value="">ALL OFFICE PROJECTS</option>
+          {% for project in briefing.projects %}
+          <option value="{{ project.project_id }}" {% if briefing.project and briefing.project.project_id == project.project_id %}selected{% endif %}>{{ project.name }} ({{ project.status.value|upper }})</option>
+          {% endfor %}
+        </select>
+        <label for="aeterna-question">ASK ÆTERNA</label>
+        <div class="aeterna-query-row">
+          <input id="aeterna-question" type="text" name="question" maxlength="180" value="{{ briefing.question }}" placeholder="TOTALS, PRIORITIES, GOBLIN CHECKS…" autocomplete="off">
+          <button type="submit" class="signal">RUN BRIEFING</button>
+        </div>
+        <p class="aeterna-command-disclaimer">Record-backed commands only. Examples: “What is outstanding?”, “What is next?”, “Check the goblins.”</p>
+      </form>
+
+      {% if briefing.interpretation %}
+      <p class="aeterna-command-intent" role="status">ÆTERNA // {{ briefing.interpretation }}</p>
+      {% endif %}
+
+      <nav class="aeterna-command-tabs" aria-label="Command views">
+        {% for section, title in [('overview','OVERVIEW'), ('totals','RUNNING TOTALS'), ('priorities','PRIORITIES'), ('checks','GOBLIN CHECKS')] %}
+        <a href="{{ url_for('aeterna_command', project_id=briefing.project.project_id if briefing.project else '', view=section) }}" {% if briefing.view == section %}aria-current="page"{% endif %}>{{ title }}</a>
+        {% endfor %}
+      </nav>
+
+      {% if briefing.view in ('overview', 'totals') %}
+      <section aria-label="Recorded totals">
+        <h2>{% if briefing.project %}PROJECT TOTALS{% else %}OFFICE TOTALS{% endif %}</h2>
+        <div class="aeterna-metric-grid">
+          <div><span>APPROVED / ISSUED INVOICES</span><strong>{{ briefing.currency }} {{ '%.2f'|format(briefing.ledger.invoiced) }}</strong></div>
+          <div><span>PAYMENTS RECORDED</span><strong>{{ briefing.currency }} {{ '%.2f'|format(briefing.ledger.paid) }}</strong></div>
+          <div><span>OUTSTANDING BALANCE</span><strong>{{ briefing.currency }} {{ '%.2f'|format(briefing.ledger.outstanding) }}</strong></div>
+          <div><span>RECORDED EXPENSES</span><strong>{{ briefing.currency }} {{ '%.2f'|format(briefing.ledger.expenses) }}</strong></div>
+          <div><span>NET CASH (NOT PROFIT)</span><strong>{{ briefing.currency }} {{ '%.2f'|format(briefing.ledger.net_cash) }}</strong></div>
+          <div><span>ACTUAL HOURS ENTERED</span><strong>{{ briefing.actual_hours }} h</strong></div>
+        </div>
+        <p class="aeterna-command-disclaimer">Figures are recalculated from {{ briefing.currency }} Office records. Draft invoices are excluded from invoiced totals. Different-currency records are excluded. Net cash is payments less recorded expenses, not gross or net profit. Hours reflect user-entered work logs, not payroll.</p>
+      </section>
+      {% endif %}
+
+      {% if briefing.view == 'overview' %}
+      <section>
+        <h2>PROJECT FILES</h2>
+        {% if briefing.project_brief %}
+        <div class="aeterna-command-records">
+          <div>STATUS <strong>{{ briefing.project.status.value|upper }}</strong></div>
+          <div>PRICING <strong>{{ briefing.project.pricing_model.replace('_',' ')|upper }}</strong></div>
+          <div>LATEST ESTIMATE <strong>{% if briefing.project_brief.estimate_total is not none %}{{ briefing.currency }} {{ '%.2f'|format(briefing.project_brief.estimate_total) }}{% else %}NOT RECORDED{% endif %}</strong></div>
+          <div>AGREEMENTS <strong>{{ briefing.project_brief.agreement_count }}</strong></div>
+          <div>EXPENSE RECORDS <strong>{{ briefing.project_brief.expense_count }}</strong></div>
+          <div>INVOICES <strong>{{ briefing.project_brief.invoice_count }}</strong></div>
+        </div>
+        <a class="aeterna-command-link" href="/jobs/{{ briefing.project.project_id }}">OPEN PROJECT WORKBENCH ›</a>
+        {% else %}
+        <div class="aeterna-command-records">
+          <div>ALL PROJECTS <strong>{{ briefing.project_count }}</strong></div>
+          <div>ACTIVE <strong>{{ briefing.active_count }}</strong></div>
+          <div>FIELD COMPLETE <strong>{{ briefing.completed_count }}</strong></div>
+          <div>ARCHIVED <strong>{{ briefing.archived_count }}</strong></div>
+        </div>
+        {% endif %}
+      </section>
+      {% endif %}
+
+      {% if briefing.view in ('overview', 'priorities') %}
+      <section aria-label="Derived action queue">
+        <h2>RECOMMENDED NEXT ACTIONS</h2>
+        <p class="aeterna-command-disclaimer">Derived from recorded states, not a persisted task list. Priority order is a suggestion, not a deadline or legal determination.</p>
+        {% if briefing.actions %}
+        <div class="aeterna-action-list">
+          {% for action in briefing.actions[:12] %}
+          <a href="{{ action.href }}">
+            <span class="aeterna-action-rank">{{ loop.index|string|rjust(2,'0') }}</span>
+            <span><small>{{ action.category }} // {{ action.project_name }}</small><strong>{{ action.title }}</strong><em>{{ action.detail }}</em></span>
+            <span aria-hidden="true">›</span>
+          </a>
+          {% endfor %}
+        </div>
+        {% if briefing.actions|length > 12 %}<p class="aeterna-command-disclaimer">Showing 12 of {{ briefing.actions|length }} derived actions. Choose a project to narrow the list.</p>{% endif %}
+        {% else %}
+        <p class="aeterna-command-empty">No action prompts can be inferred from the current records. That does not certify that every task is finished.</p>
+        {% endif %}
+      </section>
+      {% endif %}
+
+      {% if briefing.view == 'checks' or (briefing.view == 'overview' and briefing.project_brief) %}
+      <section aria-label="Specialist reports">
+        <h2>GOBLIN STATUS REPORT</h2>
+        {% if briefing.project_brief %}
+        <div class="aeterna-check-grid">
+          {% for check in briefing.project_brief.checks %}
+          <article>
+            <div><strong>{{ check.name|upper }}</strong><small>{{ check.state }}</small></div>
+            <p>{{ check.summary }}</p>
+            <a href="{{ check.href }}">OPEN SPECIALIST ›</a>
+          </article>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="aeterna-command-empty">Select an individual project to run meaningful specialist checks. Portfolio totals remain available above.</p>
+        {% endif %}
+      </section>
+      {% endif %}
+      <footer class="aeterna-command-footer">ÆTERNA // Records first. Decisions remain yours.</footer>
+    </section>
+  </section>
+</main>
+</body>
+</html>
