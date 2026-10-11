@@ -189,8 +189,8 @@ try {
     }
     await page.screenshot({ path: "artifacts/ui/" + spec.name + "-aeterna-command.png", fullPage: true });
     await page.getByRole("link", { name: "GOBLIN CHECKS" }).click();
-    if (!(await page.getByText("Select an individual project").isVisible())) {
-      throw Error(spec.name + ": Specialist check empty state missing");
+    if (!(await page.getByText("Office-wide checks summarize saved records").isVisible()) || !(await page.getByText("NOT AUTOMATED").isVisible())) {
+      throw Error(spec.name + ": Office-wide specialist checks missing");
     }
 
     if (errors.length) throw Error(spec.name + ": Browser errors: " + errors.join("; "));
