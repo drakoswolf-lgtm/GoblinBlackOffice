@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>{{ project.name }} · Job Workbench</title>
   <link rel="stylesheet" href="/static/gbo.css">
+  <link rel="stylesheet" href="/static/specialist-glass.css">
 </head>
 <body class="office-record-body">
 <main class="shell office-detail-shell">
@@ -70,13 +71,15 @@
         ('grimsnatch', 'Risk Review', 'Record-based checks', '1Lt. Grimsnatch', '/aeterna/command?project_id=' ~ project.project_id ~ '&view=checks', none, 'review checks')
       ] %}
       {% for portrait, heading, subtitle, byline, link, count, unit in panels %}
-      <a class="office-scope-panel" href="{{ link }}">
-        <span class="office-scope-portrait face-{{ portrait }}" aria-hidden="true"></span>
+      <a class="office-scope-panel specialist-glass-card" href="{{ link }}">
+        <span class="specialist-glass-layer" aria-hidden="true">
+          <span class="office-scope-portrait face-{{ portrait }}"></span>
+          <span class="specialist-glass-identity">{{ byline }}</span>
+        </span>
         <span class="office-scope-content">
           <small>{{ subtitle }}</small>
           <strong>{{ heading }}</strong>
-          <span class="office-scope-summary">{% if count is not none %}{{ count }} {{ unit }}{% else %}{{ unit|capitalize }}{% endif %}</span>
-          <span class="office-scope-byline">{{ byline }}</span>
+          <span class="office-scope-summary">{% if count is not none %}{{ count }} {% if count == 1 %}{{ {'expense records': 'expense record', 'agreements': 'agreement', 'invoices': 'invoice', 'list items': 'list item', 'work entries': 'work entry'}.get(unit, unit) }}{% else %}{{ unit }}{% endif %}{% else %}{{ unit|capitalize }}{% endif %}</span>
         </span>
         <span class="office-scope-chevron" aria-hidden="true">›</span>
       </a>

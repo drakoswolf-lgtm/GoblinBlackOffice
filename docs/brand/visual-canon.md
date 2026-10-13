@@ -474,7 +474,9 @@ On the Command Desk, project workbench, and client/project records screens, real
 
 - Main labels are business functions: **Receipt Log, Agreements, Invoices & Payments, Materials, Work Log, Risk Review**.
 - Specialists' rank and character names are compact secondary bylines, never the main headings. Ranks currently read **2Lt. Ledgergut, Ltc. SigNor, Ssg. Squarmish, Pfc. Packrat, Cpl. Patch, 1Lt. Grimsnatch**.
-- Portraits are large in area but dark, desaturated and translucent, covered by a readable text/gradient layer; interaction belongs to the whole functional panel.
+- Specialist cards have **two independent layers**: an always-functional, left-aligned information layer (label, live record/status values, navigation) above a separate, optional holographic glass layer (portrait, specialist rank/name engraving, shading, frame). No visual media may shift, resize, cover, or determine placement of the functional content.
+- Portraits are correctly proportioned, never stretched, shaded but recognisable, and atmospheric **within** the glass substrate. The character name and rank are etched into the glass layer, not repeated as foreground body text. Provide adequate contrast behind content, maintain focus visibility, and support reduced transparency and forced colors.
+- The current six-face beta sprite is a low-resolution fallback, not an approved high-resolution headshot library. Render it without non-uniform scaling; replace it with original high-resolution identity-matched portraits when those files are supplied and approved. Do not claim upscaling recreates missing visual detail.
 - Project name, linked client, status, actual ledger metrics, work logs and existing actions take precedence over the specialist grid.
 - Client records list real clients and scoped projects, not invented activities, statuses, financial figures, or unrelated decorative photography.
 - Do not manufacture functionality for specialist rough-ins; link existing real workflows and label their boundaries honestly.
