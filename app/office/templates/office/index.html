@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Goblin Black Office · Command</title>
   <link rel="stylesheet" href="/static/gbo.css">
+  <link rel="stylesheet" href="/static/specialist-glass.css">
 </head>
 <body class="command-body">
 {% include "office/_splash.html" %}
@@ -80,14 +81,16 @@
         </header>
         <div class="command-channels">
           {% for specialist in specialists %}
-          <a class="command-channel business-specialist-link" href="{{ specialist.href }}" aria-label="{{ specialist.label }}: {{ specialist.note }}">
-            <span class="office-scope-portrait face-{{ specialist.portrait }}" aria-hidden="true"></span>
+          <a class="command-channel business-specialist-link specialist-glass-card" href="{{ specialist.href }}" aria-label="{{ specialist.label }}: {{ specialist.note }}">
+            <span class="specialist-glass-layer" aria-hidden="true">
+              <span class="office-scope-portrait face-{{ specialist.portrait }}"></span>
+              <span class="specialist-glass-identity">{{ specialist.rank }} {{ specialist.name }}</span>
+            </span>
             <span class="command-channel-index" aria-hidden="true">0{{ loop.index }}</span>
             <span class="command-channel-copy">
               <small>{{ specialist.role }}</small>
               <strong>{{ specialist.label }}</strong>
               <em>{{ specialist.note }}</em>
-              <span class="office-scope-byline">{{ specialist.rank }} {{ specialist.name }}</span>
             </span>
             <span class="command-channel-state">{{ specialist.status }}</span>
             <span class="office-scope-chevron" aria-hidden="true">›</span>
