@@ -165,13 +165,26 @@ try {
     if (spriteDimensions.width < 300 || spriteDimensions.height < 75) {
       throw Error(spec.name + ": Portrait sprite failed to decode");
     }
+    const glassLayers = channels.locator(".specialist-glass-layer[aria-hidden='true']");
+    if (await glassLayers.count() !== 6) throw Error(spec.name + ": Glass not separated from functional cards");
     const firstPortrait = await channels.first().locator(".office-scope-portrait").evaluate(node => {
       const s = getComputedStyle(node);
-      return { source:s.backgroundImage, opacity:Number(s.opacity), z:s.zIndex };
+      const panel = node.closest(".specialist-glass-card");
+      const copy = panel.querySelector(".command-channel-copy");
+      return {
+        source:s.backgroundImage, size:s.backgroundSize, opacity:Number(s.opacity),
+        aspect:s.aspectRatio, z:s.zIndex,
+        glassZ:getComputedStyle(node.parentElement).zIndex,
+        contentZ:getComputedStyle(copy).zIndex,
+        copyMargin:getComputedStyle(copy).marginLeft
+      };
     });
     if (!firstPortrait.source.includes("canon-goblin-specialist-sprite.webp") ||
-        firstPortrait.opacity > .5) {
-      throw Error(spec.name + ": Portrait must be an unobtrusive background image");
+        firstPortrait.opacity < .35 || firstPortrait.opacity > .65 ||
+        firstPortrait.size !== "auto 100%" ||
+        firstPortrait.copyMargin !== "0px" ||
+        !(Number(firstPortrait.contentZ) > Number(firstPortrait.glassZ))) {
+      throw Error(spec.name + ": Portrait must be proportionate in glass beneath left-aligned functional copy: " + JSON.stringify(firstPortrait));
     }
 
     const records = await page.goto(base + "/records", { waitUntil: "domcontentloaded" });
@@ -200,6 +213,24 @@ try {
     await page.waitForURL("**/jobs/*");
     if (await page.locator(".office-scope-panel").count() !== 6) {
       throw Error(spec.name + ": Project workbench missing six functional panels");
+    }
+    const projectGlass = await page.locator(".office-scope-panel").first().evaluate(panel => {
+      const content = panel.querySelector(".office-scope-content");
+      const glass = panel.querySelector(".specialist-glass-layer");
+      const name = glass?.querySelector(".specialist-glass-identity");
+      return {
+        contentMargin:getComputedStyle(content).marginLeft,
+        contentZ:Number(getComputedStyle(content).zIndex),
+        glassZ:Number(getComputedStyle(glass).zIndex),
+        nameText:name?.textContent.trim(),
+        glassHidden:glass?.getAttribute("aria-hidden"),
+        title:content.querySelector("strong")?.textContent.trim()
+      };
+    });
+    if (projectGlass.contentMargin !== "0px" || projectGlass.glassHidden !== "true" ||
+        projectGlass.title !== "Receipt Log" || !projectGlass.nameText?.includes("Ledgergut") ||
+        projectGlass.contentZ <= projectGlass.glassZ) {
+      throw Error(spec.name + ": Project functional layer must be independent of hologlass: " + JSON.stringify(projectGlass));
     }
     if (!await page.getByRole("link", { name:/Draft agreement/ }).first().isVisible()) {
       throw Error(spec.name + ": Agreement workflow link lost");
