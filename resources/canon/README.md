@@ -43,3 +43,18 @@ Render with CSS `background-size: cover` inside the fixed Office environment lay
 - CSS maps these faces with `face-ledgergut`, `face-signor`, `face-squarmish`, `face-packrat`, `face-patch`, and `face-grimsnatch`. The characters are supporting atmospherics rather than labels or actions. The specialist headshot and engraved name/rank now belong to the optional holographic glass layer, while the independent left-aligned HTML information remains in the foreground.
 - `app/office/static/specialist-glass.css` preserves face aspect ratio with `background-size:auto 100%` for the tiny fallback strip. It does **not** add photographic detail: properly approved, high-resolution headshots are still required for a final quality pass. Never replace canon characters with invented generic goblin faces.
 - The source full-body render files are preserved in the ChatGPT conversation; this beta change does not promote a new full-body portrait family or personnel screen.
+
+## Individual goblin holographic panes
+
+The six user-supplied panes uploaded on 2026-10-14 are preserved byte-for-byte as PNGs in `characters/holographic-panes/`. Each is **1536 × 877 pixels**. Names, ranks, cyan frames, and the glass treatment are baked into the artwork.
+
+| Character | Pane | Original upload |
+| --- | --- | --- |
+| Grimsnatch | [grimsnatch.png](characters/holographic-panes/grimsnatch.png) | `1_20261014_173331_0000.png` |
+| Squarmish | [squarmish.png](characters/holographic-panes/squarmish.png) | `2_20261014_173331_0001.png` |
+| Ledgergut | [ledgergut.png](characters/holographic-panes/ledgergut.png) | `3_20261014_173331_0002.png` |
+| SigNor | [signor.png](characters/holographic-panes/signor.png) | `4_20261014_173331_0003.png` |
+| Packrat | [packrat.png](characters/holographic-panes/packrat.png) | `5_20261014_173331_0004.png` |
+| Patch | [patch.png](characters/holographic-panes/patch.png) | `6_20261014_173331_0005.png` |
+
+These individual panes provide the supplied artwork for future holographic specialist panels. Preserve their full aspect ratio and keep essential live text and controls in HTML. This asset transfer does not change the existing specialist sprite, CSS, templates, or runtime asset bindings.
