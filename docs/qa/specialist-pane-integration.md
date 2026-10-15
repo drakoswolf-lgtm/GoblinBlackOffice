@@ -13,6 +13,10 @@ The Command Desk and project workbench now mount the six supplied original panes
 - Distinguish desk workspaces from workflow guides. Project cards show scoped record counts and link to existing records or advisory checks; no new specialist capability or clearance is implied.
 - No new specialist animation, speech, autoplay media, or autonomous action.
 
+## Typography update
+
+The 2026-10-15 follow-up enlarges the panel headings and actions, right-aligns the live copy, and uses bold italic uppercase labels with restrained cyan light. This explicit request supersedes the earlier left-aligned arrangement. The complete pane browser matrix and scoped axe checks passed again after the typography change.
+
 ## Verification
 
 - Full Python suite: **204 passed**. New checks cover shared identities/art, actual project and business scope, singular/plural counts, project destinations, exact PNG bytes, image decoding, MIME type, and conditional cache revalidation.

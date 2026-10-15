@@ -32,6 +32,7 @@ async function checkPanels(page, { artwork = true } = {}) {
       if (card.width < 44 || card.height < 44) failures.push('Touch target too small');
       if (card.right > innerWidth + 1) failures.push('Card exceeds viewport');
       if (style.marginLeft !== '0px') failures.push('Art displaces information');
+      if (style.textAlign !== 'right') failures.push('Panel information is not right aligned');
       if (Number(style.zIndex) <= Number(getComputedStyle(node.querySelector('.specialist-glass-layer')).zIndex)) failures.push('Copy below art');
       for (const attr of ['aria-labelledby', 'aria-describedby']) {
         for (const id of node.getAttribute(attr).split(' ')) {
