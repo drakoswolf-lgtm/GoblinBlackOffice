@@ -212,8 +212,7 @@ def test_specialist_hologlass_keeps_records_separate_from_character_art():
 
     styles = client.get("/static/specialist-glass.css")
     assert styles.status_code == 200
-    assert b"background-size:auto 100%" in styles.data
-    assert b"aspect-ratio:17 / 22" in styles.data
+    assert b"object-fit:contain" in styles.data
     assert b"margin-left:0" in styles.data
     assert b".specialist-glass-identity" in styles.data
     assert b"prefers-reduced-transparency" in styles.data

@@ -1,3 +1,4 @@
+{% from "office/_specialist_panel.html" import specialist_panel with context %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -59,30 +60,11 @@
     <div class="stat"><strong>{{ currency }} {{ '%.2f'|format(ledger.outstanding) }}</strong><span>Outstanding issued invoices</span></div>
   </section>
 
-  <section class="office-specialist-module" aria-labelledby="project-sections-heading">
-    <header class="office-section-head"><div><p class="eyebrow">SPECIALIST CHANNELS // PROJECT RECORDS</p><h2 id="project-sections-heading">Manage this project</h2></div><small>Business first · specialists behind the work</small></header>
+  <section class="office-specialist-module specialist-projection" aria-labelledby="project-sections-heading">
+    <header class="office-section-head"><div><p class="eyebrow">SPECIALIST CHANNELS // PROJECT RECORDS</p><h2 id="project-sections-heading">Manage this project</h2></div><small>Æterna projection · project records</small></header>
     <div class="office-specialist-grid">
-      {% set panels = [
-        ('ledgergut', 'Receipt Log', 'Receipts & expenses', '2Lt. Ledgergut', '/ledgergut/?project_id=' ~ project.project_id, expenses|length, 'expense records'),
-        ('signor', 'Agreements', 'Scope & terms', 'Ltc. SigNor', '/signor/?project_id=' ~ project.project_id, agreements|length, 'agreements'),
-        ('squarmish', 'Invoices & Payments', 'Billing & receivables', 'Ssg. Squarmish', '#project-invoices', invoices|length, 'invoices'),
-        ('packrat', 'Materials', 'Shopping & requirements', 'Pfc. Packrat', '#packrat-shopping', shopping_items|length, 'list items'),
-        ('patch', 'Work Log', 'Labour & operations', 'Cpl. Patch', '#project-work', work_logs|length, 'work entries'),
-        ('grimsnatch', 'Risk Review', 'Record-based checks', '1Lt. Grimsnatch', '/aeterna/command?project_id=' ~ project.project_id ~ '&view=checks', none, 'review checks')
-      ] %}
-      {% for portrait, heading, subtitle, byline, link, count, unit in panels %}
-      <a class="office-scope-panel specialist-glass-card" href="{{ link }}">
-        <span class="specialist-glass-layer" aria-hidden="true">
-          <span class="office-scope-portrait face-{{ portrait }}"></span>
-          <span class="specialist-glass-identity">{{ byline }}</span>
-        </span>
-        <span class="office-scope-content">
-          <small>{{ subtitle }}</small>
-          <strong>{{ heading }}</strong>
-          <span class="office-scope-summary">{% if count is not none %}{{ count }} {% if count == 1 %}{{ {'expense records': 'expense record', 'agreements': 'agreement', 'invoices': 'invoice', 'list items': 'list item', 'work entries': 'work entry'}.get(unit, unit) }}{% else %}{{ unit }}{% endif %}{% else %}{{ unit|capitalize }}{% endif %}</span>
-        </span>
-        <span class="office-scope-chevron" aria-hidden="true">›</span>
-      </a>
+      {% for panel in specialists %}
+      {{ specialist_panel(panel, 'project') }}
       {% endfor %}
     </div>
   </section>

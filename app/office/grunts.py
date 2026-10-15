@@ -30,7 +30,7 @@ GRUNT_WORKFLOWS = {
         "handoffs": (
             "Ledgergut receives actual purchase/receipt evidence.",
             "Patch receives material-ready or blocked-by-material status.",
-            "Grimscratch receives hazardous, regulated, unusually expensive, or uncertain items for review.",
+            "Grimsnatch receives hazardous, regulated, unusually expensive, or uncertain items for review.",
         ),
         "guardrails": (
             "Never purchase or reserve paid goods without explicit human approval.",
@@ -62,7 +62,7 @@ GRUNT_WORKFLOWS = {
             "Packrat receives material and movement dependencies.",
             "Ledgergut receives expense evidence generated during work.",
             "Squarmish receives confirmed completed work and billable facts, never guessed hours.",
-            "Grimscratch receives safety, permit, access, or compliance flags.",
+            "Grimsnatch receives safety, permit, access, or compliance flags.",
         ),
         "guardrails": (
             "Never invent labour hours, completion, or customer approval.",
@@ -72,7 +72,7 @@ GRUNT_WORKFLOWS = {
         "first_release": "Project work orders, blocked/active/verification-ready states, dependency notes, and billing handoff. No workforce scheduling engine.",
     },
     "grimscratch": {
-        "name": "Grimscratch",
+        "name": "Grimsnatch",
         "role": "Risk & compliance",
         "mission": "Notice the expensive sentence, missing permission, unsafe assumption, or regulatory tripwire before it becomes folklore.",
         "question": "What could make this unsafe, unauthorized, non-compliant, or hard to defend later?",

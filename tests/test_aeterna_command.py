@@ -33,8 +33,8 @@ def test_briefing_infers_next_actions_without_claiming_compliance_or_receipts():
     checks = {item.name: item for item in brief.project_brief.checks}
     assert checks["Ledgergut"].state == "NO PROJECT EXPENSES"
     assert "does not prove" in checks["Ledgergut"].summary
-    assert checks["Grimscratch"].state == "NOT AUTOMATED"
-    assert "No clearance" in checks["Grimscratch"].summary
+    assert checks["Grimsnatch"].state == "NOT AUTOMATED"
+    assert "No clearance" in checks["Grimsnatch"].summary
 
 
 def test_financial_summary_excludes_drafts_foreign_currencies_and_tenants():

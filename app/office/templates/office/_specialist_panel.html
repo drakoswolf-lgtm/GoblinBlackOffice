@@ -1,0 +1,22 @@
+{% macro specialist_panel(panel, context) -%}
+{% set specialist = panel.specialist %}
+{% set id = context ~ '-' ~ specialist.key %}
+<a class="{{ 'command-channel business-specialist-link' if context == 'desk' else 'office-scope-panel' }} specialist-glass-card"
+   href="{{ panel.href }}" data-specialist="{{ specialist.key }}"
+   aria-labelledby="{{ id }}-title" aria-describedby="{{ id }}-summary {{ id }}-state {{ id }}-identity">
+  <span class="specialist-glass-layer" aria-hidden="true">
+    <img class="specialist-pane-art" src="{{ url_for('canon_asset', asset_path='characters/holographic-panes/' ~ specialist.key ~ '.png') }}"
+         alt="" width="1536" height="877" loading="lazy" decoding="async">
+  </span>
+  <span class="specialist-glass-identity" id="{{ id }}-identity">Specialist: {{ specialist.rank }} {{ specialist.name }}.</span>
+  <span class="{{ 'command-channel-copy' if context == 'desk' else 'office-scope-content' }}">
+    <small>{{ specialist.role }}</small>
+    <strong id="{{ id }}-title">{{ specialist.label }}</strong>
+    <span class="office-scope-summary" id="{{ id }}-summary">{{ panel.summary }}</span>
+    <span class="specialist-channel-footer">
+      <span class="specialist-channel-state" id="{{ id }}-state">{{ panel.state }}</span>
+      <span class="specialist-channel-action" aria-hidden="true">{{ panel.action }} <span>›</span></span>
+    </span>
+  </span>
+</a>
+{%- endmacro %}

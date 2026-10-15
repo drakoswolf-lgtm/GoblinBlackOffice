@@ -48,7 +48,7 @@ jobs:
       - name: Install Chromium
         run: |
           npm init -y >/dev/null
-          npm install --no-save playwright
+          npm install --no-save playwright axe-core
           npx playwright install --with-deps chromium
       - name: Build and run beta container
         run: |
@@ -62,6 +62,8 @@ jobs:
           done
           docker logs gbo-visual
           exit 1
+      - name: Verify specialist panes and accessibility in Chromium
+        run: node tests/specialist_panels.mjs
       - name: Verify desktop and mobile in Chromium
         run: node tests/ui_smoke.mjs
       - uses: actions/upload-artifact@v4

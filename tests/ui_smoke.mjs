@@ -3,7 +3,7 @@ import { mkdir } from "node:fs/promises";
 
 const base = process.env.GBO_BASE_URL || "http://127.0.0.1:8080";
 await mkdir("artifacts/ui", { recursive: true });
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({ headless: true, ...(process.env.GBO_BROWSER_EXECUTABLE ? { executablePath: process.env.GBO_BROWSER_EXECUTABLE } : {}) });
 
 try {
   for (const spec of [
@@ -153,38 +153,25 @@ try {
         throw Error(spec.name + ": Missing business section " + label);
       }
     }
-    const spriteSource = "/canon/characters/canon-goblin-specialist-sprite.webp";
-    const spriteResponse = await page.request.get(base + spriteSource);
-    if (!spriteResponse.ok() || !spriteResponse.headers()["content-type"]?.includes("image/webp")) {
-      throw Error(spec.name + ": Canon six-goblin portrait sprite missing");
-    }
-    const spriteDimensions = await page.evaluate(async url => {
-      const img = new Image(); img.src = url; await img.decode();
-      return { width: img.naturalWidth, height: img.naturalHeight };
-    }, spriteSource);
-    if (spriteDimensions.width < 300 || spriteDimensions.height < 75) {
-      throw Error(spec.name + ": Portrait sprite failed to decode");
-    }
     const glassLayers = channels.locator(".specialist-glass-layer[aria-hidden='true']");
     if (await glassLayers.count() !== 6) throw Error(spec.name + ": Glass not separated from functional cards");
-    const firstPortrait = await channels.first().locator(".office-scope-portrait").evaluate(node => {
-      const s = getComputedStyle(node);
-      const panel = node.closest(".specialist-glass-card");
+    const pane = await channels.first().locator(".specialist-pane-art").evaluate(async image => {
+      image.loading = "eager";
+      await image.decode();
+      const panel = image.closest(".specialist-glass-card");
       const copy = panel.querySelector(".command-channel-copy");
       return {
-        source:s.backgroundImage, size:s.backgroundSize, opacity:Number(s.opacity),
-        aspect:s.aspectRatio, z:s.zIndex,
-        glassZ:getComputedStyle(node.parentElement).zIndex,
-        contentZ:getComputedStyle(copy).zIndex,
+        source:image.currentSrc, fit:getComputedStyle(image).objectFit,
+        width:image.naturalWidth, height:image.naturalHeight,
+        glassZ:Number(getComputedStyle(image.parentElement).zIndex),
+        contentZ:Number(getComputedStyle(copy).zIndex),
         copyMargin:getComputedStyle(copy).marginLeft
       };
     });
-    if (!firstPortrait.source.includes("canon-goblin-specialist-sprite.webp") ||
-        firstPortrait.opacity < .35 || firstPortrait.opacity > .65 ||
-        firstPortrait.size !== "auto 100%" ||
-        firstPortrait.copyMargin !== "0px" ||
-        !(Number(firstPortrait.contentZ) > Number(firstPortrait.glassZ))) {
-      throw Error(spec.name + ": Portrait must be proportionate in glass beneath left-aligned functional copy: " + JSON.stringify(firstPortrait));
+    if (!pane.source.endsWith("/holographic-panes/ledgergut.png") ||
+        pane.fit !== "contain" || pane.width !== 1536 || pane.height !== 877 ||
+        pane.copyMargin !== "0px" || pane.contentZ <= pane.glassZ) {
+      throw Error(spec.name + ": Full supplied pane must sit beneath live information: " + JSON.stringify(pane));
     }
 
     const records = await page.goto(base + "/records", { waitUntil: "domcontentloaded" });
@@ -193,7 +180,10 @@ try {
     }
     await page.locator("#add-client summary").click();
     await page.locator("#client-name").fill("UX Test " + spec.name);
-    await page.locator("#add-client button[type=submit]").click();
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: "domcontentloaded" }),
+      page.locator("#add-client button[type=submit]").click(),
+    ]);
     await page.waitForURL("**/records");
     const clientLink = page.locator('.office-client-row[href*="client_id="]').filter({ hasText:"UX Test " + spec.name }).first();
     if (!await clientLink.isVisible()) throw Error(spec.name + ": Client not listed after creation");
@@ -205,7 +195,10 @@ try {
     await page.locator("#add-project summary").click();
     await page.locator("#project-name").fill("Business-first test job " + spec.name);
     await page.locator("#record-pricing").selectOption("hourly");
-    await page.locator("#add-project button[type=submit]").click();
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: "domcontentloaded" }),
+      page.locator("#add-project button[type=submit]").click(),
+    ]);
     await page.waitForURL("**/records");
     const jobRow = page.locator(".office-project-row").filter({ hasText:"Business-first test job " + spec.name }).first();
     if (!await jobRow.isVisible()) throw Error(spec.name + ": New project missing from business records");
@@ -217,7 +210,7 @@ try {
     const projectGlass = await page.locator(".office-scope-panel").first().evaluate(panel => {
       const content = panel.querySelector(".office-scope-content");
       const glass = panel.querySelector(".specialist-glass-layer");
-      const name = glass?.querySelector(".specialist-glass-identity");
+      const name = panel.querySelector(".specialist-glass-identity");
       return {
         contentMargin:getComputedStyle(content).marginLeft,
         contentZ:Number(getComputedStyle(content).zIndex),
@@ -308,7 +301,10 @@ try {
       throw Error(spec.name + ": Project selector unavailable");
     }
     await page.locator("#aeterna-question").fill("What is outstanding?");
-    await page.getByRole("button", { name: "RUN BRIEFING" }).click();
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: "domcontentloaded" }),
+      page.getByRole("button", { name: "RUN BRIEFING" }).click(),
+    ]);
     if (!(await page.getByText("FINANCIAL RECORDS").isVisible())) {
       throw Error(spec.name + ": Æterna did not route financial questions");
     }

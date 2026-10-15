@@ -37,12 +37,9 @@ The command desk uses two **pixel-identical, lossless WebP encodings** of the ap
 
 Render with CSS `background-size: cover` inside the fixed Office environment layer. Select the portrait plate at widths up to 700px. Do not crop or synthesize new artwork into these assets. The older `canon-black-office-command.svg` remains a fallback only. No additional animations are part of this change.
 
-## Goblin specialist panels (beta)
+## Superseded specialist beta sprite
 
-- `characters/canon-goblin-specialist-sprite.webp` — one optimized, six-face WebP strip for the subordinate, shaded specialist-background portraits, sourced from the previously generated full-character renders (not from fabricated avatars). The order is **Ledgergut, SigNor, Squarmish, Packrat, Patch, Grimsnatch**. The canon sheet is still the identity/uniform reference; this small background asset is deliberately not a high-resolution dossier.
-- CSS maps these faces with `face-ledgergut`, `face-signor`, `face-squarmish`, `face-packrat`, `face-patch`, and `face-grimsnatch`. The characters are supporting atmospherics rather than labels or actions. The specialist headshot and engraved name/rank now belong to the optional holographic glass layer, while the independent left-aligned HTML information remains in the foreground.
-- `app/office/static/specialist-glass.css` preserves face aspect ratio with `background-size:auto 100%` for the tiny fallback strip. It does **not** add photographic detail: properly approved, high-resolution headshots are still required for a final quality pass. Never replace canon characters with invented generic goblin faces.
-- The source full-body render files are preserved in the ChatGPT conversation; this beta change does not promote a new full-body portrait family or personnel screen.
+- `characters/canon-goblin-specialist-sprite.webp` is preserved for historical reference. It is no longer loaded by the Command Desk or project specialist panels; the individual panes below replace it.
 
 ## Individual goblin holographic panes
 
@@ -57,4 +54,4 @@ The six user-supplied panes uploaded on 2026-10-14 are preserved byte-for-byte a
 | Packrat | [packrat.png](characters/holographic-panes/packrat.png) | `5_20261014_173331_0004.png` |
 | Patch | [patch.png](characters/holographic-panes/patch.png) | `6_20261014_173331_0005.png` |
 
-These individual panes provide the supplied artwork for future holographic specialist panels. Preserve their full aspect ratio and keep essential live text and controls in HTML. This asset transfer does not change the existing specialist sprite, CSS, templates, or runtime asset bindings.
+These individual panes provide the supplied artwork for future holographic specialist panels. Preserve their full aspect ratio and keep essential live text and controls in HTML. The shared `office/_specialist_panel.html` macro loads these original PNGs via `/canon/characters/holographic-panes/<character>.png` on the desk and project workbench. The full artwork is contained without cropping or stretching beneath a dark readability layer and live business information. Cyan frames belong to Æterna’s projection; the goblins retain their physical green-steel uniforms. Rank/name text is already baked into each pane and is not printed over it again. Original files remain unchanged. No speech or specialist animation is mounted.
