@@ -37,6 +37,7 @@ from app.office.auth import (
 )
 from app.office.records import create_client, create_project
 from app.office.grunts import grunt_workflow
+from app.office.specialists import desk_panels, project_panels
 from app.packrat.service import MaterialRequirementInput
 
 _auth_required = os.environ.get("GBO_AUTH_REQUIRED", "0").lower() in {"1", "true", "yes"}
@@ -547,6 +548,10 @@ def job_workbench(project_id: str):
 
     return render_template(
         "office/job_workbench.html",
+        specialists=project_panels(
+            project_id, expenses=expenses, agreements=agreements,
+            invoices=invoices, shopping_items=shopping_items, work_logs=work_logs,
+        ),
         project=project,
         client=client,
         agreements=agreements,
@@ -581,17 +586,9 @@ def index():
     bid = current_business_id()
     projects = [p for p in office_store.projects.list_for_business(bid) if p.status != RecordStatus.ARCHIVED]
     clients = {client.client_id: client for client in office_store.clients.list_for_business(bid)}
-    specialists = [
-        {"name":"Ledgergut","rank":"2Lt.","label":"Receipt Log","role":"Receipts & expenses","status":"live","href":"/ledgergut/","portrait":"ledgergut","note":"Capture, review and reconcile expenses."},
-        {"name":"SigNor","rank":"Ltc.","label":"Agreements","role":"Scope & terms","status":"live","href":"/signor/","portrait":"signor","note":"Draft terms and keep scope defined."},
-        {"name":"Squarmish","rank":"Ssg.","label":"Invoices & Payments","role":"Receivables","status":"live","href":"/squarmish/","portrait":"squarmish","note":"Draft invoices and track receivables."},
-        {"name":"Packrat","rank":"Pfc.","label":"Materials","role":"Planning & stock","status":"rough-in","href":"/workflows/packrat","portrait":"packrat","note":"Plan requirements and reconcile supplies."},
-        {"name":"Patch","rank":"Cpl.","label":"Work Log","role":"Operations & labour","status":"rough-in","href":"/workflows/patch","portrait":"patch","note":"Record completed work and field time."},
-        {"name":"Grimsnatch","rank":"1Lt.","label":"Risk Review","role":"Risk & compliance","status":"rough-in","href":"/workflows/grimscratch","portrait":"grimsnatch","note":"Review risks and unresolved checks."},
-    ]
     return render_template(
         "office/index.html",
-        specialists=specialists,
+        specialists=desk_panels(),
         projects=projects,
         clients=clients,
         user=current_user(),

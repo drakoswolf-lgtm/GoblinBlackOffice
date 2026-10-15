@@ -424,7 +424,7 @@ Current specialists:
 - Squarmish — invoices / receivables
 - Packrat McDuffel — logistics / materials
 - Patch — operations / work orders
-- Grimscratch — risk / compliance
+- Grimsnatch — risk / compliance
 
 Æterna coordinates. Goblins specialize. Humans retain authority over consequential decisions.
 
@@ -473,13 +473,17 @@ If any answer is no, the visual is not on-model.
 On the Command Desk, project workbench, and client/project records screens, real business content has visual priority. Goblins are helpers represented as shaded, recognisable characters **behind** service labels, not as foreground profile cards or dossier UI.
 
 - Main labels are business functions: **Receipt Log, Agreements, Invoices & Payments, Materials, Work Log, Risk Review**.
-- Specialists' rank and character names are compact secondary bylines, never the main headings. Ranks currently read **2Lt. Ledgergut, Ltc. SigNor, Ssg. Squarmish, Pfc. Packrat, Cpl. Patch, 1Lt. Grimsnatch**.
+- Specialists' rank and character names are compact secondary bylines, never the main headings. The supplied 2026-10-14 panes supersede the earlier Army-style beta ranks: **LTJG Ledgergut, L.CDR SigNor, CPO Squarmish, ENS Packrat, 2PO Patch, LT Grimsnatch**. The shared presentation catalogue is `app/office/specialists.py`; legacy domain IDs such as `grimscratch` remain stable.
 - Specialist cards have **two independent layers**: an always-functional, left-aligned information layer (label, live record/status values, navigation) above a separate, optional holographic glass layer (portrait, specialist rank/name engraving, shading, frame). No visual media may shift, resize, cover, or determine placement of the functional content.
-- Portraits are correctly proportioned, never stretched, shaded but recognisable, and atmospheric **within** the glass substrate. The character name and rank are etched into the glass layer, not repeated as foreground body text. Provide adequate contrast behind content, maintain focus visibility, and support reduced transparency and forced colors.
-- The current six-face beta sprite is a low-resolution fallback, not an approved high-resolution headshot library. Render it without non-uniform scaling; replace it with original high-resolution identity-matched portraits when those files are supplied and approved. Do not claim upscaling recreates missing visual detail.
+- Portraits are correctly proportioned, never stretched, shaded but recognisable, and atmospheric **within** the glass substrate. The supplied character name and rank are already etched into the glass artwork, not repeated as foreground body text. Cyan frames represent **Æterna projecting the specialist channels**, not a change to goblin uniforms or physical green-steel identity. Provide adequate contrast behind content, maintain focus visibility, and support reduced transparency and forced colors.
+- The six original 1536 × 877 PNGs in `resources/canon/characters/holographic-panes/` are now the specialist glass artwork on both the Command Desk and project workbench. Preserve the entire supplied frame with `object-fit: contain`; never stretch, crop, redraw or duplicate their baked rank/name lettering. An accessible HTML identity accompanies each pane. The old six-face sprite is retained only as an archived beta asset and is not loaded by these panels.
 - Project name, linked client, status, actual ledger metrics, work logs and existing actions take precedence over the specialist grid.
 - Client records list real clients and scoped projects, not invented activities, statuses, financial figures, or unrelated decorative photography.
 - Do not manufacture functionality for specialist rough-ins; link existing real workflows and label their boundaries honestly.
 - Æterna retains her separate cobalt command treatment, with no goblin green command takeover.
 
 These rules supersede the character-centric dossier mockups. Future beta UI should use responsive HTML/CSS and genuine domain records, not a baked screenshot as a page.
+
+### Static pane implementation
+
+The desk and project workbench use one shared panel macro and catalogue. Business-function headings remain primary, with real project counts and scoped destinations. Desk channels distinguish working workspaces from workflow guides; project channels link to existing record sections and advisory checks. Image loading and failure cannot determine HTML placement. Labels use larger, bold italic uppercase type, left-aligned with their summaries and actions, as requested on 2026-10-15. Cards grow with text, reflow to one column on narrow screens, retain native links and visible keyboard focus, and have solid-color/reduced-transparency and forced-color fallbacks. No specialist animation, speech, autonomous action or invented completion state is part of this implementation.

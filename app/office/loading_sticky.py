@@ -37,7 +37,7 @@ LOAD_BEARING_STICKY_LINES: tuple[StickyLine, ...] = (
     StickyLine("squarmish-counting", "Squarmish is counting with intent.", 25, 49, 17),
     StickyLine("packrat-knows", "Packrat insists he knows where it is.", 25, 49, 17),
     StickyLine("patch-problem", "Patch has located the problem. Probably.", 25, 49, 15),
-    StickyLine("grimscratch-concerns", "Grimscratch has several concerns.", 25, 49, 15),
+    StickyLine("grimscratch-concerns", "Grimsnatch has several concerns.", 25, 49, 15),
 
     # 50-79%: the office is fully involved now.
     StickyLine("ledgergut-haunted", "Ledgergut says the totals feel haunted.", 50, 79, 18),
@@ -45,7 +45,7 @@ LOAD_BEARING_STICKY_LINES: tuple[StickyLine, ...] = (
     StickyLine("squarmish-overdue", "Squarmish smells overdue balances.", 50, 79, 17),
     StickyLine("packrat-safe-place", "Packrat says this was in a very safe place.", 50, 79, 16),
     StickyLine("patch-reality", "Patch is negotiating with reality at close range.", 50, 79, 16),
-    StickyLine("grimscratch-optimism", "Grimscratch is inspecting the blast radius of optimism.", 50, 79, 16),
+    StickyLine("grimscratch-optimism", "Grimsnatch is inspecting the blast radius of optimism.", 50, 79, 16),
 
     # 80-99%: increasingly concerning bomb-adjacent commentary.
     StickyLine("structural-confidence", "Structural confidence is decreasing.", 80, 99, 20),

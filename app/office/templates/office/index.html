@@ -1,3 +1,4 @@
+{% from "office/_specialist_panel.html" import specialist_panel with context %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -74,27 +75,14 @@
         {% endif %}
       </section>
 
-      <section class="command-module">
+      <section class="command-module specialist-projection" aria-label="Specialist channels projected by Æterna">
         <header class="command-module-head">
           <span>SPECIALIST CHANNELS</span>
           <small>SHARED PROJECT INTELLIGENCE</small>
         </header>
         <div class="command-channels">
-          {% for specialist in specialists %}
-          <a class="command-channel business-specialist-link specialist-glass-card" href="{{ specialist.href }}" aria-label="{{ specialist.label }}: {{ specialist.note }}">
-            <span class="specialist-glass-layer" aria-hidden="true">
-              <span class="office-scope-portrait face-{{ specialist.portrait }}"></span>
-              <span class="specialist-glass-identity">{{ specialist.rank }} {{ specialist.name }}</span>
-            </span>
-            <span class="command-channel-index" aria-hidden="true">0{{ loop.index }}</span>
-            <span class="command-channel-copy">
-              <small>{{ specialist.role }}</small>
-              <strong>{{ specialist.label }}</strong>
-              <em>{{ specialist.note }}</em>
-            </span>
-            <span class="command-channel-state">{{ specialist.status }}</span>
-            <span class="office-scope-chevron" aria-hidden="true">›</span>
-          </a>
+          {% for panel in specialists %}
+          {{ specialist_panel(panel, 'desk') }}
           {% endfor %}
         </div>
       </section>
