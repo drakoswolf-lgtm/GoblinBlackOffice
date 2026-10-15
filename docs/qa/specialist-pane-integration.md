@@ -15,7 +15,7 @@ The Command Desk and project workbench now mount the six supplied original panes
 
 ## Typography update
 
-The 2026-10-15 follow-up enlarges the panel headings and actions, right-aligns the live copy, and uses bold italic uppercase labels with restrained cyan light. This explicit request supersedes the earlier left-aligned arrangement. The complete pane browser matrix and scoped axe checks passed again after the typography change.
+The 2026-10-15 follow-up enlarges the panel headings and actions, left-aligns the live copy, and uses bold italic uppercase labels with restrained cyan light. Alignment follows the user’s correction to left alignment; the larger type and styling are retained. The complete pane browser matrix and scoped axe checks passed again after the typography change.
 
 ## Verification
 
