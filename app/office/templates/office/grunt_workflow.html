@@ -1,3 +1,4 @@
+{% from "gbo/brand.html" import office_brand %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -22,10 +23,11 @@
       body::before{background:linear-gradient(180deg,rgba(2,9,12,.62),rgba(2,9,12,.85)),
       url("/canon/environments/canon-black-office-mobile.webp") center/cover no-repeat}}
   </style>
+  {% include "gbo/head.html" %}
 </head>
 <body>
 <main>
-  <p><a href="/">← Office Desk</a></p>
+  {{ office_brand(subtitle=grunt.name) }}
   <span class="badge">Wave 2 rough-in · no autonomous actions</span>
   <p class="eyebrow">{{ grunt.role }}</p>
   <h1>{{ grunt.name }}</h1>

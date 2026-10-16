@@ -38,6 +38,7 @@ from app.office.auth import (
 from app.office.records import create_client, create_project
 from app.office.grunts import grunt_workflow
 from app.office.specialists import desk_panels, project_panels
+from app.office.branding import configure_branding
 from app.packrat.service import MaterialRequirementInput
 
 _auth_required = os.environ.get("GBO_AUTH_REQUIRED", "0").lower() in {"1", "true", "yes"}
@@ -47,6 +48,7 @@ if _auth_required and not _secret:
     raise RuntimeError("GBO_SECRET is required when authentication is enabled.")
 
 office_app = Flask(__name__, template_folder="templates")
+configure_branding(office_app)
 office_app.secret_key = _secret or "gbo-dev-secret"
 office_app.config["SESSION_COOKIE_NAME"] = "gbo_session"
 office_app.config["SESSION_COOKIE_HTTPONLY"] = True

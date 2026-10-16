@@ -1,3 +1,4 @@
+{% from "gbo/brand.html" import office_brand %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -5,11 +6,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Squarmish · Invoices</title>
   <link rel="stylesheet" href="/static/gbo.css">
+  {% include "gbo/head.html" %}
 </head>
 <body class="office-environment-body">
 <main class="shell">
   <header class="topbar">
-    <a class="brand" href="/"><span class="brand-mark">SQ</span><span>Squarmish</span></a>
+    {{ office_brand(label="Squarmish") }}
     <nav class="topnav"><a href="/">Office Desk</a><a href="/aeterna/command">ÆTERNA</a><a class="optional" href="/records">Clients &amp; Projects</a></nav>
   </header>
 

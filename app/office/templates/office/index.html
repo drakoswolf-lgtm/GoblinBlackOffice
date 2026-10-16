@@ -1,3 +1,4 @@
+{% from "gbo/brand.html" import office_brand %}
 {% from "office/_specialist_panel.html" import specialist_panel with context %}
 <!doctype html>
 <html lang="en">
@@ -7,6 +8,7 @@
   <title>Goblin Black Office · Command</title>
   <link rel="stylesheet" href="/static/gbo.css">
   <link rel="stylesheet" href="/static/specialist-glass.css">
+  {% include "gbo/head.html" %}
 </head>
 <body class="command-body">
 {% include "office/_splash.html" %}
@@ -21,10 +23,7 @@
 
 <main class="command-stage">
   <header class="command-bar">
-    <a class="command-brand" href="/">
-      <img src="/canon/brand/canon-app-badge.webp" alt="">
-      <span><strong>GOBLIN BLACK OFFICE</strong><small>COMMAND // ONLINE</small></span>
-    </a>
+    {{ office_brand(label="GOBLIN BLACK OFFICE", subtitle="COMMAND // ONLINE", class_name="command-brand") }}
     <nav class="command-nav">
       <a href="/records">RECORDS</a>
       {% if user %}<form method="post" action="/logout"><button class="command-link" type="submit">SIGN OUT</button></form>{% endif %}

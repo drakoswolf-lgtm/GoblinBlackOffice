@@ -1,3 +1,4 @@
+{% from "gbo/brand.html" import office_brand %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -5,11 +6,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Create account · Goblin Black Office</title>
   <link rel="stylesheet" href="/static/gbo.css">
+  {% include "gbo/head.html" %}
 </head>
 <body class="office-environment-body">
 <main class="auth-shell">
   <section class="auth-card">
-    <a class="brand" href="/"><span class="brand-mark">GBO</span><span>Goblin Black Office</span></a>
+    {{ office_brand(label="Goblin Black Office") }}
     <p class="eyebrow">Private beta</p>
     <h1>Create your Office.</h1>
     <p class="lead">One account, one business workspace, three specialists already arguing over whose filing cabinet this is.</p>
