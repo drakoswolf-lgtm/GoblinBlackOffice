@@ -248,7 +248,7 @@ try {
     const scanHome = await page.goto(base + "/ledgergut/", { waitUntil:"domcontentloaded" });
     if (!scanHome?.ok()) throw Error(spec.name + ": Ledgergut entry unavailable");
     const fileChoiceEvent = page.waitForEvent("filechooser", { timeout:12000 });
-    await page.locator("label.beta-upload-choice").click();
+    await page.getByRole("button", { name: "Upload Image" }).click();
     const fileChooser = await fileChoiceEvent;
     await fileChooser.setFiles({ name:"receipt-test.png", mimeType:"image/png", buffer:receiptPhoto });
     await page.waitForURL("**/ledgergut/receipts/scan", { timeout:60000 });
