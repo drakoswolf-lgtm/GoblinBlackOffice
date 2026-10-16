@@ -1,3 +1,4 @@
+{% from "gbo/brand.html" import office_brand %}
 {% from "office/_specialist_panel.html" import specialist_panel with context %}
 <!doctype html>
 <html lang="en">
@@ -7,11 +8,12 @@
   <title>{{ project.name }} · Job Workbench</title>
   <link rel="stylesheet" href="/static/gbo.css">
   <link rel="stylesheet" href="/static/specialist-glass.css">
+  {% include "gbo/head.html" %}
 </head>
 <body class="office-record-body">
 <main class="shell office-detail-shell">
   <header class="topbar office-detail-topbar">
-    <a class="brand office-brand" href="/"><img src="/canon/brand/canon-app-badge.webp" alt=""><span>GOBLIN BLACK OFFICE<small>PROJECT WORKBENCH</small></span></a>
+    {{ office_brand(label="GOBLIN BLACK OFFICE", subtitle="PROJECT WORKBENCH", class_name="brand office-brand") }}
     <nav class="topnav"><a href="/">Office Desk</a><a href="/records">Records</a></nav>
   </header>
 

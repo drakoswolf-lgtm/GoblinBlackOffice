@@ -11,9 +11,11 @@ from app.core.documents import build_agreement_pdf
 from app.core.models import AgreementStatus
 from app.core.runtime import business_id, office_store
 from app.office.auth import configure_specialist_auth, current_business_id
+from app.office.branding import configure_branding
 from app.signor.service import AgreementDraftInput, draft_agreement
 
 app = Flask(__name__, template_folder="templates")
+configure_branding(app)
 app.config["GBO_AUTH_REQUIRED"] = os.environ.get("GBO_AUTH_REQUIRED", "0").lower() in {"1", "true", "yes"}
 configure_specialist_auth(app)
 _store = office_store

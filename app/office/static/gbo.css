@@ -42,10 +42,6 @@ a:hover { color: #fff; }
   min-height: 52px; margin-bottom: 40px; padding-bottom: 16px; border-bottom: 1px solid var(--line);
 }
 .brand { display: flex; align-items: center; gap: 11px; color: var(--text); text-decoration: none; font-weight: 800; letter-spacing: -.02em; }
-.brand-mark {
-  display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid var(--line-strong);
-  border-radius: 8px; background: var(--panel); font-size: 13px; font-weight: 900; color: var(--signal-strong);
-}
 .topnav { display: flex; align-items: center; gap: 14px; font-size: .88rem; }
 .topnav a { color: var(--muted); text-decoration: none; }
 .topnav a:hover { color: var(--text); }

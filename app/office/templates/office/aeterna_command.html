@@ -1,3 +1,4 @@
+{% from "gbo/brand.html" import office_brand %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -5,6 +6,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Æterna · Command Intelligence · Goblin Black Office</title>
   <link rel="stylesheet" href="/static/gbo.css">
+  {% include "gbo/head.html" %}
 </head>
 <body class="command-body">
 <div class="command-environment" aria-hidden="true">
@@ -15,10 +17,7 @@
 </div>
 <main class="command-stage aeterna-command-stage">
   <header class="command-bar">
-    <a class="command-brand" href="/">
-      <img src="/canon/brand/canon-app-badge.webp" alt="">
-      <span><strong>GOBLIN BLACK OFFICE</strong><small>ÆTERNA // COMMAND INTELLIGENCE</small></span>
-    </a>
+    {{ office_brand(label="GOBLIN BLACK OFFICE", subtitle="ÆTERNA // COMMAND INTELLIGENCE", class_name="command-brand") }}
     <nav class="command-nav"><a href="/">OFFICE DESK</a><a href="/records">RECORDS</a></nav>
   </header>
 

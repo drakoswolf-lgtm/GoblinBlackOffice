@@ -1,3 +1,4 @@
+{% from "gbo/brand.html" import office_brand %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -33,11 +34,12 @@
     .tiny-link{font-size:.82rem;white-space:nowrap}
     @media(max-width:820px){.receipt-layout{grid-template-columns:1fr}.receipt-side{position:static}.saved-head{align-items:start;flex-direction:column}}
   </style>
+  {% include "gbo/head.html" %}
 </head>
 <body class="office-environment-body">
 <main class="shell">
   <header class="topbar">
-    <a class="brand" href="/"><span class="brand-mark">LG</span><span>Ledgergut</span></a>
+    {{ office_brand(label="Ledgergut") }}
     <nav class="topnav"><a href="/">Office Desk</a><a href="/aeterna/command">ÆTERNA</a><a class="optional" href="/records">Clients &amp; Projects</a></nav>
   </header>
 
