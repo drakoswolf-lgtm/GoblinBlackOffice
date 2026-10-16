@@ -148,7 +148,7 @@ def _project_brief(store, business_id, project, currency, records):
             f"{len(work_logs)} work log(s); {hours} hours entered by users.", href),
         GoblinCheck("Squarmish", "DRAFTS FOR REVIEW" if drafts else ("BALANCE REMAINS" if ledger.outstanding > 0 else "RECORDED" if invoices else "NO INVOICES"),
             f"{len(invoices)} invoice record(s), {len(drafts)} draft(s); {currency} {ledger.outstanding:.2f} outstanding.", href),
-        GoblinCheck("Grimscratch", "NOT AUTOMATED",
+        GoblinCheck("Grimsnatch", "NOT AUTOMATED",
             "Risk and compliance checks are not yet implemented. No clearance is implied.", "/workflows/grimscratch"),
     )
     return ProjectBrief(
@@ -222,7 +222,7 @@ def build_command_briefing(store, business_id: str, *, project_id: str = "", vie
         GoblinCheck("Squarmish", "DRAFTS FOR REVIEW" if draft_count else
             ("OUTSTANDING" if ledger.outstanding > 0 else "NO DRAFTS"),
             f"{len(all_invoices)} invoice record(s), {draft_count} draft(s); {currency} {ledger.outstanding:.2f} outstanding on approved/issued invoices.", "/squarmish/"),
-        GoblinCheck("Grimscratch", "NOT AUTOMATED",
+        GoblinCheck("Grimsnatch", "NOT AUTOMATED",
             "Compliance/risk review is not instrumented. No clearance is implied.", "/workflows/grimscratch"),
     )
     resolved_view, interpretation = resolve_view(view, question)

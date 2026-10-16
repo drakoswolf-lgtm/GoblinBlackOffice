@@ -1,0 +1,6 @@
+{% macro office_brand(label='Goblin Black Office', subtitle='', class_name='brand') -%}
+<a class="{{ class_name }} gbo-brand" href="/" aria-label="{{ label }} · Office home">
+  <img class="gbo-brand-badge" src="/canon/brand/canon-app-badge.webp" width="48" height="48" alt="" decoding="async">
+  <span class="gbo-brand-copy"><strong>{{ label }}</strong>{% if subtitle %}<small>{{ subtitle }}</small>{% endif %}</span>
+</a>
+{%- endmacro %}

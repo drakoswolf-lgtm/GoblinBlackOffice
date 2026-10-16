@@ -187,3 +187,33 @@ def test_existing_project_can_be_resumed_from_office_desk_and_records():
     records = client.get("/records")
     assert records.status_code == 200
     assert f'href="/jobs/{project.project_id}"'.encode() in records.data
+
+
+def test_specialist_hologlass_keeps_records_separate_from_character_art():
+    """Both routes render functional copy independently of the decorative layer."""
+    client = Client(application, Response)
+    desk = client.get("/")
+    assert desk.status_code == 200
+    assert b'/static/specialist-glass.css' in desk.data
+    assert desk.data.count(b'class="command-channel business-specialist-link specialist-glass-card"') == 6
+    assert desk.data.count(b'class="specialist-glass-layer" aria-hidden="true"') == 6
+    assert b'class="specialist-glass-identity"' in desk.data
+    assert b'class="office-scope-byline"' not in desk.data
+
+    project = _project("Hologlass")
+    job = client.get(f"/jobs/{project.project_id}")
+    assert job.status_code == 200
+    assert b'/static/specialist-glass.css' in job.data
+    assert job.data.count(b'class="office-scope-panel specialist-glass-card"') == 6
+    assert job.data.count(b'class="specialist-glass-layer" aria-hidden="true"') == 6
+    for label in (b"Receipt Log", b"Agreements", b"Invoices &amp; Payments", b"Materials", b"Work Log", b"Risk Review"):
+        assert label in job.data
+    assert b'class="office-scope-byline"' not in job.data
+
+    styles = client.get("/static/specialist-glass.css")
+    assert styles.status_code == 200
+    assert b"object-fit:contain" in styles.data
+    assert b"margin-left:0" in styles.data
+    assert b".specialist-glass-identity" in styles.data
+    assert b"prefers-reduced-transparency" in styles.data
+    assert b"forced-colors:active" in styles.data

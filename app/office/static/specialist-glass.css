@@ -1,0 +1,190 @@
+/* Supplied specialist panes projected by Æterna over the physical Office.
+ * Artwork, names and frames are decorative. Business facts remain live HTML.
+ * No animation, speech, image cropping, sprite stretching or scripted layout. */
+.specialist-projection .command-channels,
+.specialist-projection .office-specialist-grid {
+  gap:16px;
+  padding:16px;
+  background:transparent;
+}
+.office-scope-panel.specialist-glass-card,
+.command-channel.business-specialist-link.specialist-glass-card {
+  position:relative;
+  isolation:isolate;
+  display:flex;
+  align-items:flex-start;
+  min-width:0;
+  width:100%;
+  min-height:260px;
+  padding:24px 22px 92px;
+  gap:0;
+  border:1px solid #426676;
+  border-radius:5px;
+  background:#08151c;
+  color:#f2f8f7;
+  box-shadow:0 8px 22px #0004;
+  overflow:hidden;
+  text-decoration:none;
+  transition:none;
+  transform:none;
+}
+.specialist-glass-card .specialist-glass-layer {
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+}
+.specialist-glass-card .specialist-pane-art {
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center;
+  opacity:.95;
+}
+/* A constant dark substrate guarantees text contrast regardless of the artwork.
+ * Fade the remainder of the pane, leaving the baked name and frame visible. */
+.office-scope-panel.specialist-glass-card::before,
+.command-channel.business-specialist-link.specialist-glass-card::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  background:linear-gradient(180deg,#041016c7 0%,#041016c7 60%,#04101666 78%,#04101612 100%);
+  pointer-events:none;
+}
+.office-scope-panel.specialist-glass-card::after,
+.command-channel.business-specialist-link.specialist-glass-card::after {content:none}
+.office-scope-panel.specialist-glass-card .office-scope-content,
+.command-channel.business-specialist-link.specialist-glass-card .command-channel-copy {
+  position:relative;
+  z-index:2;
+  display:grid;
+  align-content:start;
+  justify-items:start;
+  gap:7px;
+  width:100%;
+  min-width:0;
+  margin-left:0;
+  padding:0;
+  text-align:left;
+  overflow-wrap:anywhere;
+}
+.office-scope-panel.specialist-glass-card .office-scope-content>small,
+.command-channel.business-specialist-link.specialist-glass-card .command-channel-copy>small {
+  color:#b9d3db;
+  font-size:.66rem;
+  line-height:1.5;
+  letter-spacing:.1em;
+  font-weight:600;
+  text-transform:uppercase;
+}
+.office-scope-panel.specialist-glass-card .office-scope-content>strong,
+.command-channel.business-specialist-link.specialist-glass-card .command-channel-copy>strong {
+  color:#f4fcff;
+  font-size:clamp(1.55rem,2.5vw,2.15rem);
+  line-height:1.08;
+  font-weight:800;
+  font-style:italic;
+  text-transform:uppercase;
+  letter-spacing:.025em;
+  text-shadow:0 0 16px #83ddff26;
+  text-wrap:balance;
+}
+.specialist-glass-card .office-scope-summary {
+  color:#dae7e8;
+  font-size:.88rem;
+  line-height:1.5;
+  font-variant-numeric:tabular-nums;
+}
+.specialist-channel-footer {
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  flex-wrap:wrap;
+  gap:8px 16px;
+  margin-top:7px;
+  width:100%;
+  font-size:.69rem;
+  line-height:1.5;
+}
+.specialist-channel-state {
+  padding:2px 7px;
+  color:#dfebe4;
+  background:#152d26;
+  border:1px solid #657e70;
+  border-radius:3px;
+}
+.specialist-channel-action {
+  color:#c5f1ff;
+  font-size:.9rem;
+  font-weight:750;
+  letter-spacing:.055em;
+  text-transform:uppercase;
+  text-decoration:underline;
+  text-underline-offset:4px;
+}
+.specialist-channel-action>span {margin-left:6px;font-size:1.3em;line-height:1}
+/* Identity is already engraved in the supplied artwork. Preserve a matching,
+ * accessible text equivalent without double-printing names over the pane. */
+.specialist-glass-card .specialist-glass-identity {
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip-path:inset(50%);
+  white-space:nowrap;
+  border:0;
+}
+.office-scope-panel.specialist-glass-card:hover,
+.command-channel.business-specialist-link.specialist-glass-card:hover {
+  background:#08151c;
+  border-color:#a6d9e8;
+  transform:none;
+}
+.office-scope-panel.specialist-glass-card:focus-visible,
+.command-channel.business-specialist-link.specialist-glass-card:focus-visible {
+  outline:3px solid #c5f1ff;
+  outline-offset:3px;
+  border-color:#a6d9e8;
+}
+@media(max-width:700px) {
+  .specialist-projection .command-channels,
+  .specialist-projection .office-specialist-grid {grid-template-columns:1fr;gap:12px;padding:12px}
+  .office-scope-panel.specialist-glass-card,
+  .command-channel.business-specialist-link.specialist-glass-card {
+    min-height:250px;
+    padding:20px 18px 92px;
+  }
+}
+@media(prefers-reduced-transparency:reduce) {
+  .specialist-glass-card .specialist-glass-layer {display:none}
+  .office-scope-panel.specialist-glass-card,
+  .command-channel.business-specialist-link.specialist-glass-card {background:#08151c}
+  .specialist-glass-card .specialist-glass-identity {
+    position:relative;z-index:2;width:auto;height:auto;margin:0;clip-path:none;white-space:normal;
+    color:#b9d3db;font-size:.75rem;
+  }
+  .office-scope-panel.specialist-glass-card,
+  .command-channel.business-specialist-link.specialist-glass-card {flex-direction:column;gap:12px;min-height:0;padding:20px}
+}
+@media(forced-colors:active) {
+  .specialist-glass-card .specialist-glass-layer {display:none}
+  .office-scope-panel.specialist-glass-card::before,
+  .command-channel.business-specialist-link.specialist-glass-card::before {display:none}
+  .office-scope-panel.specialist-glass-card,
+  .command-channel.business-specialist-link.specialist-glass-card {
+    border:1px solid LinkText;background:Canvas;color:LinkText;box-shadow:none;
+    min-height:0;padding:20px;
+  }
+  .office-scope-panel.specialist-glass-card .office-scope-content>small,
+  .office-scope-panel.specialist-glass-card .office-scope-content>strong,
+  .command-channel.business-specialist-link.specialist-glass-card .command-channel-copy>small,
+  .command-channel.business-specialist-link.specialist-glass-card .command-channel-copy>strong,
+  .specialist-glass-card .office-scope-summary,
+  .specialist-glass-card .specialist-channel-action {color:LinkText}
+  .specialist-glass-card .specialist-channel-state {color:CanvasText;background:Canvas;border-color:CanvasText}
+  .specialist-glass-card:focus-visible {outline-color:Highlight}
+}

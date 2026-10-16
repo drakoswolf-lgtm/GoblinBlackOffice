@@ -1,3 +1,5 @@
+{% from "gbo/brand.html" import office_brand %}
+{% from "office/_specialist_panel.html" import specialist_panel with context %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -5,9 +7,11 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Goblin Black Office · Command</title>
   <link rel="stylesheet" href="/static/gbo.css">
+  <link rel="stylesheet" href="/static/specialist-glass.css">
+  {% include "gbo/head.html" %}
 </head>
 <body class="command-body">
-{% include "office/_splash.html" %}
+{% include "gbo/launch.html" %}
 <script id="gbo-sticky-lines" type="application/json">{{ sticky_lines|tojson }}</script>
 
 <div class="command-environment" aria-hidden="true">
@@ -19,10 +23,7 @@
 
 <main class="command-stage">
   <header class="command-bar">
-    <a class="command-brand" href="/">
-      <img src="/canon/brand/canon-app-badge.webp" alt="">
-      <span><strong>GOBLIN BLACK OFFICE</strong><small>COMMAND // ONLINE</small></span>
-    </a>
+    {{ office_brand(label="GOBLIN BLACK OFFICE", subtitle="COMMAND // ONLINE", class_name="command-brand") }}
     <nav class="command-nav">
       <a href="/records">RECORDS</a>
       {% if user %}<form method="post" action="/logout"><button class="command-link" type="submit">SIGN OUT</button></form>{% endif %}
@@ -73,25 +74,14 @@
         {% endif %}
       </section>
 
-      <section class="command-module">
+      <section class="command-module specialist-projection" aria-label="Specialist channels projected by Æterna">
         <header class="command-module-head">
           <span>SPECIALIST CHANNELS</span>
           <small>SHARED PROJECT INTELLIGENCE</small>
         </header>
         <div class="command-channels">
-          {% for specialist in specialists %}
-          <a class="command-channel business-specialist-link" href="{{ specialist.href }}" aria-label="{{ specialist.label }}: {{ specialist.note }}">
-            <span class="office-scope-portrait face-{{ specialist.portrait }}" aria-hidden="true"></span>
-            <span class="command-channel-index" aria-hidden="true">0{{ loop.index }}</span>
-            <span class="command-channel-copy">
-              <small>{{ specialist.role }}</small>
-              <strong>{{ specialist.label }}</strong>
-              <em>{{ specialist.note }}</em>
-              <span class="office-scope-byline">{{ specialist.rank }} {{ specialist.name }}</span>
-            </span>
-            <span class="command-channel-state">{{ specialist.status }}</span>
-            <span class="office-scope-chevron" aria-hidden="true">›</span>
-          </a>
+          {% for panel in specialists %}
+          {{ specialist_panel(panel, 'desk') }}
           {% endfor %}
         </div>
       </section>
@@ -136,6 +126,5 @@
   </footer>
 </main>
 
-<script src="/static/gbo.js" defer></script>
 </body>
 </html>

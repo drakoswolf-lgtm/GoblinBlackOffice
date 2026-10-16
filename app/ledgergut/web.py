@@ -14,6 +14,7 @@ from flask import Flask, Response, redirect, render_template, request, url_for
 from app.core.job_lifecycle import ingest_receipt_for_project
 from app.core.runtime import business_id as _office_business_id, office_store as _office_store
 from app.office.auth import configure_specialist_auth, current_business_id
+from app.office.branding import configure_branding
 from app.ledgergut.form_mapper import build_models
 from app.ledgergut.image_store import ReceiptImageStoreError, build_receipt_image_store
 from app.ledgergut.models import BillableStatus, PaidBy, ReimbursementStatus
@@ -30,6 +31,7 @@ MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 PENDING_IMAGE_TTL = timedelta(minutes=30)
 
 app = Flask(__name__, template_folder=str(_HERE / "templates"))
+configure_branding(app)
 app.secret_key = os.environ.get("GBO_SECRET", os.environ.get("LEDGERGUT_SECRET", "ledgergut-dev-secret"))
 app.config["GBO_AUTH_REQUIRED"] = os.environ.get("GBO_AUTH_REQUIRED", "0").lower() in {"1", "true", "yes"}
 configure_specialist_auth(app)

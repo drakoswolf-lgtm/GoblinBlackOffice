@@ -1,3 +1,4 @@
+{% from "gbo/brand.html" import office_brand %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -5,11 +6,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>SigNor · Agreements</title>
   <link rel="stylesheet" href="/static/gbo.css">
+  {% include "gbo/head.html" %}
 </head>
 <body class="office-environment-body">
+{% include "gbo/launch.html" %}
 <main class="shell">
   <header class="topbar">
-    <a class="brand" href="/"><span class="brand-mark">SN</span><span>SigNor the Immutable</span></a>
+    {{ office_brand(label="SigNor the Immutable") }}
     <nav class="topnav"><a href="/">Office Desk</a><a href="/aeterna/command">ÆTERNA</a><a class="optional" href="/records">Clients &amp; Projects</a></nav>
   </header>
 

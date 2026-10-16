@@ -3,6 +3,7 @@
   const stage = document.querySelector("[data-first-entry]");
   if (!stage) return;
   const video = stage.querySelector("[data-first-entry-video]");
+  window.GBOAudio?.film('intro', true);
   const sound = stage.querySelector("[data-intro-sound]");
   const advance = stage.querySelector("[data-intro-continue]");
   const status = stage.querySelector("[data-intro-status]");
@@ -59,8 +60,11 @@
     }
   });
 
-  video.play().catch(() => {
+  const begin = () => video.play().catch(() => {
     // On hardened browsers the user may press Replay or Continue.
     show("PRESS REPLAY WITH SOUND OR CONTINUE");
   });
+  if (document.documentElement.dataset.gboLaunch === 'pending') {
+    window.addEventListener('gbo:splash-complete', begin, {once: true});
+  } else begin();
 })();

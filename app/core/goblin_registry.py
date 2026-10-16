@@ -176,7 +176,7 @@ _GOBLINS: List[GoblinEntry] = [
     ),
     GoblinEntry(
         id="grimscratch",
-        display_name="Grimscratch",
+        display_name="Grimsnatch",
         species_or_class="Risk Goblin",
         department="Compliance & Risk",
         mission="Keep clever ideas from becoming expensive lessons.",

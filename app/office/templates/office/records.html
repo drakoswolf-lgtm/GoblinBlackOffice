@@ -1,8 +1,17 @@
+{% from "gbo/brand.html" import office_brand %}
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Clients &amp; Projects · Goblin Black Office</title><link rel="stylesheet" href="/static/gbo.css"></head>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Clients &amp; Projects · Goblin Black Office</title>
+  <link rel="stylesheet" href="/static/gbo.css">
+  {% include "gbo/head.html" %}
+</head>
 <body class="office-record-body">
+{% include "gbo/launch.html" %}
 <main class="shell office-detail-shell">
-<header class="topbar office-detail-topbar"><a class="brand office-brand" href="/"><img src="/canon/brand/canon-app-badge.webp" alt=""><span>GOBLIN BLACK OFFICE<small>CLIENTS &amp; PROJECTS</small></span></a><nav class="topnav"><a href="/">Command Desk</a><a href="/aeterna/command">Æterna</a></nav></header>
+<header class="topbar office-detail-topbar">{{ office_brand(label="GOBLIN BLACK OFFICE", subtitle="CLIENTS &amp; PROJECTS", class_name="brand office-brand") }}<nav class="topnav"><a href="/">Command Desk</a><a href="/aeterna/command">Æterna</a></nav></header>
 <section class="office-detail-hero"><p class="eyebrow">BUSINESS RECORDS // SHARED PROJECT INTELLIGENCE</p><h1>Clients &amp; Projects</h1><p class="lead">The people behind the projects. Select a client to see their projects and existing contact details.</p><div class="office-hero-actions"><a class="button signal" href="#add-client">+ New client</a><a class="button secondary" href="#add-project">+ New project</a></div></section>
 {% if errors %}<div class="errors" role="alert">{% for e in errors %}<div>{{ e }}</div>{% endfor %}</div>{% endif %}
 <div class="office-record-columns">

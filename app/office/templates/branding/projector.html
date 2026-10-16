@@ -1,0 +1,36 @@
+<details class="gbo-projector" data-sound-projector>
+  <summary aria-label="Soundtrack projector — inspect music controls">
+    <span class="gbo-projector-scene" aria-hidden="true">
+      <span class="gbo-projector-beam"></span>
+      <span class="gbo-glyph-space"><span class="gbo-glyph"><span>∆ΩT</span><span>∆ΩT</span></span></span>
+      <span class="gbo-projector-base"></span>
+    </span>
+    <span class="gbo-projector-caption">SOUNDTRACK</span>
+    <span class="gbo-projector-indicator" data-sound-indicator>Standby</span>
+  </summary>
+  <section class="gbo-projector-panel" aria-label="Soundtrack controls">
+    <header><span>∆ΩT // AUDIO LINK</span><button type="button" data-sound-close aria-label="Close soundtrack controls">×</button></header>
+    <p class="gbo-track-title" data-sound-title>Office soundtrack</p>
+    <p class="gbo-track-credit">Music by {% if soundtrack.artist_url %}<a href="{{ soundtrack.artist_url }}" target="_blank" rel="noopener noreferrer">{{ soundtrack.artist }}</a>{% else %}{{ soundtrack.artist }}{% endif %}</p>
+    <p class="gbo-sound-status" data-sound-status role="status" aria-live="polite">{% if soundtrack.tracks %}Ready{% else %}Tracks will appear here when added.{% endif %}</p>
+    <label for="gbo-track">Track</label>
+    <select id="gbo-track" data-sound-track {% if not soundtrack.tracks %}disabled{% endif %}>
+      {% for track in soundtrack.tracks %}<option value="{{ loop.index0 }}">{{ track.title }}</option>{% else %}<option>No tracks loaded</option>{% endfor %}
+    </select>
+    <div class="gbo-sound-buttons">
+      <button type="button" data-sound-play {% if not soundtrack.tracks %}disabled{% endif %}>Play</button>
+      <button type="button" data-sound-mute aria-pressed="false">Mute</button>
+      <button type="button" data-sound-next {% if not soundtrack.tracks %}disabled{% endif %}>Next</button>
+    </div>
+    <label for="gbo-sound-volume">Music volume <output data-sound-volume-label>12%</output></label>
+    <input type="range" id="gbo-sound-volume" data-sound-volume min="0" max="100" value="12">
+    <label for="gbo-sound-seek">Position <output data-sound-time>0:00 / 0:00</output></label>
+    <input type="range" id="gbo-sound-seek" data-sound-seek min="0" max="100" value="0" step=".1" disabled>
+    <label class="gbo-sound-option"><input type="checkbox" data-splash-sound checked> Startup sound</label>
+    <label for="gbo-splash-volume">Startup volume <output data-splash-volume-label>12%</output></label>
+    <input type="range" id="gbo-splash-volume" data-splash-volume min="0" max="100" value="12">
+    <label class="gbo-sound-option"><input type="checkbox" data-projector-motion checked> Rotate projection</label>
+    <audio data-office-audio preload="none"></audio>
+  </section>
+</details>
+<script type="application/json" id="gbo-soundtrack">{{ soundtrack|tojson }}</script>

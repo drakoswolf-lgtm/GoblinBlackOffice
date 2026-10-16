@@ -3,7 +3,7 @@ import { mkdir } from "node:fs/promises";
 
 const base = process.env.GBO_BASE_URL || "http://127.0.0.1:8080";
 await mkdir("artifacts/ui", { recursive: true });
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({ headless: true, ...(process.env.GBO_BROWSER_EXECUTABLE ? { executablePath: process.env.GBO_BROWSER_EXECUTABLE } : {}) });
 
 try {
   for (const spec of [
@@ -42,6 +42,7 @@ try {
       height: film.videoHeight,
       duration: film.duration,
       muted: film.muted,
+      volume: film.volume,
       paused: film.paused,
       currentTime: film.currentTime,
     }));
@@ -54,7 +55,7 @@ try {
     if ((spec.name === "mobile") !== (filmStatus.height > filmStatus.width)) {
       throw Error(spec.name + ": Master aspect ratio is incorrect: " + JSON.stringify(filmStatus));
     }
-    if (!filmStatus.muted || !(await splash.evaluate((node) => node.classList.contains("is-film")))) {
+    if (filmStatus.volume > .15 || !(await splash.evaluate((node) => node.classList.contains("is-film")))) {
       throw Error(spec.name + ": Video autoplay setup or cinematic overlay failed");
     }
     const startupSize = await page.locator(".gbo-charge").evaluate(
@@ -153,25 +154,25 @@ try {
         throw Error(spec.name + ": Missing business section " + label);
       }
     }
-    const spriteSource = "/canon/characters/canon-goblin-specialist-sprite.webp";
-    const spriteResponse = await page.request.get(base + spriteSource);
-    if (!spriteResponse.ok() || !spriteResponse.headers()["content-type"]?.includes("image/webp")) {
-      throw Error(spec.name + ": Canon six-goblin portrait sprite missing");
-    }
-    const spriteDimensions = await page.evaluate(async url => {
-      const img = new Image(); img.src = url; await img.decode();
-      return { width: img.naturalWidth, height: img.naturalHeight };
-    }, spriteSource);
-    if (spriteDimensions.width < 300 || spriteDimensions.height < 75) {
-      throw Error(spec.name + ": Portrait sprite failed to decode");
-    }
-    const firstPortrait = await channels.first().locator(".office-scope-portrait").evaluate(node => {
-      const s = getComputedStyle(node);
-      return { source:s.backgroundImage, opacity:Number(s.opacity), z:s.zIndex };
+    const glassLayers = channels.locator(".specialist-glass-layer[aria-hidden='true']");
+    if (await glassLayers.count() !== 6) throw Error(spec.name + ": Glass not separated from functional cards");
+    const pane = await channels.first().locator(".specialist-pane-art").evaluate(async image => {
+      image.loading = "eager";
+      await image.decode();
+      const panel = image.closest(".specialist-glass-card");
+      const copy = panel.querySelector(".command-channel-copy");
+      return {
+        source:image.currentSrc, fit:getComputedStyle(image).objectFit,
+        width:image.naturalWidth, height:image.naturalHeight,
+        glassZ:Number(getComputedStyle(image.parentElement).zIndex),
+        contentZ:Number(getComputedStyle(copy).zIndex),
+        copyMargin:getComputedStyle(copy).marginLeft
+      };
     });
-    if (!firstPortrait.source.includes("canon-goblin-specialist-sprite.webp") ||
-        firstPortrait.opacity > .5) {
-      throw Error(spec.name + ": Portrait must be an unobtrusive background image");
+    if (!pane.source.endsWith("/holographic-panes/ledgergut.png") ||
+        pane.fit !== "contain" || pane.width !== 1536 || pane.height !== 877 ||
+        pane.copyMargin !== "0px" || pane.contentZ <= pane.glassZ) {
+      throw Error(spec.name + ": Full supplied pane must sit beneath live information: " + JSON.stringify(pane));
     }
 
     const records = await page.goto(base + "/records", { waitUntil: "domcontentloaded" });
@@ -180,7 +181,10 @@ try {
     }
     await page.locator("#add-client summary").click();
     await page.locator("#client-name").fill("UX Test " + spec.name);
-    await page.locator("#add-client button[type=submit]").click();
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: "domcontentloaded" }),
+      page.locator("#add-client button[type=submit]").click(),
+    ]);
     await page.waitForURL("**/records");
     const clientLink = page.locator('.office-client-row[href*="client_id="]').filter({ hasText:"UX Test " + spec.name }).first();
     if (!await clientLink.isVisible()) throw Error(spec.name + ": Client not listed after creation");
@@ -192,7 +196,10 @@ try {
     await page.locator("#add-project summary").click();
     await page.locator("#project-name").fill("Business-first test job " + spec.name);
     await page.locator("#record-pricing").selectOption("hourly");
-    await page.locator("#add-project button[type=submit]").click();
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: "domcontentloaded" }),
+      page.locator("#add-project button[type=submit]").click(),
+    ]);
     await page.waitForURL("**/records");
     const jobRow = page.locator(".office-project-row").filter({ hasText:"Business-first test job " + spec.name }).first();
     if (!await jobRow.isVisible()) throw Error(spec.name + ": New project missing from business records");
@@ -200,6 +207,24 @@ try {
     await page.waitForURL("**/jobs/*");
     if (await page.locator(".office-scope-panel").count() !== 6) {
       throw Error(spec.name + ": Project workbench missing six functional panels");
+    }
+    const projectGlass = await page.locator(".office-scope-panel").first().evaluate(panel => {
+      const content = panel.querySelector(".office-scope-content");
+      const glass = panel.querySelector(".specialist-glass-layer");
+      const name = panel.querySelector(".specialist-glass-identity");
+      return {
+        contentMargin:getComputedStyle(content).marginLeft,
+        contentZ:Number(getComputedStyle(content).zIndex),
+        glassZ:Number(getComputedStyle(glass).zIndex),
+        nameText:name?.textContent.trim(),
+        glassHidden:glass?.getAttribute("aria-hidden"),
+        title:content.querySelector("strong")?.textContent.trim()
+      };
+    });
+    if (projectGlass.contentMargin !== "0px" || projectGlass.glassHidden !== "true" ||
+        projectGlass.title !== "Receipt Log" || !projectGlass.nameText?.includes("Ledgergut") ||
+        projectGlass.contentZ <= projectGlass.glassZ) {
+      throw Error(spec.name + ": Project functional layer must be independent of hologlass: " + JSON.stringify(projectGlass));
     }
     if (!await page.getByRole("link", { name:/Draft agreement/ }).first().isVisible()) {
       throw Error(spec.name + ": Agreement workflow link lost");
@@ -224,7 +249,7 @@ try {
     const scanHome = await page.goto(base + "/ledgergut/", { waitUntil:"domcontentloaded" });
     if (!scanHome?.ok()) throw Error(spec.name + ": Ledgergut entry unavailable");
     const fileChoiceEvent = page.waitForEvent("filechooser", { timeout:12000 });
-    await page.locator("label.beta-upload-choice").click();
+    await page.getByRole("button", { name: "Upload Image" }).click();
     const fileChooser = await fileChoiceEvent;
     await fileChooser.setFiles({ name:"receipt-test.png", mimeType:"image/png", buffer:receiptPhoto });
     await page.waitForURL("**/ledgergut/receipts/scan", { timeout:60000 });
@@ -277,7 +302,10 @@ try {
       throw Error(spec.name + ": Project selector unavailable");
     }
     await page.locator("#aeterna-question").fill("What is outstanding?");
-    await page.getByRole("button", { name: "RUN BRIEFING" }).click();
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: "domcontentloaded" }),
+      page.getByRole("button", { name: "RUN BRIEFING" }).click(),
+    ]);
     if (!(await page.getByText("FINANCIAL RECORDS").isVisible())) {
       throw Error(spec.name + ": Æterna did not route financial questions");
     }

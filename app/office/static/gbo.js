@@ -56,163 +56,139 @@
   }
 
   const splash = document.querySelector('[data-gbo-splash]');
-  if (!splash) return;
-
+  const bus = window.GBOAudio;
+  if (!splash) { document.documentElement.dataset.gboLaunch = 'complete'; return; }
+  const film = splash.querySelector('[data-gbo-film]');
+  const filmAudio = splash.querySelector('[data-gbo-film-audio]');
+  const skip = splash.querySelector('[data-gbo-skip]');
   const ring = splash.querySelector('[data-progress-ring]');
   const value = splash.querySelector('[data-progress-value]');
   const mode = splash.querySelector('[data-progress-mode]');
   const joke = splash.querySelector('[data-sticky-joke]');
   const linesNode = document.getElementById('gbo-sticky-lines');
-  const lines = linesNode ? JSON.parse(linesNode.textContent || '[]') : [];
+  let lines = [];
+  try { lines = linesNode ? JSON.parse(linesNode.textContent || '[]') : []; } catch (_) { /* default note */ }
   const params = new URLSearchParams(window.location.search);
   const updating = params.get('updating') === '1';
-  const forceSplash = params.get('splash') === '1' || updating;
+  const forceSplash = params.get('splash') === '1' || params.get('updating') === '1';
   const sessionKey = 'gbo.startup.seen';
   let seenThisSession = false;
-
-  try {
-    seenThisSession = window.sessionStorage.getItem(sessionKey) === '1';
-  } catch (_) {
-    seenThisSession = false;
-  }
-
+  try { seenThisSession = window.sessionStorage.getItem(sessionKey) === '1'; } catch (_) { /* private mode */ }
   if (seenThisSession && !forceSplash) {
     splash.hidden = true;
-    splash.setAttribute('aria-hidden', 'true');
-    document.body.classList.remove('splash-active');
+    document.documentElement.dataset.gboLaunch = 'complete';
     document.body.classList.add('gbo-entered');
     return;
   }
 
   const minMs = 5000;
-  let start = performance.now();
-  let progress = 0;
-  let lastBand = -1;
-
+  let start = performance.now(), lastBand = -1;
+  let complete = false, legacyStarted = false, audioBlocked = false, filmGuard = null;
+  const inertNodes = [];
+  for (const child of document.body.children) {
+    if (child.hasAttribute('data-gbo-launch-root') || ['SCRIPT', 'STYLE', 'LINK'].includes(child.tagName)) continue;
+    inertNodes.push([child, child.inert]); child.inert = true;
+  }
   mode.textContent = updating ? 'UPDATING' : 'LOADING';
   splash.hidden = false;
   splash.setAttribute('aria-hidden', 'false');
   document.body.classList.add('splash-active');
+  bus?.film('splash', true);
+  splash.focus({preventScroll: true});
 
-  function weightedChoice(candidates) {
-    if (!candidates.length) return null;
-    const total = candidates.reduce((sum, item) => sum + Number(item.weight || 1), 0);
-    let n = Math.random() * total;
-    for (const item of candidates) {
-      n -= Number(item.weight || 1);
-      if (n <= 0) return item;
-    }
-    return candidates[candidates.length - 1];
+  function leave() {
+    if (complete) return;
+    complete = true;
+    clearTimeout(filmGuard);
+    film?.pause();
+    try { window.sessionStorage.setItem(sessionKey, '1'); } catch (_) { /* entry stays skippable */ }
+    splash.hidden = true;
+    splash.setAttribute('aria-hidden', 'true');
+    document.documentElement.dataset.gboLaunch = 'complete';
+    document.body.classList.remove('splash-active');
+    document.body.classList.add('gbo-entered');
+    for (const [node, wasInert] of inertNodes) node.inert = wasInert;
+    bus?.film('splash', false);
+    const first = document.querySelector('main input:not([type="hidden"]):not([disabled]), main a, main button');
+    if (document.activeElement === splash || splash.contains(document.activeElement)) first?.focus({preventScroll: true});
+    window.dispatchEvent(new Event('gbo:splash-complete'));
   }
-
-  function setJoke(p) {
+  skip?.addEventListener('click', leave);
+  splash.addEventListener('keydown', event => {
+    if (event.key === 'Escape') { event.preventDefault(); leave(); }
+    if (event.key !== 'Tab') return;
+    const buttons = [...splash.querySelectorAll('button')].filter(node => !node.hidden && !node.disabled);
+    if (!buttons.length) return;
+    if (event.shiftKey && (document.activeElement === buttons[0] || document.activeElement === splash)) {
+      event.preventDefault(); buttons.at(-1).focus();
+    } else if (!event.shiftKey && (document.activeElement === buttons.at(-1) || document.activeElement === splash)) {
+      event.preventDefault(); buttons[0].focus();
+    }
+  });
+  function draw(progress) {
+    const p = Math.max(0, Math.min(100, progress));
+    value.textContent = Math.floor(p) + '%'; ring.style.setProperty('--progress', String(p));
+    splash.style.setProperty('--load', String(p / 100));
     const band = p < 25 ? 0 : p < 50 ? 1 : p < 80 ? 2 : 3;
     if (band === lastBand) return;
     lastBand = band;
     const eligible = lines.filter(item => p >= item.min && p <= item.max);
-    const picked = weightedChoice(eligible);
-    if (picked) joke.textContent = picked.text;
+    let n = Math.random() * eligible.reduce((sum, item) => sum + Number(item.weight || 1), 0);
+    for (const item of eligible) { n -= Number(item.weight || 1); if (n <= 0) { joke.textContent = item.text; break; } }
   }
-
-  function draw(p) {
-    progress = Math.max(0, Math.min(100, p));
-    value.textContent = Math.floor(progress) + '%';
-    ring.style.setProperty('--progress', String(progress));
-    splash.style.setProperty('--load', String(progress / 100));
-    setJoke(progress);
-  }
-
-  function finish() {
-    draw(100);
-    try {
-      window.sessionStorage.setItem(sessionKey, '1');
-    } catch (_) {
-      // Storage can be unavailable in hardened/private browser contexts.
-    }
-    splash.classList.add('is-breaching');
-    window.setTimeout(() => splash.classList.add('is-door'), 450);
-    window.setTimeout(() => splash.classList.add('is-opening'), 1050);
-    window.setTimeout(() => splash.classList.add('is-whiteout'), 1850);
-    window.setTimeout(() => {
-      splash.hidden = true;
-      splash.setAttribute('aria-hidden', 'true');
-      document.body.classList.remove('splash-active');
-      document.body.classList.add('gbo-entered');
-    }, 2350);
-  }
-
   function tick(now) {
+    if (complete) return;
     const elapsed = now - start;
-    const floorProgress = Math.min(96, (elapsed / minMs) * 96);
-    draw(floorProgress);
-    if (elapsed >= minMs) {
-      finish();
-      return;
-    }
-    requestAnimationFrame(tick);
+    draw(Math.min(96, elapsed / minMs * 96));
+    if (elapsed < minMs) { requestAnimationFrame(tick); return; }
+    draw(100); splash.classList.add('is-breaching');
+    setTimeout(() => splash.classList.add('is-door'), 450);
+    setTimeout(() => splash.classList.add('is-opening'), 1050);
+    setTimeout(() => splash.classList.add('is-whiteout'), 1850);
+    setTimeout(leave, 2350);
   }
-
-  const film = splash.querySelector('[data-gbo-film]');
-  const filmAudio = splash.querySelector('[data-gbo-film-audio]');
-
-  if (!film) {
-    requestAnimationFrame(tick);
-    return;
-  }
-
-  let filmComplete = false;
-  let legacyStarted = false;
-  let filmGuard = null;
-
   function fallbackToLegacy() {
-    if (legacyStarted || filmComplete) return;
-    legacyStarted = true;
-    window.clearTimeout(filmGuard);
-    film.pause();
+    if (legacyStarted || complete) return;
+    legacyStarted = true; clearTimeout(filmGuard); film?.pause();
     splash.classList.remove('is-film');
     if (filmAudio) filmAudio.hidden = true;
-    start = performance.now();
-    requestAnimationFrame(tick);
+    start = performance.now(); requestAnimationFrame(tick);
   }
-
-  film.addEventListener('ended', () => {
-    if (legacyStarted || filmComplete) return;
-    filmComplete = true;
-    window.clearTimeout(filmGuard);
-    try {
-      window.sessionStorage.setItem(sessionKey, '1');
-    } catch (_) {
-      // A blocked sessionStorage must not trap the user in the splash.
+  function soundState() {
+    if (!film || !filmAudio) return;
+    film.volume = bus?.settings.splashVolume ?? .12;
+    film.muted = !(bus?.settings.splashSound ?? true) || audioBlocked;
+    filmAudio.textContent = film.muted ? 'ENABLE SOUND' : 'MUTE SOUND';
+    filmAudio.setAttribute('aria-pressed', String(!film.muted));
+  }
+  if (!film) { fallbackToLegacy(); return; }
+  window.addEventListener('gbo:audio-settings', soundState);
+  filmAudio.hidden = false;
+  filmAudio.addEventListener('click', async () => {
+    const enable = film.muted;
+    audioBlocked = false;
+    bus?.save({splashSound: enable});
+    soundState();
+    try { if (film.paused) await film.play(); } catch (error) {
+      if (error.name === 'NotAllowedError') { audioBlocked = true; soundState(); }
+      else fallbackToLegacy();
     }
-    splash.classList.add('is-film-ending');
-    window.setTimeout(() => {
-      splash.hidden = true;
-      splash.setAttribute('aria-hidden', 'true');
-      document.body.classList.remove('splash-active');
-      document.body.classList.add('gbo-entered');
-    }, 220);
-  }, { once: true });
-
-  film.addEventListener('error', fallbackToLegacy, { once: true });
-
-  if (filmAudio) {
-    filmAudio.hidden = false;
-    filmAudio.addEventListener('click', () => {
-      film.muted = !film.muted;
-      filmAudio.textContent = film.muted ? 'ENABLE SOUND' : 'MUTE SOUND';
-      filmAudio.setAttribute('aria-pressed', film.muted ? 'false' : 'true');
-      if (film.paused) film.play().catch(fallbackToLegacy);
-    });
-  }
-
+  });
+  film.addEventListener('ended', () => {
+    if (legacyStarted || complete) return;
+    splash.classList.add('is-film-ending'); setTimeout(leave, 220);
+  }, {once: true});
+  film.addEventListener('error', fallbackToLegacy, {once: true});
   splash.classList.add('is-film');
-  // Treat the movie as an authored introduction, never as real loading progress.
-  // With mute enabled, modern browsers generally permit autoplay.
-  const playback = film.play();
-  if (playback && typeof playback.catch === 'function') {
-    playback.catch(fallbackToLegacy);
-  }
-  filmGuard = window.setTimeout(() => {
-    if (!filmComplete && !legacyStarted && film.paused) fallbackToLegacy();
-  }, 2500);
+  soundState();
+  // Try the owner's quiet sound-on preference. Blocked sound falls back to a
+  // silent film and an honest sound button, without delaying the login screen.
+  film.play().catch(async error => {
+    if (complete || legacyStarted) return;
+    if (error.name !== 'NotAllowedError') { fallbackToLegacy(); return; }
+    audioBlocked = true; soundState();
+    try { await film.play(); } catch (_) { fallbackToLegacy(); }
+  });
+  filmGuard = setTimeout(() => { if (!complete && !legacyStarted && film.paused) fallbackToLegacy(); }, 8000);
+  window.addEventListener('pagehide', () => film.pause());
 })();
