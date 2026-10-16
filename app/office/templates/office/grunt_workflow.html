@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="/static/gbo.css">
   <title>{{ grunt.name }} · Workflow rough-in</title>
   <style>
     :root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#111416;color:#f2efe8}
@@ -26,6 +27,7 @@
   {% include "gbo/head.html" %}
 </head>
 <body>
+{% include "gbo/launch.html" %}
 <main>
   {{ office_brand(subtitle=grunt.name) }}
   <span class="badge">Wave 2 rough-in · no autonomous actions</span>

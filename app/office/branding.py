@@ -4,6 +4,7 @@ from pathlib import Path
 
 from flask import Flask
 from jinja2 import ChoiceLoader, FileSystemLoader, PrefixLoader
+from app.office.soundtrack import soundtrack_catalogue
 
 
 def configure_branding(app: Flask) -> None:
@@ -12,3 +13,7 @@ def configure_branding(app: Flask) -> None:
         app.jinja_loader,
         PrefixLoader({"gbo": FileSystemLoader(str(shared))}),
     ])
+
+    @app.context_processor
+    def office_media():
+        return {"soundtrack": soundtrack_catalogue()}

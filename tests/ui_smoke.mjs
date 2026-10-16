@@ -42,6 +42,7 @@ try {
       height: film.videoHeight,
       duration: film.duration,
       muted: film.muted,
+      volume: film.volume,
       paused: film.paused,
       currentTime: film.currentTime,
     }));
@@ -54,7 +55,7 @@ try {
     if ((spec.name === "mobile") !== (filmStatus.height > filmStatus.width)) {
       throw Error(spec.name + ": Master aspect ratio is incorrect: " + JSON.stringify(filmStatus));
     }
-    if (!filmStatus.muted || !(await splash.evaluate((node) => node.classList.contains("is-film")))) {
+    if (filmStatus.volume > .15 || !(await splash.evaluate((node) => node.classList.contains("is-film")))) {
       throw Error(spec.name + ": Video autoplay setup or cinematic overlay failed");
     }
     const startupSize = await page.locator(".gbo-charge").evaluate(

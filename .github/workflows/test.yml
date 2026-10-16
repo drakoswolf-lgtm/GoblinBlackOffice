@@ -64,6 +64,8 @@ jobs:
           exit 1
       - name: Verify specialist panes and accessibility in Chromium
         run: node tests/specialist_panels.mjs
+      - name: Verify soundtrack projector and entry splash
+        run: node tests/sound_projector.mjs
       - name: Verify desktop and mobile in Chromium
         run: node tests/ui_smoke.mjs
       - uses: actions/upload-artifact@v4

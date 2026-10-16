@@ -8,6 +8,7 @@
   {% include "gbo/head.html" %}
 </head>
 <body class="curriculum-body">
+{% include "gbo/launch.html" %}
 <script id="gbo-sticky-lines" type="application/json">{{ sticky_lines|tojson }}</script>
 
 <main class="curriculum-shell" data-curriculum>
@@ -287,7 +288,6 @@
   </section>
 </main>
 
-<script src="/static/gbo.js" defer></script>
 <script src="/static/curriculum.js" defer></script>
 </body>
 </html>
